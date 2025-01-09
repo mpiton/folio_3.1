@@ -22,22 +22,22 @@ jobs:
 
     - name: Build backend
       run: |
-        cd api
+        cd portfolio/api
         cargo build --verbose
 
     - name: Build frontend
       run: |
-        cd web
+        cd portfolio/web
         cargo build --verbose
 
     - name: Run backend tests
       run: |
-        cd api
+        cd portfolio/api
         cargo test --verbose -- --test-threads=1
 
     - name: Run frontend tests
       run: |
-        cd web
+        cd portfolio/web
         cargo test --verbose -- --test-threads=1
 
     - name: Check formatting
