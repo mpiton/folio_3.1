@@ -42,8 +42,10 @@ jobs:
 
     - name: Check formatting
       run: |
+        cd portfolio/api
         cargo fmt --all -- --check
 
     - name: Static analysis
       run: |
+        cd portfolio/api
         cargo clippy -- -D warnings
