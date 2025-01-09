@@ -48,4 +48,4 @@ jobs:
     - name: Static analysis
       run: |
         cd portfolio/api
-        cargo clippy -- -D warnings
+        cargo clippy --tests -- -D warnings
