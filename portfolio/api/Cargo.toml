@@ -1,0 +1,44 @@
+[package]
+name = "portfolio-api"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mathieu Piton"]
+description = "Backend API for Mathieu Piton's portfolio"
+
+[dependencies]
+# Web framework
+actix-web = "4.9"
+actix-cors = "0.7"
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# Async runtime
+tokio = { version = "1.43", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging and configuration
+env_logger = "0.11"
+log = "0.4"
+dotenv = "0.15"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+
+[dev-dependencies]
+# Testing
+tokio-test = "0.4"
+actix-rt = "2.10"
+mockall = "0.13"
+rstest = "0.24"
+wiremock = "0.5"

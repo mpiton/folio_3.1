@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Build backend
+      run: |
+        cd api
+        cargo build --verbose
+
+    - name: Build frontend
+      run: |
+        cd web
+        cargo build --verbose
+
+    - name: Run backend tests
+      run: |
+        cd api
+        cargo test --verbose -- --test-threads=1
+
+    - name: Run frontend tests
+      run: |
+        cd web
+        cargo test --verbose -- --test-threads=1
+
+    - name: Check formatting
+      run: |
+        cargo fmt --all -- --check
+
+    - name: Static analysis
+      run: |
+        cargo clippy -- -D warnings

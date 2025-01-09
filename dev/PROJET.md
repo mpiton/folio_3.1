@@ -39,14 +39,14 @@ portfolio/
   │   ├── tests/
   │   └── Cargo.toml
   ├── db/
-  │   └── mongo/
+  │   └── sqlite/
   ├── .gitignore
   └── README.md
 ```
 
 - Le dossier `api` contiendra le code backend en Rust, avec le framework choisi (Rocket, Actix Web ou Warp).
 - Le dossier `web` contiendra le code frontend en Rust, avec le framework Yew ou Percy.
-- Le dossier `db` contiendra les scripts et configurations pour la base de données MongoDB.
+- Le dossier `db` contiendra les scripts et configurations pour la base de données SQLite.
 
 ## 4. Fonctionnalités
 
