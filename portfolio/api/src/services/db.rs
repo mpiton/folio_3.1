@@ -1,7 +1,7 @@
+use anyhow::Result;
 use rusqlite::Connection;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use anyhow::Result;
 
 pub type DbPool = Arc<Mutex<Connection>>;
 

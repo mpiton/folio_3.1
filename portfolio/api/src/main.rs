@@ -1,5 +1,5 @@
-mod routes;
 mod models;
+mod routes;
 mod services;
 
 use actix_cors::Cors;
@@ -16,9 +16,7 @@ async fn main() -> std::io::Result<()> {
     info!("Starting server...");
 
     // Initialize database
-    let db_pool = init_db()
-        .await
-        .expect("Failed to initialize database");
+    let db_pool = init_db().await.expect("Failed to initialize database");
 
     HttpServer::new(move || {
         // Configure CORS

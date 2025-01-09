@@ -1,5 +1,5 @@
 use crate::models::contact::ContactForm;
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use serde_json::json;
 use wiremock::matchers::{method, path};
 
@@ -28,14 +28,12 @@ pub async fn send_contact_email(form: &ContactForm) -> Result<()> {
     }
 
     // Get Brevo API configuration from environment variables
-    let api_key = std::env::var("BREVO_API_KEY")
-        .map_err(|_| anyhow!("BREVO_API_KEY not set"))?;
-    let recipient_email = std::env::var("RECIPIENT_EMAIL")
-        .map_err(|_| anyhow!("RECIPIENT_EMAIL not set"))?;
-    let sender_name = std::env::var("SENDER_NAME")
-        .map_err(|_| anyhow!("SENDER_NAME not set"))?;
-    let sender_email = std::env::var("SENDER_EMAIL")
-        .map_err(|_| anyhow!("SENDER_EMAIL not set"))?;
+    let api_key = std::env::var("BREVO_API_KEY").map_err(|_| anyhow!("BREVO_API_KEY not set"))?;
+    let recipient_email =
+        std::env::var("RECIPIENT_EMAIL").map_err(|_| anyhow!("RECIPIENT_EMAIL not set"))?;
+    let sender_name = std::env::var("SENDER_NAME").map_err(|_| anyhow!("SENDER_NAME not set"))?;
+    let sender_email =
+        std::env::var("SENDER_EMAIL").map_err(|_| anyhow!("SENDER_EMAIL not set"))?;
     let api_url = std::env::var("BREVO_API_URL")
         .unwrap_or_else(|_| String::from("https://api.brevo.com/v3/smtp/email"));
 
@@ -98,7 +96,7 @@ pub async fn send_contact_email(form: &ContactForm) -> Result<()> {
 mod tests {
     use super::*;
     use std::env;
-    use wiremock::{MockServer, Mock, ResponseTemplate};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     async fn setup_test_env(mock_url: &str) {
         env::set_var("BREVO_API_KEY", "test-api-key");
@@ -120,8 +118,7 @@ mod tests {
 
         Mock::given(method("POST"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_json(&success_response))
+            .respond_with(ResponseTemplate::new(200).set_body_json(&success_response))
             .expect(1)
             .named("successful_email_send")
             .mount(&mock_server)
@@ -180,8 +177,7 @@ mod tests {
 
         Mock::given(method("POST"))
             .and(path("/"))
-            .respond_with(ResponseTemplate::new(400)
-                .set_body_json(&error_response))
+            .respond_with(ResponseTemplate::new(400).set_body_json(&error_response))
             .expect(1)
             .named("error_handling")
             .mount(&mock_server)
@@ -199,8 +195,7 @@ mod tests {
 
         let err = result.unwrap_err().to_string();
         assert!(
-            err.contains("Invalid API key") ||
-            err.contains("invalid_api_key"),
+            err.contains("Invalid API key") || err.contains("invalid_api_key"),
             "Unexpected error message: {}",
             err
         );
