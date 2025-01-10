@@ -11,7 +11,7 @@ where
     bson::from_bson(bson).map_err(serde::de::Error::custom)
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RssFeed {
     pub title: String,
     pub link: String,
@@ -20,7 +20,7 @@ pub struct RssFeed {
     pub last_updated: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RssItem {
     pub title: String,
     pub link: String,

@@ -10,7 +10,7 @@ Le projet sera développé à 100% en Rust, en utilisant les technologies suivan
 
 - Frontend : Rust avec le framework Yew ou Percy pour le développement de l'interface utilisateur
 - Backend : Rust avec un framework web comme Rocket, Actix Web ou Warp pour l'API et la logique métier
-- Base de données : SQLite pour le stockage des données (flux RSS, messages de contact, etc.)
+- Base de données : MongoDB pour le stockage des données (flux RSS, messages de contact, etc.)
 - Tests : Tests unitaires et d'intégration en Rust avec les outils intégrés et des bibliothèques comme reqwest ou httpmock
 
 L'approche TDD sera suivie tout au long du développement, avec l'écriture des tests avant le code de production. Les principes DDD seront appliqués pour organiser le code autour du domaine métier.
@@ -39,14 +39,14 @@ portfolio/
   │   ├── tests/
   │   └── Cargo.toml
   ├── db/
-  │   └── sqlite/
+  │   └── mongodb/
   ├── .gitignore
   └── README.md
 ```
 
 - Le dossier `api` contiendra le code backend en Rust, avec le framework choisi (Rocket, Actix Web ou Warp).
 - Le dossier `web` contiendra le code frontend en Rust, avec le framework Yew ou Percy.
-- Le dossier `db` contiendra les scripts et configurations pour la base de données SQLite.
+- Le dossier `db` contiendra les scripts et configurations pour la base de données MongoDB.
 
 ## 4. Fonctionnalités
 
@@ -60,12 +60,12 @@ Les principales fonctionnalités du portfolio seront :
 6. Design responsive et accessible
 7. Support multilingue (français et anglais) pour toutes les pages et fonctionnalités
 
-## 5. Intégration de SQLite pour les flux RSS
+## 5. Intégration de MongoDB pour les flux RSS
 
-Pour gérer l'affichage des flux RSS sur le portfolio, nous utiliserons une base de données SQLite. Voici comment cela fonctionnera :
+Pour gérer l'affichage des flux RSS sur le portfolio, nous utiliserons une base de données MongoDB. Voici comment cela fonctionnera :
 
 1. Un script Rust sera créé pour récupérer régulièrement les flux RSS des blogs et projets de Mathieu.
-2. Les données des flux seront parsées et stockées dans des tables SQLite dédiées.
+2. Les données des flux seront parsées et stockées dans des collections MongoDB dédiées.
 3. L'API backend exposera un endpoint pour récupérer les X derniers articles/projets.
 4. Le frontend appellera cet endpoint pour afficher les flux RSS sur la page d'accueil ou une page dédiée.
 
@@ -79,7 +79,7 @@ Le déploiement du portfolio se fera de la manière suivante :
 2. Une intégration continue sera mise en place avec GitHub Actions
 3. À chaque push, les tests seront exécutés automatiquement
 4. Si les tests passent, le code sera déployé sur Vercel, avec une configuration spécifique pour les applications Rust
-5. La base de données SQLite sera déployée avec le reste de l'application sur Vercel
+5. La base de données MongoDB sera déployée sur MongoDB Atlas avec une configuration optimisée pour la production
 
 ## 7. Planning
 
@@ -143,10 +143,10 @@ L'application de ces conventions sera vérifiée lors des revues de code et via 
    1. Définir les routes de l'API
    2. Écrire les tests des handlers
    3. Implémenter les handlers
-6. Intégrer SQLite pour les flux RSS
-   1. Définir la structure des données des flux RSS dans SQLite
-   2. Écrire les tests pour la récupération des flux depuis SQLite
-   3. Implémenter le code d'interaction avec SQLite et faire passer les tests
+6. Intégrer MongoDB pour les flux RSS
+   1. Définir le schéma des collections pour les flux RSS
+   2. Écrire les tests pour la récupération des flux depuis MongoDB
+   3. Implémenter le code d'interaction avec MongoDB et faire passer les tests
    4. Intégrer les données réelles des flux dans la page RSS
 7. Mettre en place le formulaire de contact
    1. Écrire les tests du formulaire (validation, envoi email)
@@ -166,7 +166,7 @@ L'application de ces conventions sera vérifiée lors des revues de code et via 
 11. Optimiser les performances et l'accessibilité
     1. Écrire les tests de performance et d'accessibilité
     2. Optimiser le code pour faire passer les tests
-12. Rédiger la documentation du projet, y compris les instructions pour SQLite
+12. Rédiger la documentation du projet, y compris les instructions pour MongoDB
 13. Déployer en production sur Vercel
 
 Ce plan de projet servira de base pour le développement du portfolio. Il pourra être amené à évoluer au fur et à mesure de l'avancement et des retours du client. L'objectif est de livrer un portfolio de qualité, reflétant les compétences de Mathieu Piton, dans les temps et le budget impartis.
