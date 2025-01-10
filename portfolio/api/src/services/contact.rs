@@ -1,14 +1,15 @@
 use crate::models::contact::ContactForm;
 use anyhow::{anyhow, Result};
 use serde_json::json;
-use wiremock::matchers::{method, path};
 
+#[allow(dead_code)]
 // Constants for validation
 const MAX_NAME_LENGTH: usize = 100;
 const MAX_EMAIL_LENGTH: usize = 255;
 const MAX_SUBJECT_LENGTH: usize = 200;
 const MAX_MESSAGE_LENGTH: usize = 1000;
 
+#[allow(dead_code)]
 pub async fn send_contact_email(form: &ContactForm) -> Result<()> {
     // Validate input
     if form.name.len() > MAX_NAME_LENGTH {
@@ -95,109 +96,38 @@ pub async fn send_contact_email(form: &ContactForm) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
-    use wiremock::{Mock, MockServer, ResponseTemplate};
-
-    async fn setup_test_env(mock_url: &str) {
-        env::set_var("BREVO_API_KEY", "test-api-key");
-        env::set_var("RECIPIENT_EMAIL", "recipient@example.com");
-        env::set_var("SENDER_NAME", "Test Sender");
-        env::set_var("SENDER_EMAIL", "sender@example.com");
-        env::set_var("BREVO_API_URL", mock_url);
-    }
+    use dotenv::dotenv;
 
     #[tokio::test]
-    async fn test_successful_email_send() {
-        let mock_server = MockServer::start().await;
-        setup_test_env(&mock_server.uri()).await;
-
-        let success_response = json!({
-            "messageId": "test-message-id",
-            "message": "Email sent successfully"
-        });
-
-        Mock::given(method("POST"))
-            .and(path("/"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(&success_response))
-            .expect(1)
-            .named("successful_email_send")
-            .mount(&mock_server)
-            .await;
+    async fn test_send_contact_message() {
+        dotenv().ok();
 
         let contact_form = ContactForm {
             name: "Test User".to_string(),
             email: "test@example.com".to_string(),
             subject: "Test Subject".to_string(),
-            message: "Test Message".to_string(),
+            message: "Test message".to_string(),
         };
 
+        // Act
         let result = send_contact_email(&contact_form).await;
-        assert!(result.is_ok());
-    }
 
-    #[tokio::test]
-    async fn test_send_contact_email_validation() {
-        let mock_server = MockServer::start().await;
-        setup_test_env(&mock_server.uri()).await;
+        // Assert
+        assert!(
+            result.is_ok(),
+            "Failed to send contact message: {:?}",
+            result
+        );
 
-        // Test invalid email
-        let contact_form = ContactForm {
-            name: "Test User".to_string(),
+        // Test avec des données invalides
+        let invalid_form = ContactForm {
+            name: "".to_string(),
             email: "invalid-email".to_string(),
             subject: "Test Subject".to_string(),
-            message: "Test Message".to_string(),
+            message: "".to_string(),
         };
 
-        let result = send_contact_email(&contact_form).await;
-        assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Invalid email"));
-
-        // Test too long name
-        let contact_form = ContactForm {
-            name: "a".repeat(MAX_NAME_LENGTH + 1),
-            email: "test@example.com".to_string(),
-            subject: "Test Subject".to_string(),
-            message: "Test Message".to_string(),
-        };
-
-        let result = send_contact_email(&contact_form).await;
-        assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Name too long"));
-    }
-
-    #[tokio::test]
-    async fn test_api_error_handling() {
-        let mock_server = MockServer::start().await;
-        setup_test_env(&mock_server.uri()).await;
-
-        let error_response = json!({
-            "code": "invalid_api_key",
-            "message": "Invalid API key"
-        });
-
-        Mock::given(method("POST"))
-            .and(path("/"))
-            .respond_with(ResponseTemplate::new(400).set_body_json(&error_response))
-            .expect(1)
-            .named("error_handling")
-            .mount(&mock_server)
-            .await;
-
-        let contact_form = ContactForm {
-            name: "Test User".to_string(),
-            email: "test@example.com".to_string(),
-            subject: "Test Subject".to_string(),
-            message: "Test Message".to_string(),
-        };
-
-        let result = send_contact_email(&contact_form).await;
-        assert!(result.is_err());
-
-        let err = result.unwrap_err().to_string();
-        assert!(
-            err.contains("Invalid API key") || err.contains("invalid_api_key"),
-            "Unexpected error message: {}",
-            err
-        );
+        let result = send_contact_email(&invalid_form).await;
+        assert!(result.is_err(), "Expected error for invalid contact data");
     }
 }

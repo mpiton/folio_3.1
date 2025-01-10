@@ -1,36 +1,22 @@
-use anyhow::Result;
-use rusqlite::Connection;
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use crate::models::rss::Tweet;
+use mongodb::{Client, Collection, Database};
 
-pub type DbPool = Arc<Mutex<Connection>>;
+pub type Db = Database;
 
-pub async fn init_db() -> Result<DbPool> {
-    let conn = Connection::open("portfolio.db")?;
+#[allow(dead_code)]
+pub type TweetCollection = Collection<Tweet>;
 
-    // Initialize tables
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS contact_messages (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            subject TEXT NOT NULL,
-            message TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )",
-        [],
-    )?;
+pub async fn init_db() -> mongodb::error::Result<Db> {
+    let mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
+    println!("Connecting to MongoDB at {}", mongo_url);
 
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS rss_feeds (
-            id INTEGER PRIMARY KEY,
-            title TEXT NOT NULL,
-            link TEXT NOT NULL,
-            description TEXT NOT NULL,
-            published_at DATETIME NOT NULL
-        )",
-        [],
-    )?;
+    let client = Client::with_uri_str(&mongo_url).await?;
+    let db = client.database("rss-bot");
 
-    Ok(Arc::new(Mutex::new(conn)))
+    Ok(db)
+}
+
+#[allow(dead_code)]
+pub fn get_tweet_collection(db: &Db) -> TweetCollection {
+    db.collection("tweets")
 }

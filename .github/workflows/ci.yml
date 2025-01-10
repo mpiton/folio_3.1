@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  MONGO_URL: ${{ secrets.MONGO_URL }}
+  BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+  RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+  SENDER_NAME: ${{ secrets.SENDER_NAME }}
+  SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+  BREVO_API_URL: "https://api.brevo.com/v3/smtp/email"
+
 jobs:
 
   build:

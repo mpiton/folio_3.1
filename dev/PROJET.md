@@ -170,3 +170,33 @@ L'application de ces conventions sera vérifiée lors des revues de code et via 
 13. Déployer en production sur Vercel
 
 Ce plan de projet servira de base pour le développement du portfolio. Il pourra être amené à évoluer au fur et à mesure de l'avancement et des retours du client. L'objectif est de livrer un portfolio de qualité, reflétant les compétences de Mathieu Piton, dans les temps et le budget impartis.
+
+## Nettoyage régulier des données
+
+Afin de s'assurer que l'application Rust puisse toujours désérialiser correctement les données provenant de MongoDB, un script de nettoyage des données a été mis en place.
+
+### Fonctionnement
+
+Le script `clean_tweets.rs` s'exécute régulièrement et effectue les opérations suivantes sur la collection `tweets` :
+
+- Parcours de tous les documents
+- Pour chaque document, nettoyage des champs `title` et `description` :
+  - Remplacement des caractères non-ASCII par des espaces
+  - Suppression des caractères de contrôle
+- Sauvegarde des documents nettoyés
+
+Le script est écrit en Rust et utilise les mêmes modèles et connexions MongoDB que l'application principale.
+
+### Exécution
+
+Le script peut être exécuté de plusieurs façons :
+
+- Manuellement, avec la commande `cargo run --bin clean_tweets`
+- Automatiquement, avant chaque lancement de l'application, via le script de démarrage `start_app.sh`
+- À intervalle régulier, via une tâche cron (tous les jours à 3h du matin)
+
+### Évolutions futures
+
+- Surveiller le volume et la fréquence d'insertion des données invalides, et ajuster la fréquence d'exécution du script en conséquence
+- Étendre le nettoyage à d'autres collections si nécessaire
+- Améliorer la regexp de détection des caractères valides si besoin
