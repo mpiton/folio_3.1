@@ -7,7 +7,7 @@
 - [x] Architecture de base du projet
 - [x] Mise en place du repository Git
 - [x] Configuration de l'environnement de développement
-- [x] Choix des technologies (Rust, MongoDB, Yew/Percy)
+- [x] Choix des technologies (Rust, MongoDB, Dioxus)
 
 ## 🔧 Phase 2 : Backend (En cours) 🚧
 
@@ -17,10 +17,15 @@
 - [x] Optimisation des indexes MongoDB
 - [x] Tests d'intégration de la base de données
 - [x] Schéma de la base de données
-- [ ] Scripts de backup automatique
+- [x] Scripts de backup automatique
 - [ ] Monitoring des performances MongoDB
 - [ ] Configuration du clustering
 - [ ] Gestion des TTL indexes pour le nettoyage automatique
+- [ ] Stratégie de backup incrémentiel
+- [ ] Monitoring des index MongoDB
+- [ ] Optimisation des requêtes agrégées
+- [ ] Gestion des migrations de schéma
+- [ ] Monitoring de la fragmentation
 
 ### API ✅
 - [x] Configuration des routes de base
