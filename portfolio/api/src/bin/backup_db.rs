@@ -85,7 +85,6 @@ mod tests {
         match verify_backup(&config).await {
             Ok(_) => {
                 // Test réussi si nous avons assez d'espace
-                assert!(true);
             }
             Err(e) => {
                 // Le test est aussi considéré comme réussi si l'erreur est liée à MongoDB
