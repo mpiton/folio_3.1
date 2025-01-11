@@ -86,7 +86,7 @@ impl ContactService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::db::init_db;
+    use crate::services::db::test_utils::create_test_db;
     use wiremock::{
         matchers::{header, method, path},
         Mock, MockServer, ResponseTemplate,
@@ -97,24 +97,26 @@ mod tests {
         // Configuration de test
         let config = Config::test_config();
 
-        // Initialiser la base de test
-        let db = init_db().await.expect("Failed to initialize test database");
+        // Créer une base de données de test
+        let db = create_test_db()
+            .await
+            .expect("Failed to create test database");
 
-        // Créer un mock server pour Brevo
+        // Créer un mock server pour Brevo avec réponse immédiate
         let mock_server = MockServer::start().await;
-
-        // Mocker la réponse de l'API Brevo
         Mock::given(method("POST"))
             .and(path("/v3/smtp/email"))
             .and(header("api-key", "test_key"))
-            .respond_with(ResponseTemplate::new(200))
+            .respond_with(
+                ResponseTemplate::new(200).set_delay(std::time::Duration::from_millis(50)),
+            )
+            .expect(1)
             .mount(&mock_server)
             .await;
 
-        // Créer un service avec l'URL du mock server
+        // Créer le service avec l'URL du mock server
         let mut config = config;
         config.brevo_api_key = "test_key".to_string();
-
         let service = ContactService {
             db: db.clone(),
             config: config.clone(),
@@ -122,6 +124,7 @@ mod tests {
             brevo_url: mock_server.uri(),
         };
 
+        // Test avec un formulaire valide
         let form = ContactForm {
             name: "Test User".to_string(),
             email: "test@example.com".to_string(),
@@ -130,14 +133,15 @@ mod tests {
 
         // Soumettre le formulaire
         let result = service.submit_contact(form).await;
-        if let Err(e) = &result {
-            eprintln!("Error submitting contact: {:?}", e);
-        }
-        assert!(result.is_ok(), "Failed to submit contact form");
+        assert!(
+            result.is_ok(),
+            "Failed to submit contact form: {:?}",
+            result
+        );
 
-        // Vérifier que le message a été stocké
-        let collection = db.collection("contacts");
-        let doc: mongodb::bson::Document = collection
+        // Vérifier l'enregistrement en base
+        let collection = db.collection::<mongodb::bson::Document>("contacts");
+        let doc = collection
             .find_one(doc! { "email": "test@example.com" })
             .await
             .expect("Failed to query database")
@@ -147,7 +151,7 @@ mod tests {
         assert_eq!(doc.get_str("email").unwrap(), "test@example.com");
         assert_eq!(doc.get_str("message").unwrap(), "This is a test message");
 
-        // Nettoyer la base de test
+        // Nettoyer
         db.drop().await.ok();
     }
 

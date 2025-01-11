@@ -152,77 +152,90 @@ impl RssService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::db::init_db;
+    use crate::services::db::test_utils::create_test_db;
+    use std::time::Duration;
+    use tokio::time::timeout;
     use wiremock::{
         matchers::{method, path},
         Mock, MockServer, ResponseTemplate,
     };
 
+    const TEST_TIMEOUT: Duration = Duration::from_secs(60);
+
     #[tokio::test]
     async fn test_fetch_and_store_feed() {
-        // Configuration de test
-        let config = Config::test_config();
+        // Test avec timeout
+        match timeout(TEST_TIMEOUT, async {
+            // Configuration de test
+            let config = Config::test_config();
 
-        // Initialiser la base de test
-        let db = init_db().await.expect("Failed to initialize test database");
+            // Créer une base de données de test
+            let db = create_test_db()
+                .await
+                .expect("Failed to create test database");
 
-        // Créer un mock server
-        let mock_server = MockServer::start().await;
-        let mock_feed = r#"<?xml version="1.0" encoding="UTF-8"?>
-        <rss version="2.0">
-            <channel>
-                <title>Test Feed</title>
-                <link>http://example.com</link>
-                <description>Test Description</description>
-                <item>
-                    <title>Test Item</title>
-                    <link>http://example.com/item</link>
-                    <description>Test Item Description</description>
-                    <pubDate>Tue, 15 Nov 2023 12:00:00 GMT</pubDate>
-                </item>
-            </channel>
-        </rss>"#;
+            // Créer un mock server avec réponse rapide
+            let mock_server = MockServer::start().await;
+            let mock_feed = r#"<?xml version="1.0" encoding="UTF-8"?>
+            <rss version="2.0">
+                <channel>
+                    <title>Test Feed</title>
+                    <link>http://example.com</link>
+                    <description>Test Description</description>
+                    <item>
+                        <title>Test Item</title>
+                        <link>http://example.com/item</link>
+                        <description>Test Item Description</description>
+                        <pubDate>Tue, 15 Nov 2023 12:00:00 GMT</pubDate>
+                    </item>
+                </channel>
+            </rss>"#;
 
-        Mock::given(method("GET"))
-            .and(path("/feed"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .set_body_string(mock_feed)
-                    .insert_header("content-type", "application/rss+xml"),
-            )
-            .expect(1)
-            .mount(&mock_server)
-            .await;
+            Mock::given(method("GET"))
+                .and(path("/feed"))
+                .respond_with(
+                    ResponseTemplate::new(200)
+                        .set_body_string(mock_feed)
+                        .set_delay(Duration::from_millis(100))
+                        .insert_header("content-type", "application/rss+xml"),
+                )
+                .expect(1)
+                .mount(&mock_server)
+                .await;
 
-        // Créer le service RSS
-        let rss_service = RssService::new(db.clone(), config);
+            // Créer le service RSS
+            let rss_service = RssService::new(db.clone(), config);
 
-        // Tester la récupération du flux
-        let items = rss_service
-            .fetch_and_store_feed(&format!("{}/feed", mock_server.uri()))
-            .await
-            .expect("Failed to fetch feed");
+            // Tester la récupération du flux
+            let items = rss_service
+                .fetch_and_store_feed(&format!("{}/feed", mock_server.uri()))
+                .await
+                .expect("Failed to fetch feed");
 
-        assert_eq!(items.len(), 1, "Expected 1 item in the feed");
-        assert_eq!(
-            items[0].title, "Test Item",
-            "Expected item title to be 'Test Item'"
-        );
+            assert_eq!(items.len(), 1, "Expected 1 item in the feed");
+            assert_eq!(items[0].title, "Test Item");
 
-        // Vérifier que les données sont en cache
-        let cached_items = rss_service
-            .get_cached_items(&format!("{}/feed", mock_server.uri()))
-            .await
-            .expect("Failed to get cached items")
-            .expect("No cached items found");
+            // Vérifier le cache avec un délai minimal
+            tokio::time::sleep(Duration::from_millis(100)).await;
+            let cached_items = rss_service
+                .get_cached_items(&format!("{}/feed", mock_server.uri()))
+                .await
+                .expect("Failed to get cached items")
+                .expect("No cached items found");
 
-        assert_eq!(cached_items.len(), 1, "Expected 1 item in the cache");
-        assert_eq!(
-            cached_items[0].title, "Test Item",
-            "Expected cached item title to be 'Test Item'"
-        );
+            assert_eq!(cached_items.len(), 1, "Expected 1 item in the cache");
+            assert_eq!(cached_items[0].title, "Test Item");
 
-        // Nettoyer la base de test
-        db.drop().await.ok();
+            // Nettoyer
+            db.drop().await.ok();
+        })
+        .await
+        {
+            Ok(_) => (),
+            Err(_) => panic!(
+                "Le test a dépassé le délai de {} secondes",
+                TEST_TIMEOUT.as_secs()
+            ),
+        }
     }
 }

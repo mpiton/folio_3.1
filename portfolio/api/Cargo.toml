@@ -44,6 +44,7 @@ validator_derive = "0.19.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 tower = { version = "0.5.2", features = ["util"] }
+futures-util = "0.3.31"
 
 [dev-dependencies]
 mockito = "1.6.1"
