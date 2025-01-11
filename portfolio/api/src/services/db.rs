@@ -31,6 +31,8 @@ async fn init_collections(db: &Database) -> Result<()> {
         match *collection_name {
             "portfolio" => {
                 let collection = db.collection::<mongodb::bson::Document>(collection_name);
+
+                // Index pour l'unicité et la recherche
                 let index = IndexModel::builder()
                     .keys(doc! {
                         "url": 1,
@@ -38,9 +40,22 @@ async fn init_collections(db: &Database) -> Result<()> {
                     })
                     .build();
                 collection.create_index(index).await?;
+
+                // TTL index pour nettoyer les vieux articles (90 jours)
+                let ttl_index = IndexModel::builder()
+                    .keys(doc! { "pub_date": 1 })
+                    .options(
+                        mongodb::options::IndexOptions::builder()
+                            .expire_after(std::time::Duration::from_secs(90 * 24 * 60 * 60))
+                            .build(),
+                    )
+                    .build();
+                collection.create_index(ttl_index).await?;
             }
             "contacts" => {
                 let collection = db.collection::<mongodb::bson::Document>(collection_name);
+
+                // Index pour l'unicité et la recherche
                 let index = IndexModel::builder()
                     .keys(doc! {
                         "email": 1,
@@ -48,6 +63,17 @@ async fn init_collections(db: &Database) -> Result<()> {
                     })
                     .build();
                 collection.create_index(index).await?;
+
+                // TTL index pour nettoyer les vieux contacts (180 jours)
+                let ttl_index = IndexModel::builder()
+                    .keys(doc! { "created_at": 1 })
+                    .options(
+                        mongodb::options::IndexOptions::builder()
+                            .expire_after(std::time::Duration::from_secs(180 * 24 * 60 * 60))
+                            .build(),
+                    )
+                    .build();
+                collection.create_index(ttl_index).await?;
             }
             _ => {}
         }

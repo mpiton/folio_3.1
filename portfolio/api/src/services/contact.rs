@@ -1,7 +1,8 @@
 use crate::config::Config;
 use crate::models::contact::ContactForm;
 use anyhow::Result;
-use mongodb::bson::{doc, Bson};
+use futures_util::TryStreamExt;
+use mongodb::bson::{doc, Bson, Document};
 use mongodb::Database;
 use validator::Validate;
 
@@ -27,13 +28,15 @@ impl ContactService {
         form.validate()?;
 
         // Stocker dans la base de données
-        let collection = self.db.collection("contacts");
+        let collection = self.db.collection::<Document>("contacts");
+
         collection
             .insert_one(doc! {
                 "name": &form.name,
                 "email": &form.email,
                 "message": &form.message,
-                "created_at": Bson::DateTime(mongodb::bson::DateTime::from_millis(chrono::Utc::now().timestamp_millis()))
+                "created_at": Bson::DateTime(mongodb::bson::DateTime::from_millis(chrono::Utc::now().timestamp_millis())),
+                "status": "pending"
             })
             .await?;
 
@@ -41,6 +44,63 @@ impl ContactService {
         self.send_email(&form).await?;
 
         Ok(())
+    }
+
+    pub async fn get_recent_contacts(&self, limit: i64) -> Result<Vec<ContactForm>> {
+        let collection = self.db.collection::<Document>("contacts");
+
+        let mut cursor = collection.find(doc! {}).await?;
+
+        let mut contacts = Vec::new();
+        let mut count = 0;
+
+        while let Some(doc) = cursor.try_next().await? {
+            if count >= limit {
+                break;
+            }
+            contacts.push(ContactForm {
+                name: doc.get_str("name")?.to_string(),
+                email: doc.get_str("email")?.to_string(),
+                message: doc.get_str("message")?.to_string(),
+            });
+            count += 1;
+        }
+
+        Ok(contacts)
+    }
+
+    pub async fn get_contact_stats(&self) -> Result<serde_json::Value> {
+        let collection = self.db.collection::<Document>("contacts");
+
+        let pipeline = vec![
+            doc! {
+                "$group": {
+                    "_id": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": "$created_at"
+                        }
+                    },
+                    "count": { "$sum": 1 }
+                }
+            },
+            doc! {
+                "$sort": {
+                    "_id": 1
+                }
+            },
+        ];
+
+        let mut cursor = collection.aggregate(pipeline).await?;
+        let mut stats = Vec::new();
+
+        while let Some(doc) = cursor.try_next().await? {
+            stats.push(doc);
+        }
+
+        Ok(serde_json::json!({
+            "daily_stats": stats
+        }))
     }
 
     async fn send_email(&self, form: &ContactForm) -> Result<()> {

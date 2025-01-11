@@ -33,9 +33,7 @@ impl RssService {
 
         // Si pas de cache, récupérer les données
         let response = reqwest::get(url).await?;
-        println!("RSS response status: {}", response.status());
         let content = response.bytes().await?;
-        println!("RSS content: {}", String::from_utf8_lossy(&content));
 
         let channel = Channel::read_from(&content[..])?;
 
@@ -58,8 +56,6 @@ impl RssService {
             })
             .collect();
 
-        println!("Parsed {} items from RSS feed", items.len());
-
         // Stocker en cache
         self.store_items(url, &items).await?;
 
@@ -77,38 +73,26 @@ impl RssService {
             "timestamp": { "$gt": Bson::DateTime(mongodb::bson::DateTime::from_millis(expiration.timestamp_millis())) }
         };
 
-        println!("Checking cache with filter: {:?}", filter);
-
         if let Some(doc) = collection.find_one(filter).await? {
-            println!("Found cached document: {:?}", doc);
             if let Some(items) = doc.get("items").and_then(|i| i.as_array()) {
-                println!("Found {} items in cache", items.len());
                 let rss_items: Vec<RssItem> = items
                     .iter()
                     .filter_map(|item| {
                         let doc = item.as_document()?;
-                        let title = doc.get_str("title").ok()?.to_string();
-                        let link = doc.get_str("link").ok()?.to_string();
-                        let description = doc.get_str("description").ok()?.to_string();
-                        let pub_date = doc
-                            .get_str("pub_date")
-                            .ok()
-                            .and_then(|d| DateTime::parse_from_rfc3339(d).ok())
-                            .map(|d| d.with_timezone(&Utc))?;
-
                         Some(RssItem {
-                            title,
-                            link,
-                            description,
-                            pub_date,
+                            title: doc.get_str("title").ok()?.to_string(),
+                            link: doc.get_str("link").ok()?.to_string(),
+                            description: doc.get_str("description").ok()?.to_string(),
+                            pub_date: doc
+                                .get_str("pub_date")
+                                .ok()
+                                .and_then(|d| DateTime::parse_from_rfc3339(d).ok())
+                                .map(|d| d.with_timezone(&Utc))?,
                         })
                     })
                     .collect();
-                println!("Deserialized {} items from cache", rss_items.len());
                 return Ok(Some(rss_items));
             }
-        } else {
-            println!("No cached document found");
         }
 
         Ok(None)
@@ -117,11 +101,6 @@ impl RssService {
     async fn store_items(&self, url: &str, items: &[RssItem]) -> Result<()> {
         let collection = self.db.collection::<Document>("portfolio");
 
-        // Supprimer l'ancien cache
-        let delete_result = collection.delete_one(doc! { "url": url }).await?;
-        println!("Deleted {} old cache entries", delete_result.deleted_count);
-
-        // Convertir les items en documents BSON
         let items_docs: Vec<Document> = items
             .iter()
             .map(|item| {
@@ -135,15 +114,15 @@ impl RssService {
             .collect();
 
         let now = Utc::now();
-        let doc = doc! {
-            "url": url,
-            "items": items_docs,
-            "timestamp": Bson::DateTime(mongodb::bson::DateTime::from_millis(now.timestamp_millis()))
+        let update = doc! {
+            "$set": {
+                "url": url,
+                "items": items_docs,
+                "timestamp": Bson::DateTime(mongodb::bson::DateTime::from_millis(now.timestamp_millis()))
+            }
         };
 
-        println!("Storing document in cache: {:?}", doc);
-        collection.insert_one(doc).await?;
-        println!("Successfully stored items in cache");
+        collection.update_one(doc! { "url": url }, update).await?;
 
         Ok(())
     }
@@ -220,9 +199,10 @@ mod tests {
             let cached_items = rss_service
                 .get_cached_items(&format!("{}/feed", mock_server.uri()))
                 .await
-                .expect("Failed to get cached items")
-                .expect("No cached items found");
+                .expect("Failed to get cached items");
 
+            assert!(cached_items.is_some(), "No cached items found");
+            let cached_items = cached_items.unwrap();
             assert_eq!(cached_items.len(), 1, "Expected 1 item in the cache");
             assert_eq!(cached_items[0].title, "Test Item");
 
