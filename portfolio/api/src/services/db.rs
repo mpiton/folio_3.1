@@ -73,7 +73,7 @@ pub mod test_utils {
         let client_clone = client.clone();
 
         // Nettoyer les anciennes bases de test au démarrage des tests
-        if let Err(_) = timeout(
+        if timeout(
             TEST_TIMEOUT,
             CLEANUP.get_or_init(|| async move {
                 if let Ok(db_names) = client_clone.list_database_names().await {
@@ -100,6 +100,7 @@ pub mod test_utils {
             }),
         )
         .await
+        .is_err()
         {
             eprintln!("Timeout lors du nettoyage des anciennes bases de test");
         }
