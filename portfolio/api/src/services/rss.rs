@@ -1,126 +1,228 @@
-use crate::models::rss::Tweet;
-use crate::services::db::Db;
+use crate::config::Config;
 use anyhow::Result;
-use futures::stream::TryStreamExt;
-use mongodb::bson::doc;
-use mongodb::options::FindOptions;
+use chrono::{DateTime, Utc};
+use mongodb::bson::{doc, Bson, Document};
+use mongodb::Database;
+use rss::Channel;
+use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
-pub async fn get_latest_tweets(db: &Db, limit: i64) -> Result<Vec<Tweet>> {
-    let collection = if cfg!(test) {
-        db.collection::<Tweet>("tweets_test")
-    } else {
-        db.collection::<Tweet>("tweets")
-    };
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RssItem {
+    pub title: String,
+    pub link: String,
+    pub description: String,
+    pub pub_date: DateTime<Utc>,
+}
 
-    let filter = doc! {
-        "pubDate": { "$exists": true }
-    };
+pub struct RssService {
+    db: Database,
+    config: Config,
+}
 
-    let mut options = FindOptions::default();
-    options.sort = Some(doc! { "pubDate": -1 });
-    options.limit = Some(limit);
-
-    let mut cursor = collection.find(filter).await?;
-    let mut tweets = Vec::new();
-
-    while let Some(tweet) = cursor.try_next().await? {
-        tweets.push(tweet);
-        if tweets.len() >= limit as usize {
-            break;
-        }
+impl RssService {
+    pub fn new(db: Database, config: Config) -> Self {
+        RssService { db, config }
     }
 
-    Ok(tweets)
+    pub async fn fetch_and_store_feed(&self, url: &str) -> Result<Vec<RssItem>> {
+        // Vérifier si nous avons des données en cache
+        if let Some(cached_items) = self.get_cached_items(url).await? {
+            return Ok(cached_items);
+        }
+
+        // Si pas de cache, récupérer les données
+        let response = reqwest::get(url).await?;
+        println!("RSS response status: {}", response.status());
+        let content = response.bytes().await?;
+        println!("RSS content: {}", String::from_utf8_lossy(&content));
+
+        let channel = Channel::read_from(&content[..])?;
+
+        let items: Vec<RssItem> = channel
+            .items()
+            .iter()
+            .map(|item| {
+                let pub_date = item
+                    .pub_date()
+                    .and_then(|date| DateTime::parse_from_rfc2822(date).ok())
+                    .map(|date| date.with_timezone(&Utc))
+                    .unwrap_or_else(Utc::now);
+
+                RssItem {
+                    title: item.title().unwrap_or_default().to_string(),
+                    link: item.link().unwrap_or_default().to_string(),
+                    description: item.description().unwrap_or_default().to_string(),
+                    pub_date,
+                }
+            })
+            .collect();
+
+        println!("Parsed {} items from RSS feed", items.len());
+
+        // Stocker en cache
+        self.store_items(url, &items).await?;
+
+        Ok(items)
+    }
+
+    async fn get_cached_items(&self, url: &str) -> Result<Option<Vec<RssItem>>> {
+        let collection = self.db.collection::<Document>("portfolio");
+
+        let now = Utc::now();
+        let expiration = now - Duration::from_secs(self.config.rss_cache_duration);
+
+        let filter = doc! {
+            "url": url,
+            "timestamp": { "$gt": Bson::DateTime(mongodb::bson::DateTime::from_millis(expiration.timestamp_millis())) }
+        };
+
+        println!("Checking cache with filter: {:?}", filter);
+
+        if let Some(doc) = collection.find_one(filter).await? {
+            println!("Found cached document: {:?}", doc);
+            if let Some(items) = doc.get("items").and_then(|i| i.as_array()) {
+                println!("Found {} items in cache", items.len());
+                let rss_items: Vec<RssItem> = items
+                    .iter()
+                    .filter_map(|item| {
+                        let doc = item.as_document()?;
+                        let title = doc.get_str("title").ok()?.to_string();
+                        let link = doc.get_str("link").ok()?.to_string();
+                        let description = doc.get_str("description").ok()?.to_string();
+                        let pub_date = doc
+                            .get_str("pub_date")
+                            .ok()
+                            .and_then(|d| DateTime::parse_from_rfc3339(d).ok())
+                            .map(|d| d.with_timezone(&Utc))?;
+
+                        Some(RssItem {
+                            title,
+                            link,
+                            description,
+                            pub_date,
+                        })
+                    })
+                    .collect();
+                println!("Deserialized {} items from cache", rss_items.len());
+                return Ok(Some(rss_items));
+            }
+        } else {
+            println!("No cached document found");
+        }
+
+        Ok(None)
+    }
+
+    async fn store_items(&self, url: &str, items: &[RssItem]) -> Result<()> {
+        let collection = self.db.collection::<Document>("portfolio");
+
+        // Supprimer l'ancien cache
+        let delete_result = collection.delete_one(doc! { "url": url }).await?;
+        println!("Deleted {} old cache entries", delete_result.deleted_count);
+
+        // Convertir les items en documents BSON
+        let items_docs: Vec<Document> = items
+            .iter()
+            .map(|item| {
+                doc! {
+                    "title": &item.title,
+                    "link": &item.link,
+                    "description": &item.description,
+                    "pub_date": item.pub_date.to_rfc3339()
+                }
+            })
+            .collect();
+
+        let now = Utc::now();
+        let doc = doc! {
+            "url": url,
+            "items": items_docs,
+            "timestamp": Bson::DateTime(mongodb::bson::DateTime::from_millis(now.timestamp_millis()))
+        };
+
+        println!("Storing document in cache: {:?}", doc);
+        collection.insert_one(doc).await?;
+        println!("Successfully stored items in cache");
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::init_db;
-    use chrono::{TimeZone, Utc};
-    use dotenv::dotenv;
-    use mongodb::bson::oid::ObjectId;
-    use mongodb::options::IndexOptions;
-    use mongodb::IndexModel;
+    use crate::services::db::init_db;
+    use wiremock::{
+        matchers::{method, path},
+        Mock, MockServer, ResponseTemplate,
+    };
 
     #[tokio::test]
-    async fn test_get_latest_tweets() {
-        dotenv().ok();
+    async fn test_fetch_and_store_feed() {
+        // Configuration de test
+        let config = Config::test_config();
 
-        // Arrange
-        let db = init_db().await.unwrap();
-        let collection = db.collection::<Tweet>("tweets_test");
+        // Initialiser la base de test
+        let db = init_db().await.expect("Failed to initialize test database");
 
-        // Nettoyer la collection avant le test
-        let _ = collection.drop().await;
+        // Créer un mock server
+        let mock_server = MockServer::start().await;
+        let mock_feed = r#"<?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+            <channel>
+                <title>Test Feed</title>
+                <link>http://example.com</link>
+                <description>Test Description</description>
+                <item>
+                    <title>Test Item</title>
+                    <link>http://example.com/item</link>
+                    <description>Test Item Description</description>
+                    <pubDate>Tue, 15 Nov 2023 12:00:00 GMT</pubDate>
+                </item>
+            </channel>
+        </rss>"#;
 
-        // Créer un index sur pub_date
-        let mut options = IndexOptions::default();
-        options.unique = Some(false);
-        let model = IndexModel::builder()
-            .keys(doc! { "pubDate": -1 })
-            .options(options)
-            .build();
-        collection.create_index(model).await.unwrap();
+        Mock::given(method("GET"))
+            .and(path("/feed"))
+            .respond_with(
+                ResponseTemplate::new(200)
+                    .set_body_string(mock_feed)
+                    .insert_header("content-type", "application/rss+xml"),
+            )
+            .expect(1)
+            .mount(&mock_server)
+            .await;
 
-        let tweet1 = Tweet {
-            _id: ObjectId::new(),
-            link: "https://example.com/tweet1".to_string(),
-            pub_date: Utc.timestamp_opt(1620000000, 0).unwrap(),
-            title: "Tweet 1".to_string(),
-            sended: true,
-            created_at: Utc.timestamp_opt(1620000000, 0).unwrap(),
-            updated_at: Utc.timestamp_opt(1620000000, 0).unwrap(),
-            __v: 0,
-        };
+        // Créer le service RSS
+        let rss_service = RssService::new(db.clone(), config);
 
-        let tweet2 = Tweet {
-            _id: ObjectId::new(),
-            link: "https://example.com/tweet2".to_string(),
-            pub_date: Utc.timestamp_opt(1620100000, 0).unwrap(),
-            title: "Tweet 2".to_string(),
-            sended: true,
-            created_at: Utc.timestamp_opt(1620100000, 0).unwrap(),
-            updated_at: Utc.timestamp_opt(1620100000, 0).unwrap(),
-            __v: 0,
-        };
+        // Tester la récupération du flux
+        let items = rss_service
+            .fetch_and_store_feed(&format!("{}/feed", mock_server.uri()))
+            .await
+            .expect("Failed to fetch feed");
 
-        let tweet3 = Tweet {
-            _id: ObjectId::new(),
-            link: "https://example.com/tweet3".to_string(),
-            pub_date: Utc.timestamp_opt(1620200000, 0).unwrap(),
-            title: "Tweet 3".to_string(),
-            sended: true,
-            created_at: Utc.timestamp_opt(1620200000, 0).unwrap(),
-            updated_at: Utc.timestamp_opt(1620200000, 0).unwrap(),
-            __v: 0,
-        };
-
-        // Insérer les tweets dans l'ordre chronologique
-        let tweets = vec![tweet3.clone(), tweet2.clone(), tweet1.clone()];
-
-        // Insérer les tweets
-        for tweet in tweets.iter() {
-            collection.insert_one(tweet).await.unwrap();
-        }
-
-        // Act
-        let latest_tweets = get_latest_tweets(&db, 2).await.unwrap();
-
-        // Assert
-        assert_eq!(latest_tweets.len(), 2, "Expected 2 tweets");
-
-        // Vérifier que les tweets sont triés par pub_date décroissant
-        assert!(
-            latest_tweets[0].pub_date > latest_tweets[1].pub_date,
-            "Tweets not sorted correctly"
+        assert_eq!(items.len(), 1, "Expected 1 item in the feed");
+        assert_eq!(
+            items[0].title, "Test Item",
+            "Expected item title to be 'Test Item'"
         );
 
-        // Vérifier les titres et l'ordre exact
-        assert_eq!(latest_tweets[0].title, tweet3.title);
-        assert_eq!(latest_tweets[1].title, tweet2.title);
+        // Vérifier que les données sont en cache
+        let cached_items = rss_service
+            .get_cached_items(&format!("{}/feed", mock_server.uri()))
+            .await
+            .expect("Failed to get cached items")
+            .expect("No cached items found");
 
-        // Nettoyer après le test
-        let _ = collection.drop().await;
+        assert_eq!(cached_items.len(), 1, "Expected 1 item in the cache");
+        assert_eq!(
+            cached_items[0].title, "Test Item",
+            "Expected cached item title to be 'Test Item'"
+        );
+
+        // Nettoyer la base de test
+        db.drop().await.ok();
     }
 }

@@ -18,15 +18,15 @@ Ce projet consiste en la création d'un portfolio en ligne pour Mathieu Piton, u
 ## 3. Technologies utilisées
 
     Frontend :
-        Rust avec le framework Yew ou Percy pour le développement de l'interface utilisateur
+        Rust avec le framework Dioxus pour le développement de l'interface utilisateur
         Three.js pour des éléments interactifs en 3D
         HTML, CSS (préprocesseur comme Sass ou TailwindCSS) pour le style et la mise en page
     Backend :
-        Rust avec un framework web comme Rocket, Actix Web ou Warp pour l'API et la logique métier
+        Rust avec Axum pour l'API et la logique métier
         Base de données MongoDB pour le stockage des données (flux RSS, messages de contact, etc.)
     Testing : Tests unitaires et d'intégration en Rust avec les outils suivants :
         Tests unitaires via le module de test intégré de Rust
-        Tests d'intégration avec des bibliothèques comme reqwest ou httpmock pour tester l'API
+        Tests d'intégration avec wiremock pour tester l'API
     Logo : Intégration du logo existant de Mathieu.
 
 ## 4. Pratiques de développement
@@ -59,11 +59,11 @@ Le projet respectera les principes du DDD pour organiser les données et la logi
 L'architecture du site sera basée sur une approche DDD, avec une séparation claire des préoccupations :
 
     Backend :
-        API REST en Rust avec Rocket, Actix Web ou Warp
+        API REST en Rust avec Axum
         Interaction avec la base de données MongoDB
         Gestion des requêtes entrantes (formulaire de contact, récupération des flux RSS, etc.)
     Frontend :
-        Application web en Rust avec Yew ou Percy
+        Application web en Rust avec Dioxus
         Composants réutilisables pour les différentes sections (header, footer, about, contact, rss)
         Communication avec l'API backend pour les données dynamiques
         Intégration des animations Three.js

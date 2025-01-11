@@ -8,16 +8,16 @@ L'objectif principal de ce projet est de créer un portfolio en ligne pour Mathi
 
 Le projet sera développé à 100% en Rust, en utilisant les technologies suivantes :
 
-- Frontend : Rust avec le framework Yew ou Percy pour le développement de l'interface utilisateur
-- Backend : Rust avec un framework web comme Rocket, Actix Web ou Warp pour l'API et la logique métier
+- Frontend : Rust avec le framework Dioxus pour le développement de l'interface utilisateur
+- Backend : Axum pour l'API et la logique métier (migration depuis Actix Web terminée)
 - Base de données : MongoDB pour le stockage des données (flux RSS, messages de contact, etc.)
-- Tests : Tests unitaires et d'intégration en Rust avec les outils intégrés et des bibliothèques comme reqwest ou httpmock
-
-L'approche TDD sera suivie tout au long du développement, avec l'écriture des tests avant le code de production. Les principes DDD seront appliqués pour organiser le code autour du domaine métier.
+- Tests : Tests unitaires et d'intégration avec wiremock pour les tests HTTP
+- Email : Service Brevo (anciennement Sendinblue) pour l'envoi d'emails
+- Cache : Cache en mémoire avec tokio pour les flux RSS
 
 ## 3. Structure du projet
 
-Le projet sera organisé selon l'arborescence suivante :
+Le projet est organisé selon l'arborescence suivante :
 
 ```
 portfolio/
@@ -25,8 +25,18 @@ portfolio/
   │   ├── src/
   │   │   ├── main.rs
   │   │   ├── routes/
+  │   │   │   ├── health.rs
+  │   │   │   ├── contact.rs
+  │   │   │   └── rss.rs
   │   │   ├── models/
+  │   │   │   ├── contact.rs
+  │   │   │   └── rss.rs
   │   │   └── services/
+  │   │       ├── contact.rs
+  │   │       ├── db.rs
+  │   │       ├── email_queue.rs
+  │   │       ├── email_templates.rs
+  │   │       └── rss.rs
   │   ├── tests/
   │   └── Cargo.toml
   ├── web/
@@ -44,159 +54,210 @@ portfolio/
   └── README.md
 ```
 
-- Le dossier `api` contiendra le code backend en Rust, avec le framework choisi (Rocket, Actix Web ou Warp).
-- Le dossier `web` contiendra le code frontend en Rust, avec le framework Yew ou Percy.
-- Le dossier `db` contiendra les scripts et configurations pour la base de données MongoDB.
+## 4. Fonctionnalités implémentées
 
-## 4. Fonctionnalités
+### Backend (API)
 
-Les principales fonctionnalités du portfolio seront :
+1. Service RSS ✅
+   - Synchronisation avec la base de données RSS
+   - Mise en cache des flux RSS
+   - Endpoint pour récupérer les articles récents
+   - Synchronisation périodique automatique
+   - Tests unitaires et d'intégration
 
-1. Page d'accueil avec une présentation de Mathieu (bio, compétences, technologies)
-2. Section "A propos" avec plus de détails sur la carrière de Mathieu
-3. Formulaire de contact fonctionnel
-4. Intégration de flux RSS pour afficher les derniers articles de blog ou projets de Mathieu
-5. Animations 3D interactives avec Three.js pour un design immersif
-6. Design responsive et accessible
-7. Support multilingue (français et anglais) pour toutes les pages et fonctionnalités
+2. Service Contact ✅
+   - Validation des formulaires de contact
+   - Protection anti-spam (rate limiting, détection de spam)
+   - File d'attente d'emails asynchrone
+   - Templates d'emails HTML
+   - Intégration avec Brevo
+   - Tests unitaires et d'intégration
 
-## 5. Intégration de MongoDB pour les flux RSS
+3. Base de données ✅
+   - Connexion MongoDB
+   - Collections pour les flux RSS et les articles
+   - Indexation pour les performances
+   - Tests avec base de données de test
 
-Pour gérer l'affichage des flux RSS sur le portfolio, nous utiliserons une base de données MongoDB. Voici comment cela fonctionnera :
+### Frontend (Web)
 
-1. Un script Rust sera créé pour récupérer régulièrement les flux RSS des blogs et projets de Mathieu.
-2. Les données des flux seront parsées et stockées dans des collections MongoDB dédiées.
-3. L'API backend exposera un endpoint pour récupérer les X derniers articles/projets.
-4. Le frontend appellera cet endpoint pour afficher les flux RSS sur la page d'accueil ou une page dédiée.
+[En attente - Migration vers Dioxus]
 
-Cette approche permettra de découpler la récupération des flux de leur affichage, et d'avoir de meilleures performances en servant les données depuis la base de données plutôt que de faire des appels RSS à chaque chargement de page.
+## 5. Tests
 
-## 6. Déploiement
+Les tests sont écrits en suivant l'approche TDD et couvrent :
 
-Le déploiement du portfolio se fera de la manière suivante :
+1. Tests unitaires ✅
+   - Validation des formulaires
+   - Détection de spam
+   - Parsing des flux RSS
+   - Templates d'emails
 
-1. Le code sera poussé sur un dépôt GitHub
-2. Une intégration continue sera mise en place avec GitHub Actions
-3. À chaque push, les tests seront exécutés automatiquement
-4. Si les tests passent, le code sera déployé sur Vercel, avec une configuration spécifique pour les applications Rust
-5. La base de données MongoDB sera déployée sur MongoDB Atlas avec une configuration optimisée pour la production
+2. Tests d'intégration ✅
+   - Endpoints API
+   - Synchronisation RSS
+   - File d'attente d'emails
 
-## 7. Planning
+3. Mocks ✅
+   - Requêtes HTTP avec wiremock
+   - Base de données de test
 
-Le développement du portfolio se déroulera sur X semaines, avec les étapes suivantes :
+## 6. Sécurité
 
-- Semaine 1 : Mise en place de l'architecture, choix des technologies, création des dépôts
-- Semaine 2 : Développement de l'API backend avec intégration de MongoDB
-- Semaine 3 : Développement des composants frontend principaux
-- Semaine 4 : Intégration frontend/backend, développement des fonctionnalités avancées
-- Semaine 5 : Finalisation du design, tests d'accessibilité, optimisations
-- Semaine 6 : Tests utilisateur, corrections de bugs, préparation du déploiement
-- Semaine 7 : Déploiement en production, rédaction de la documentation
+1. Protection anti-spam ✅
+   - Rate limiting par IP
+   - Détection de mots-clés spam
+   - Validation des champs de formulaire
+   - Délai minimum entre les soumissions
 
-Ce planning est indicatif et pourra être ajusté en fonction de l'avancement réel du projet.
+2. Base de données ✅
+   - Indexes uniques pour éviter les doublons
+   - Validation des données
 
-## 8. Livrables
+## 7. Performance
 
-Les livrables du projet seront :
+1. Cache ✅
+   - Mise en cache des flux RSS
+   - Actualisation périodique en arrière-plan
 
-- Le code source complet du portfolio, frontend et backend
-- La documentation technique et utilisateur
-- Un accès à la version de production du portfolio pour validation avant mise en ligne officielle
+2. Base de données ✅
+   - Indexes optimisés
+   - Requêtes paginées
+   - Upsert pour éviter les doublons
 
-## 9. Critères de validation
+## 8. Prochaines étapes
 
-Le projet sera considéré comme terminé une fois les critères suivants remplis :
+1. Frontend
+   - Migration vers Dioxus
+   - Mise en place de l'architecture
+   - Développement des composants
+   - Tests unitaires et d'intégration
 
-- Toutes les fonctionnalités décrites sont implémentées et fonctionnelles dans les deux langues (français et anglais)
-- Le code est documenté et testé, avec une couverture de tests supérieure à 80%
-- Le portfolio est accessible et affiche un design responsive sur tous les supports
-- Les performances sont optimisées, avec un temps de chargement inférieur à 2 secondes
-- La version de production est déployée et accessible publiquement
-- La documentation est complète et à jour, incluant les instructions pour la gestion des traductions
-- Le client (Mathieu Piton) a validé le résultat final dans les deux langues
+2. Optimisations
+   - Documentation API OpenAPI/Swagger
+   - Monitoring temps réel
+   - Système de backup automatique
 
-## 10. Conventions de codage
+3. Sécurité
+   - Audit de sécurité
+   - Tests de pénétration
+   - Monitoring de sécurité
+
+## 9. Déploiement
+
+Le déploiement se fera sur :
+- Backend : VPS avec Docker
+- Frontend : Vercel
+- Base de données : MongoDB Atlas
+
+## 10. Maintenance
+
+1. Logs ✅
+   - Logs d'erreurs pour la synchronisation RSS
+   - Logs d'envoi d'emails
+   - Logs de détection de spam
+
+2. Monitoring ✅
+   - Surveillance de la synchronisation RSS
+   - Surveillance de la file d'attente d'emails
+   - Métriques de performance
+
+## 11. Conventions de codage
 
 Pour assurer la cohérence et la lisibilité du code, les conventions suivantes seront appliquées :
 
+1. Style de code
 - Nommage des variables, fonctions et fichiers en `snake_case`
-- Nommage des composants en `PascalCase`
+   - Nommage des types, traits et structures en `PascalCase`
+   - Nommage des constantes en `SCREAMING_SNAKE_CASE`
 - Indentation avec 4 espaces
 - Largeur de ligne maximale de 100 caractères
-- Commentaires en anglais
-- Tests unitaires dans le même fichier que le code testé
-- Messages de commit descriptifs en anglais, préfixés par le type de changement (feat, fix, docs, etc)
 
-L'application de ces conventions sera vérifiée lors des revues de code et via des outils d'analyse statique comme Clippy.
+2. Documentation
+   - Commentaires en français
+   - Documentation des fonctions publiques obligatoire
+   - Exemples de code dans la documentation
+   - Tests comme documentation vivante
 
-## 11. Étapes de développement (TDD)
+3. Organisation du code
+   - Un module par fichier
+   - Tests dans le même fichier que le code testé
+   - Imports groupés et ordonnés (std, externes, crate)
+   - Utilisation des modules pour organiser le code
 
-1. Mettre en place la structure de base du projet Rust avec Cargo
-2. Configurer l'intégration continue (GitHub Actions) pour les tests et le déploiement
-3. Définir les User Stories principales
-4. Pour chaque User Story :
-   1. Écrire un test d'acceptation
-   2. Écrire les tests unitaires des composants impliqués
-   3. Implémenter le code pour faire passer les tests
-   4. Refactorer si besoin en gardant les tests au vert
-5. Développer le backend Rust :
-   1. Définir les routes de l'API
-   2. Écrire les tests des handlers
-   3. Implémenter les handlers
-6. Intégrer MongoDB pour les flux RSS
-   1. Définir le schéma des collections pour les flux RSS
-   2. Écrire les tests pour la récupération des flux depuis MongoDB
-   3. Implémenter le code d'interaction avec MongoDB et faire passer les tests
-   4. Intégrer les données réelles des flux dans la page RSS
-7. Mettre en place le formulaire de contact
-   1. Écrire les tests du formulaire (validation, envoi email)
-   2. Implémenter le formulaire et faire passer les tests
-8. Développer le frontend Rust avec Yew ou Percy :
-   1. Mettre en place la structure des composants
-   2. Intégrer un framework d'internationalisation (i18n) pour gérer les traductions
-   3. Écrire les tests des composants, y compris la vérification du changement de langue
-   4. Implémenter les composants et la logique de changement de langue
-   5. Gérer les interactions et la communication avec le backend
-9. Intégrer le design avec CSS/Sass
-   1. Écrire les tests des règles CSS principales
-   2. Implémenter les styles et faire passer les tests
-10. Ajouter les éléments d'animation avec Three.js
-    1. Écrire les tests des animations
-    2. Implémenter les animations et faire passer les tests
-11. Optimiser les performances et l'accessibilité
-    1. Écrire les tests de performance et d'accessibilité
-    2. Optimiser le code pour faire passer les tests
-12. Rédiger la documentation du projet, y compris les instructions pour MongoDB
-13. Déployer en production sur Vercel
+4. Tests
+   - Tests unitaires pour chaque fonction publique
+   - Tests d'intégration pour les fonctionnalités complètes
+   - Tests de documentation comme exemples
+   - Utilisation de fixtures pour les données de test
 
-Ce plan de projet servira de base pour le développement du portfolio. Il pourra être amené à évoluer au fur et à mesure de l'avancement et des retours du client. L'objectif est de livrer un portfolio de qualité, reflétant les compétences de Mathieu Piton, dans les temps et le budget impartis.
+5. Gestion des erreurs
+   - Utilisation de `Result` et `Option`
+   - Messages d'erreur descriptifs
+   - Propagation des erreurs avec `?`
+   - Types d'erreur personnalisés quand nécessaire
 
-## Nettoyage régulier des données
+6. Performance
+   - Éviter les allocations inutiles
+   - Utiliser des références quand possible
+   - Optimiser les requêtes MongoDB
+   - Mettre en cache les données fréquemment utilisées
 
-Afin de s'assurer que l'application Rust puisse toujours désérialiser correctement les données provenant de MongoDB, un script de nettoyage des données a été mis en place.
+7. Sécurité
+   - Validation des entrées utilisateur
+   - Protection contre les injections
+   - Gestion sécurisée des secrets
+   - Logs sécurisés (pas d'informations sensibles)
 
-### Fonctionnement
+8. Git
+   - Messages de commit descriptifs en français
+   - Une fonctionnalité par branche
+   - Revue de code obligatoire
+   - Tests passants avant merge
 
-Le script `clean_tweets.rs` s'exécute régulièrement et effectue les opérations suivantes sur la collection `tweets` :
+## 12. Étapes de développement (TDD)
 
-- Parcours de tous les documents
-- Pour chaque document, nettoyage des champs `title` et `description` :
-  - Remplacement des caractères non-ASCII par des espaces
-  - Suppression des caractères de contrôle
-- Sauvegarde des documents nettoyés
+1. Pour chaque fonctionnalité :
+   - Écrire les tests d'acceptation
+   - Écrire les tests unitaires
+   - Implémenter le code minimal
+   - Refactorer si nécessaire
+   - Documenter le code
+   - Revue de code
 
-Le script est écrit en Rust et utilise les mêmes modèles et connexions MongoDB que l'application principale.
+2. Cycle de développement :
+   - Branche feature
+   - Tests en rouge
+   - Implémentation minimale
+   - Tests en vert
+   - Refactoring
+   - Documentation
+   - Pull request
+   - Revue
+   - Merge
 
-### Exécution
+## 13. Métriques de qualité
 
-Le script peut être exécuté de plusieurs façons :
+1. Code
+   - Couverture de tests > 80%
+   - Pas d'avertissements clippy
+   - Documentation complète
+   - Performance optimale
 
-- Manuellement, avec la commande `cargo run --bin clean_tweets`
-- Automatiquement, avant chaque lancement de l'application, via le script de démarrage `start_app.sh`
-- À intervalle régulier, via une tâche cron (tous les jours à 3h du matin)
+2. Performance
+   - Temps de réponse API < 100ms
+   - Utilisation mémoire stable
+   - Charge CPU raisonnable
+   - Temps de synchronisation RSS optimal
 
-### Évolutions futures
+3. Base de données
+   - Temps de requête < 50ms
+   - Indexes optimisés
+   - Utilisation mémoire contrôlée
+   - Backup régulier
 
-- Surveiller le volume et la fréquence d'insertion des données invalides, et ajuster la fréquence d'exécution du script en conséquence
-- Étendre le nettoyage à d'autres collections si nécessaire
-- Améliorer la regexp de détection des caractères valides si besoin
+4. Sécurité
+   - Pas de vulnérabilités connues
+   - Protection anti-spam efficace
+   - Données sensibles protégées
+   - Logs sécurisés

@@ -6,9 +6,6 @@ authors = ["Mathieu Piton"]
 description = "Backend API for Mathieu Piton's portfolio"
 
 [dependencies]
-# Web framework
-actix-web = "4.9"
-actix-cors = "0.7"
 
 # Database
 mongodb = "3.1"
@@ -36,8 +33,20 @@ chrono = { version = "0.4", features = ["serde"] }
 reqwest = { version = "0.11", features = ["json"] }
 url = "2.5.4"
 rss = "2.0.11"
+regex = "1.11.1"
+lazy_static = "1.5.0"
+handlebars = "4.3"
+async-channel = "1.8"
+axum = { version = "0.8.1", features = ["tower-log"] }
+tower-http = { version = "0.6.2", features = ["cors"] }
+validator = "0.19.0"
+validator_derive = "0.19.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tower = { version = "0.5.2", features = ["util"] }
 
 [dev-dependencies]
+mockito = "1.6.1"
 # Testing
 tokio-test = "0.4"
 wiremock = "0.5"

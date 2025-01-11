@@ -1,133 +1,180 @@
+use crate::config::Config;
 use crate::models::contact::ContactForm;
-use anyhow::{anyhow, Result};
-use serde_json::json;
+use anyhow::Result;
+use mongodb::bson::{doc, Bson};
+use mongodb::Database;
+use validator::Validate;
 
-#[allow(dead_code)]
-// Constants for validation
-const MAX_NAME_LENGTH: usize = 100;
-const MAX_EMAIL_LENGTH: usize = 255;
-const MAX_SUBJECT_LENGTH: usize = 200;
-const MAX_MESSAGE_LENGTH: usize = 1000;
+pub struct ContactService {
+    db: Database,
+    config: Config,
+    #[cfg(test)]
+    brevo_url: String,
+}
 
-#[allow(dead_code)]
-pub async fn send_contact_email(form: &ContactForm) -> Result<()> {
-    // Validate input
-    if form.name.len() > MAX_NAME_LENGTH {
-        return Err(anyhow!("Name too long"));
-    }
-    if form.email.len() > MAX_EMAIL_LENGTH {
-        return Err(anyhow!("Email too long"));
-    }
-    if !form.email.contains('@') {
-        return Err(anyhow!("Invalid email format"));
-    }
-    if form.subject.len() > MAX_SUBJECT_LENGTH {
-        return Err(anyhow!("Subject too long"));
-    }
-    if form.message.len() > MAX_MESSAGE_LENGTH {
-        return Err(anyhow!("Message too long"));
-    }
-
-    // Get Brevo API configuration from environment variables
-    let api_key = std::env::var("BREVO_API_KEY").map_err(|_| anyhow!("BREVO_API_KEY not set"))?;
-    let recipient_email =
-        std::env::var("RECIPIENT_EMAIL").map_err(|_| anyhow!("RECIPIENT_EMAIL not set"))?;
-    let sender_name = std::env::var("SENDER_NAME").map_err(|_| anyhow!("SENDER_NAME not set"))?;
-    let sender_email =
-        std::env::var("SENDER_EMAIL").map_err(|_| anyhow!("SENDER_EMAIL not set"))?;
-    let api_url = std::env::var("BREVO_API_URL")
-        .unwrap_or_else(|_| String::from("https://api.brevo.com/v3/smtp/email"));
-
-    // Create email payload
-    let payload = json!({
-        "sender": {
-            "name": &sender_name,
-            "email": &sender_email
-        },
-        "to": [{
-            "email": &recipient_email,
-            "name": "Mathieu Piton"
-        }],
-        "replyTo": {
-            "email": &form.email,
-            "name": &form.name
-        },
-        "subject": &form.subject,
-        "htmlContent": format!(
-            "<p><strong>New contact message from portfolio</strong></p>
-            <p><strong>Name:</strong> {}</p>
-            <p><strong>Email:</strong> {}</p>
-            <p><strong>Message:</strong></p>
-            <p>{}</p>",
-            &form.name,
-            &form.email,
-            &form.message.replace("\n", "<br>")
-        )
-    });
-
-    // Send request to Brevo API
-    let client = reqwest::Client::new();
-    let response = client
-        .post(api_url)
-        .header("api-key", api_key)
-        .header("accept", "application/json")
-        .json(&payload)
-        .send()
-        .await?;
-
-    let status = response.status();
-
-    let response_text = response.text().await?;
-
-    if !status.is_success() {
-        // Try to parse the error response as JSON
-        if let Ok(error) = serde_json::from_str::<serde_json::Value>(&response_text) {
-            if let Some(message) = error.get("message") {
-                return Err(anyhow!("Failed to send email: {}", message));
-            }
+impl ContactService {
+    pub fn new(db: Database, config: Config) -> Self {
+        ContactService {
+            db,
+            config,
+            #[cfg(test)]
+            brevo_url: "https://api.brevo.com/v3/smtp/email".to_string(),
         }
-        // Fallback to raw response text if not JSON
-        return Err(anyhow!("Failed to send email: {}", response_text));
     }
 
-    Ok(())
+    pub async fn submit_contact(&self, form: ContactForm) -> Result<()> {
+        // Valider le formulaire
+        form.validate()?;
+
+        // Stocker dans la base de données
+        let collection = self.db.collection("contacts");
+        collection
+            .insert_one(doc! {
+                "name": &form.name,
+                "email": &form.email,
+                "message": &form.message,
+                "created_at": Bson::DateTime(mongodb::bson::DateTime::from_millis(chrono::Utc::now().timestamp_millis()))
+            })
+            .await?;
+
+        // Envoyer l'email via Brevo
+        self.send_email(&form).await?;
+
+        Ok(())
+    }
+
+    async fn send_email(&self, form: &ContactForm) -> Result<()> {
+        let client = reqwest::Client::new();
+
+        let email_data = serde_json::json!({
+            "sender": {
+                "name": self.config.sender_name,
+                "email": self.config.sender_email
+            },
+            "to": [{
+                "email": self.config.recipient_email,
+                "name": self.config.recipient_email
+            }],
+            "subject": "Nouveau message de contact",
+            "htmlContent": format!(
+                "<p><strong>Nom:</strong> {}</p><p><strong>Email:</strong> {}</p><p><strong>Message:</strong></p><p>{}</p>",
+                form.name, form.email, form.message
+            )
+        });
+
+        #[cfg(test)]
+        let brevo_url = format!("{}/v3/smtp/email", self.brevo_url);
+        #[cfg(not(test))]
+        let brevo_url = "https://api.brevo.com/v3/smtp/email";
+
+        let response = client
+            .post(brevo_url)
+            .header("api-key", &self.config.brevo_api_key)
+            .header("Content-Type", "application/json")
+            .json(&email_data)
+            .send()
+            .await?;
+
+        if !response.status().is_success() {
+            anyhow::bail!("Failed to send email: {}", response.status());
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dotenv::dotenv;
+    use crate::services::db::init_db;
+    use wiremock::{
+        matchers::{header, method, path},
+        Mock, MockServer, ResponseTemplate,
+    };
 
     #[tokio::test]
-    async fn test_send_contact_message() {
-        dotenv().ok();
+    async fn test_submit_contact() {
+        // Configuration de test
+        let config = Config::test_config();
 
-        let contact_form = ContactForm {
+        // Initialiser la base de test
+        let db = init_db().await.expect("Failed to initialize test database");
+
+        // Créer un mock server pour Brevo
+        let mock_server = MockServer::start().await;
+
+        // Mocker la réponse de l'API Brevo
+        Mock::given(method("POST"))
+            .and(path("/v3/smtp/email"))
+            .and(header("api-key", "test_key"))
+            .respond_with(ResponseTemplate::new(200))
+            .mount(&mock_server)
+            .await;
+
+        // Créer un service avec l'URL du mock server
+        let mut config = config;
+        config.brevo_api_key = "test_key".to_string();
+
+        let service = ContactService {
+            db: db.clone(),
+            config: config.clone(),
+            #[cfg(test)]
+            brevo_url: mock_server.uri(),
+        };
+
+        let form = ContactForm {
             name: "Test User".to_string(),
             email: "test@example.com".to_string(),
-            subject: "Test Subject".to_string(),
-            message: "Test message".to_string(),
+            message: "This is a test message".to_string(),
         };
 
-        // Act
-        let result = send_contact_email(&contact_form).await;
+        // Soumettre le formulaire
+        let result = service.submit_contact(form).await;
+        if let Err(e) = &result {
+            eprintln!("Error submitting contact: {:?}", e);
+        }
+        assert!(result.is_ok(), "Failed to submit contact form");
 
-        // Assert
-        assert!(
-            result.is_ok(),
-            "Failed to send contact message: {:?}",
-            result
-        );
+        // Vérifier que le message a été stocké
+        let collection = db.collection("contacts");
+        let doc: mongodb::bson::Document = collection
+            .find_one(doc! { "email": "test@example.com" })
+            .await
+            .expect("Failed to query database")
+            .expect("Document not found");
 
-        // Test avec des données invalides
-        let invalid_form = ContactForm {
-            name: "".to_string(),
+        assert_eq!(doc.get_str("name").unwrap(), "Test User");
+        assert_eq!(doc.get_str("email").unwrap(), "test@example.com");
+        assert_eq!(doc.get_str("message").unwrap(), "This is a test message");
+
+        // Nettoyer la base de test
+        db.drop().await.ok();
+    }
+
+    #[test]
+    fn test_contact_form_validation() {
+        // Test avec des données valides
+        let valid_form = ContactForm {
+            name: "Test User".to_string(),
+            email: "test@example.com".to_string(),
+            message: "This is a valid test message".to_string(),
+        };
+        assert!(valid_form.validate().is_ok());
+
+        // Test avec un email invalide
+        let invalid_email = ContactForm {
+            name: "Test User".to_string(),
             email: "invalid-email".to_string(),
-            subject: "Test Subject".to_string(),
-            message: "".to_string(),
+            message: "This is a test message".to_string(),
         };
+        assert!(invalid_email.validate().is_err());
 
-        let result = send_contact_email(&invalid_form).await;
-        assert!(result.is_err(), "Expected error for invalid contact data");
+        // Test avec un message trop court
+        let short_message = ContactForm {
+            name: "Test User".to_string(),
+            email: "test@example.com".to_string(),
+            message: "Short".to_string(),
+        };
+        assert!(short_message.validate().is_err());
     }
 }

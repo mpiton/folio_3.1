@@ -1,44 +1,40 @@
 use chrono::{DateTime, Utc};
-use mongodb::bson;
-use serde::{Deserialize, Deserializer, Serialize};
+use mongodb::bson::oid::ObjectId;
+use serde::{Deserialize, Serialize};
 
-#[allow(dead_code)]
-fn deserialize_string<'de, D>(deserializer: D) -> Result<String, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let bson = bson::Bson::deserialize(deserializer)?;
-    bson::from_bson(bson).map_err(serde::de::Error::custom)
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RssFeed {
-    pub title: String,
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
     pub link: String,
-    pub description: String,
-    pub items: Vec<RssItem>,
-    pub last_updated: DateTime<Utc>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct RssItem {
-    pub title: String,
-    pub link: String,
-    pub description: String,
-    pub pub_date: DateTime<Utc>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Tweet {
-    pub _id: mongodb::bson::oid::ObjectId,
-    pub link: String,
-    #[serde(rename = "pubDate")]
-    pub pub_date: DateTime<Utc>,
-    pub title: String,
-    pub sended: bool,
-    #[serde(rename = "createdAt")]
     pub created_at: DateTime<Utc>,
-    #[serde(rename = "updatedAt")]
     pub updated_at: DateTime<Utc>,
-    pub __v: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RssItem {
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
+    pub feed_id: ObjectId,
+    pub title: String,
+    pub link: String,
+    pub description: String,
+    pub pub_date: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ParsedFeed {
+    pub title: String,
+    pub link: String,
+    pub description: String,
+    pub items: Vec<ParsedItem>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ParsedItem {
+    pub title: String,
+    pub link: String,
+    pub description: String,
+    pub pub_date: Option<DateTime<Utc>>,
 }
