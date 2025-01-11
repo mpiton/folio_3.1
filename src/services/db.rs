@@ -78,8 +78,44 @@ pub mod test_utils {
     }
 
     pub async fn create_test_db() -> Result<Database> {
+        dotenv::dotenv().ok();
         let mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let client = Client::with_uri_str(&mongo_url).await?;
+        let client_clone = client.clone();
+
+        // Nettoyer les anciennes bases de test au démarrage des tests
+        if timeout(
+            TEST_TIMEOUT,
+            CLEANUP.get_or_init(|| async move {
+                if let Ok(db_names) = client_clone.list_database_names().await {
+                    println!("Nettoyage de {} bases de test", db_names.len());
+                    let futures = db_names
+                        .into_iter()
+                        .filter(|name| name.starts_with("test_db_"))
+                        .map(|name| {
+                            let client = client_clone.clone();
+                            async move {
+                                if let Err(e) = client.database(&name).drop().await {
+                                    eprintln!(
+                                        "Erreur lors de la suppression de la base {}: {}",
+                                        name, e
+                                    );
+                                } else {
+                                    println!("Base {} supprimée", name);
+                                }
+                            }
+                        })
+                        .collect::<Vec<_>>();
+                    join_all(futures).await;
+                }
+            }),
+        )
+        .await
+        .is_err()
+        {
+            eprintln!("Timeout lors du nettoyage des anciennes bases de test");
+        }
+
         let db = client.database(TEST_DB_NAME);
 
         // Nettoyer les collections existantes
