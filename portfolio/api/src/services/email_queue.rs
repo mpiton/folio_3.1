@@ -1,10 +1,12 @@
 use anyhow::Result;
 use once_cell::sync::OnceCell;
-use tokio::sync::mpsc;
+use std::sync::Arc;
+use tokio::sync::{
+    mpsc::{self, Receiver, Sender},
+    Mutex,
+};
 
-static INIT: OnceCell<()> = OnceCell::new();
-static mut EMAIL_SENDER: Option<mpsc::Sender<EmailMessage>> = None;
-static mut EMAIL_RECEIVER: Option<mpsc::Receiver<EmailMessage>> = None;
+static EMAIL_QUEUE: OnceCell<Arc<EmailQueue>> = OnceCell::new();
 
 #[derive(Debug, Clone)]
 pub struct EmailMessage {
@@ -13,17 +15,23 @@ pub struct EmailMessage {
     pub body: String,
 }
 
+struct EmailQueue {
+    sender: Sender<EmailMessage>,
+    receiver: Mutex<Option<Receiver<EmailMessage>>>,
+}
+
 /// Initialise la file d'attente des emails.
 ///
-/// # Safety
-///
-/// Cette fonction doit être appelée une seule fois au démarrage de l'application.
+/// Cette fonction est thread-safe et ne peut être appelée qu'une seule fois.
+/// Les appels suivants n'auront aucun effet.
 pub fn init_queue() {
-    let (sender, receiver) = mpsc::channel(100);
-    unsafe {
-        EMAIL_SENDER = Some(sender);
-        EMAIL_RECEIVER = Some(receiver);
-    }
+    EMAIL_QUEUE.get_or_init(|| {
+        let (sender, receiver) = mpsc::channel(100);
+        Arc::new(EmailQueue {
+            sender,
+            receiver: Mutex::new(Some(receiver)),
+        })
+    });
 }
 
 /// Ajoute un email à la file d'attente pour envoi.
@@ -31,33 +39,34 @@ pub fn init_queue() {
 /// # Errors
 ///
 /// Cette fonction retourne une erreur si :
+/// - La file d'attente n'est pas initialisée
 /// - La file d'attente est pleine
 /// - Le canal de communication est fermé
 pub async fn enqueue_email(message: EmailMessage) -> Result<()> {
-    let sender = unsafe { &EMAIL_SENDER };
-    if let Some(sender) = sender {
-        sender.send(message).await?;
-        Ok(())
-    } else {
-        Err(anyhow::anyhow!("La file d'attente n'est pas initialisée"))
-    }
+    let queue = EMAIL_QUEUE
+        .get()
+        .ok_or_else(|| anyhow::anyhow!("La file d'attente n'est pas initialisée"))?;
+    queue.sender.send(message).await?;
+    Ok(())
 }
 
-pub fn start_email_processor() {
-    INIT.get_or_init(|| {
-        tokio::spawn(async {
-            if let Some(mut receiver) = unsafe { EMAIL_RECEIVER.take() } {
-                while let Some(message) = receiver.recv().await {
-                    process_email(&message);
-                }
-            }
-        });
-    });
+/// Démarre le processeur d'emails en arrière-plan.
+/// Cette fonction est thread-safe et peut être appelée plusieurs fois.
+pub async fn start_email_processor() {
+    let queue = match EMAIL_QUEUE.get() {
+        Some(queue) => queue,
+        None => return,
+    };
+
+    if let Some(mut receiver) = queue.receiver.lock().await.take() {
+        while let Some(message) = receiver.recv().await {
+            process_email(&message);
+        }
+    }
 }
 
 /// Traite un email de la file d'attente.
 fn process_email(message: &EmailMessage) {
-    // TODO: Implémenter l'envoi réel des emails
     println!(
         "Email envoyé à {} avec le sujet: {}",
         message.to, message.subject
@@ -73,9 +82,6 @@ mod tests {
         // Initialiser la file d'attente
         init_queue();
 
-        // Démarrer le processeur d'emails
-        start_email_processor();
-
         // Créer un message de test
         let message = EmailMessage {
             to: "test@example.com".to_string(),
@@ -86,5 +92,13 @@ mod tests {
         // Envoyer le message
         let result = enqueue_email(message).await;
         assert!(result.is_ok());
+
+        // Démarrer le processeur d'emails dans un nouveau thread
+        let handle = tokio::spawn(async {
+            start_email_processor().await;
+        });
+
+        // Attendre que le processeur termine
+        handle.await.unwrap();
     }
 }
