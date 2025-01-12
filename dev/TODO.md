@@ -88,7 +88,6 @@
 - [ ] Audit de sécurité
 - [ ] Tests de pénétration
 - [ ] Gestion des secrets
-- [ ] Monitoring de sécurité
 - [ ] Détection d'intrusion
 
 ### Tests Backend ✅
@@ -104,7 +103,7 @@
 ## 💻 Phase 3 : Frontend 🚧
 
 ### Architecture
-- [ ] Setup Yew/Percy
+- [ ] Setup Dioxus
 - [ ] Structure des composants
 - [ ] Configuration des routes
 - [ ] État global de l'application

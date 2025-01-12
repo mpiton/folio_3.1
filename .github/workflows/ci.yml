@@ -14,7 +14,8 @@ env:
   SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
   HOST: ${{ secrets.HOST }}
   PORT: ${{ secrets.PORT }}
-
+  RUST_LOG: debug
+  RUST_BACKTRACE: 1
 
 jobs:
 
@@ -43,7 +44,7 @@ jobs:
     - name: Run backend tests
       run: |
         cd portfolio/api
-        cargo test --verbose -- --test-threads=1
+        cargo test --verbose -- --nocapture --test-threads=1
 
     # - name: Run frontend tests
     #   run: |
