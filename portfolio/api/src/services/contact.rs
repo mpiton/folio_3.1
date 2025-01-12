@@ -1,21 +1,22 @@
 use crate::config::Config;
-use crate::models::contact::ContactForm;
+use crate::models::contact::Request;
 use anyhow::Result;
 use futures_util::TryStreamExt;
 use mongodb::bson::{doc, Bson, Document};
 use mongodb::Database;
 use validator::Validate;
 
-pub struct ContactService {
+pub struct MessageService {
     db: Database,
     config: Config,
     #[cfg(test)]
     brevo_url: String,
 }
 
-impl ContactService {
-    pub fn new(db: Database, config: Config) -> Self {
-        ContactService {
+impl MessageService {
+    #[must_use]
+    pub const fn new(db: Database, config: Config) -> Self {
+        Self {
             db,
             config,
             #[cfg(test)]
@@ -23,7 +24,15 @@ impl ContactService {
         }
     }
 
-    pub async fn submit_contact(&self, form: ContactForm) -> Result<()> {
+    /// Soumet un nouveau formulaire de contact.
+    ///
+    /// # Errors
+    ///
+    /// Cette fonction retourne une erreur si :
+    /// - La validation du formulaire échoue
+    /// - L'insertion dans la base de données échoue
+    /// - L'envoi de l'email échoue
+    pub async fn submit_contact(&self, form: Request) -> Result<()> {
         // Valider le formulaire
         form.validate()?;
 
@@ -46,29 +55,41 @@ impl ContactService {
         Ok(())
     }
 
-    pub async fn get_recent_contacts(&self, limit: i64) -> Result<Vec<ContactForm>> {
+    /// Récupère les contacts récents, limités au nombre spécifié.
+    ///
+    /// # Errors
+    ///
+    /// Cette fonction retourne une erreur si :
+    /// - La requête à la base de données échoue
+    /// - La lecture des documents échoue
+    pub async fn get_recent_contacts(&self, limit: i64) -> Result<Vec<Request>> {
         let collection = self.db.collection::<Document>("contacts");
 
-        let mut cursor = collection.find(doc! {}).await?;
+        let mut cursor = collection
+            .find(doc! {})
+            .sort(doc! { "created_at": -1 })
+            .limit(limit)
+            .await?;
 
         let mut contacts = Vec::new();
-        let mut count = 0;
-
         while let Some(doc) = cursor.try_next().await? {
-            if count >= limit {
-                break;
-            }
-            contacts.push(ContactForm {
+            contacts.push(Request {
                 name: doc.get_str("name")?.to_string(),
                 email: doc.get_str("email")?.to_string(),
                 message: doc.get_str("message")?.to_string(),
             });
-            count += 1;
         }
 
         Ok(contacts)
     }
 
+    /// Récupère les statistiques des contacts.
+    ///
+    /// # Errors
+    ///
+    /// Cette fonction retourne une erreur si :
+    /// - L'agrégation `MongoDB` échoue
+    /// - La lecture des résultats échoue
     pub async fn get_contact_stats(&self) -> Result<serde_json::Value> {
         let collection = self.db.collection::<Document>("contacts");
 
@@ -103,7 +124,14 @@ impl ContactService {
         }))
     }
 
-    async fn send_email(&self, form: &ContactForm) -> Result<()> {
+    /// Envoie un email via le service Brevo.
+    ///
+    /// # Errors
+    ///
+    /// Cette fonction retourne une erreur si :
+    /// - La requête HTTP échoue
+    /// - Le service Brevo retourne une erreur
+    async fn send_email(&self, form: &Request) -> Result<()> {
         let client = reqwest::Client::new();
 
         let email_data = serde_json::json!({
@@ -146,7 +174,7 @@ impl ContactService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::db::test_utils::create_test_db;
+    use crate::services::db::test_utils::{clean_collections, create_test_db};
     use wiremock::{
         matchers::{header, method, path},
         Mock, MockServer, ResponseTemplate,
@@ -161,6 +189,11 @@ mod tests {
         let db = create_test_db()
             .await
             .expect("Failed to create test database");
+
+        // Vider les collections avant le test
+        clean_collections(&db)
+            .await
+            .expect("Failed to clean test database");
 
         // Créer un mock server pour Brevo avec réponse immédiate
         let mock_server = MockServer::start().await;
@@ -177,7 +210,7 @@ mod tests {
         // Créer le service avec l'URL du mock server
         let mut config = config;
         config.brevo_api_key = "test_key".to_string();
-        let service = ContactService {
+        let service = MessageService {
             db: db.clone(),
             config: config.clone(),
             #[cfg(test)]
@@ -185,7 +218,7 @@ mod tests {
         };
 
         // Test avec un formulaire valide
-        let form = ContactForm {
+        let form = Request {
             name: "Test User".to_string(),
             email: "test@example.com".to_string(),
             message: "This is a test message".to_string(),
@@ -211,14 +244,16 @@ mod tests {
         assert_eq!(doc.get_str("email").unwrap(), "test@example.com");
         assert_eq!(doc.get_str("message").unwrap(), "This is a test message");
 
-        // Nettoyer
-        db.drop().await.ok();
+        // Nettoyer la base de test
+        clean_collections(&db)
+            .await
+            .expect("Failed to cleanup test database");
     }
 
     #[test]
     fn test_contact_form_validation() {
         // Test avec des données valides
-        let valid_form = ContactForm {
+        let valid_form = Request {
             name: "Test User".to_string(),
             email: "test@example.com".to_string(),
             message: "This is a valid test message".to_string(),
@@ -226,7 +261,7 @@ mod tests {
         assert!(valid_form.validate().is_ok());
 
         // Test avec un email invalide
-        let invalid_email = ContactForm {
+        let invalid_email = Request {
             name: "Test User".to_string(),
             email: "invalid-email".to_string(),
             message: "This is a test message".to_string(),
@@ -234,7 +269,7 @@ mod tests {
         assert!(invalid_email.validate().is_err());
 
         // Test avec un message trop court
-        let short_message = ContactForm {
+        let short_message = Request {
             name: "Test User".to_string(),
             email: "test@example.com".to_string(),
             message: "Short".to_string(),

@@ -14,6 +14,22 @@ pub struct Config {
 }
 
 impl Config {
+    /// Crée une nouvelle instance de Config à partir des variables d'environnement.
+    ///
+    /// # Panics
+    ///
+    /// Cette fonction panique si l'une des variables d'environnement suivantes n'est pas définie
+    /// ou n'a pas le format attendu :
+    /// - `MONGO_URL`
+    /// - `HOST`
+    /// - `PORT` (doit être un nombre valide)
+    /// - `BREVO_API_KEY`
+    /// - `RECIPIENT_EMAIL`
+    /// - `SENDER_NAME`
+    /// - `SENDER_EMAIL`
+    ///
+    /// La variable `RSS_CACHE_DURATION` est optionnelle et vaut 3600 par défaut.
+    #[must_use]
     pub fn new() -> Self {
         dotenv::dotenv().ok();
 
@@ -34,7 +50,7 @@ impl Config {
         let sender_name = env::var("SENDER_NAME").expect("SENDER_NAME must be set");
         let sender_email = env::var("SENDER_EMAIL").expect("SENDER_EMAIL must be set");
 
-        Config {
+        Self {
             mongo_url,
             host,
             port,
@@ -46,10 +62,16 @@ impl Config {
         }
     }
 
+    /// Crée une configuration de test avec des valeurs par défaut.
+    ///
+    /// # Panics
+    ///
+    /// Cette fonction panique si la variable d'environnement `MONGO_URL` n'est pas définie.
     #[cfg(test)]
+    #[must_use]
     pub fn test_config() -> Self {
         dotenv::dotenv().ok();
-        Config {
+        Self {
             mongo_url: env::var("MONGO_URL").expect("MONGO_URL must be set"),
             host: "127.0.0.1".to_string(),
             port: 3001,

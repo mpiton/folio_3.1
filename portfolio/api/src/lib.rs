@@ -3,14 +3,15 @@ pub mod models;
 pub mod routes;
 pub mod services;
 
-use services::{contact::ContactService, rss::RssService};
+use services::{contact::MessageService, rss::FeedService};
 use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub rss_service: Arc<RssService>,
-    pub contact_service: Arc<ContactService>,
+    pub feed_service: Arc<FeedService>,
+    pub message_service: Arc<MessageService>,
 }
 
 pub use config::Config;
-pub use services::*;
+pub use models::contact::Request as ContactRequest;
+pub use models::rss::FeedItem;

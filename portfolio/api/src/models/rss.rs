@@ -3,7 +3,7 @@ use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RssFeed {
+pub struct Feed {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub link: String,
@@ -12,7 +12,7 @@ pub struct RssFeed {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RssItem {
+pub struct FeedItem {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub feed_id: ObjectId,

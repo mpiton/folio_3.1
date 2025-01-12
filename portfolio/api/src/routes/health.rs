@@ -1,5 +1,5 @@
 use axum::response::IntoResponse;
 
-pub async fn health_check() -> impl IntoResponse {
-    "OK"
+pub async fn check() -> impl IntoResponse {
+    "Service OK".into_response()
 }

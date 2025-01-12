@@ -53,7 +53,7 @@ mod tests {
         filetime::set_file_mtime(&old_file, filetime::FileTime::from_system_time(old_time))
             .unwrap();
 
-        cleanup_old_backups(&config).unwrap();
+        cleanup_old_backups(&config);
 
         assert!(!old_file.exists(), "Le vieux fichier devrait être supprimé");
         assert!(
@@ -107,7 +107,7 @@ mod tests {
         let config = create_test_config(&temp_dir);
 
         // Simuler mongodump avec une commande mock
-        let result = create_backup(&config).await;
+        let result = create_backup(&config);
 
         // Le test échouera si mongodump n'est pas installé
         assert!(result.is_err());
@@ -142,14 +142,17 @@ impl BackupConfig {
     }
 }
 
-async fn create_backup(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
+fn create_backup(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
     // Créer le répertoire de backup s'il n'existe pas
     std::fs::create_dir_all(&config.backup_dir)?;
 
-    let date = Utc::now().format("%Y%m%d_%H%M%S");
-    let backup_path = format!("{}/backup_{}.gz", config.backup_dir, date);
-
-    info!("Démarrage du backup vers {}", backup_path);
+    // Construire le nom du fichier de backup avec la date
+    let now = Utc::now();
+    let backup_file = format!(
+        "{}/backup_{}.gz",
+        config.backup_dir,
+        now.format("%Y%m%d_%H%M%S")
+    );
 
     // Exécuter mongodump
     let output = Command::new("mongodump")
@@ -159,22 +162,21 @@ async fn create_backup(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
         .arg(&config.database_name)
         .arg("--gzip")
         .arg("--archive")
-        .arg(&backup_path)
+        .arg(&backup_file)
         .output()?;
 
     if !output.status.success() {
         let error_msg = String::from_utf8_lossy(&output.stderr);
-        error!("Échec du backup: {}", error_msg);
-        return Err(format!("Échec du backup: {}", error_msg).into());
+        return Err(format!("Échec du backup: {error_msg}").into());
     }
 
-    info!("Backup créé avec succès: {}", backup_path);
+    info!("Backup créé avec succès: {}", backup_file);
     Ok(())
 }
 
-fn cleanup_old_backups(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
+fn cleanup_old_backups(config: &BackupConfig) {
     let backup_dir = Path::new(&config.backup_dir);
-    let retention_duration = chrono::Duration::days(config.retention_days as i64);
+    let retention_duration = chrono::Duration::days(i64::from(config.retention_days));
     let now = Utc::now();
 
     if let Ok(entries) = std::fs::read_dir(backup_dir) {
@@ -185,9 +187,8 @@ fn cleanup_old_backups(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
                     if now - modified > retention_duration {
                         if let Err(e) = std::fs::remove_file(entry.path()) {
                             error!(
-                                "Erreur lors de la suppression du backup {}: {}",
-                                entry.path().display(),
-                                e
+                                "Erreur lors de la suppression du backup {}: {e}",
+                                entry.path().display()
                             );
                         } else {
                             info!("Backup supprimé: {}", entry.path().display());
@@ -197,8 +198,6 @@ fn cleanup_old_backups(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
             }
         }
     }
-
-    Ok(())
 }
 
 async fn verify_backup(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
@@ -242,10 +241,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     verify_backup(&config).await?;
 
     // Création du backup
-    create_backup(&config).await?;
+    create_backup(&config)?;
 
     // Nettoyage des anciens backups
-    cleanup_old_backups(&config)?;
+    cleanup_old_backups(&config);
 
     info!("Processus de backup terminé avec succès");
     Ok(())

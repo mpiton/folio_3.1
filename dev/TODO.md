@@ -29,7 +29,6 @@
 - [x] Tests complets des handlers
 - [x] Documentation de l'API
 - [x] Validation des données entrantes
-- [ ] Middleware d'authentification
 - [x] Gestion des erreurs globale
 - [x] Rate limiting
 - [x] Logging et monitoring
@@ -79,9 +78,6 @@
 - [x] Tests de charge
 - [x] Gestion du cache
 - [ ] Optimisation des requêtes MongoDB
-- [ ] Mise en place de métriques détaillées
-- [ ] Monitoring temps réel
-- [ ] Système de backup automatique
 - [ ] Gestion des erreurs améliorée
 - [ ] Documentation API OpenAPI/Swagger
 

@@ -1,17 +1,19 @@
-use crate::{models::contact::ContactRequest, AppState};
-use axum::{
-    extract::{ConnectInfo, Json, State},
-    response::IntoResponse,
-};
-use std::net::SocketAddr;
+use axum::{extract::State, response::IntoResponse, Json};
+use std::sync::Arc;
 
-pub async fn submit_contact(
-    State(state): State<AppState>,
-    ConnectInfo(_addr): ConnectInfo<SocketAddr>,
-    Json(request): Json<ContactRequest>,
+use crate::models::contact::Request;
+use crate::services::contact::MessageService;
+
+pub async fn handle_message(
+    State(state): State<Arc<MessageService>>,
+    Json(form): Json<Request>,
 ) -> impl IntoResponse {
-    match state.contact_service.submit_contact(request.form).await {
-        Ok(_) => "Message envoyé avec succès".into_response(),
-        Err(e) => format!("Erreur lors de l'envoi du message: {}", e).into_response(),
+    match state.submit_contact(form).await {
+        Ok(()) => "Message envoyé avec succès".into_response(),
+        Err(e) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Error: {e}"),
+        )
+            .into_response(),
     }
 }

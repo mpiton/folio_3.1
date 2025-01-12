@@ -1,57 +1,47 @@
 use anyhow::Result;
 use handlebars::Handlebars;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde_json::json;
 
-lazy_static! {
-    static ref TEMPLATES: Handlebars<'static> = {
-        let mut hb = Handlebars::new();
+static TEMPLATES: Lazy<Handlebars<'static>> = Lazy::new(|| {
+    let mut reg = Handlebars::new();
+    reg.register_template_string(
+        "contact",
+        r"
+        <h2>Nouveau message de contact</h2>
+        <p><strong>De:</strong> {{name}} ({{email}})</p>
+        <p><strong>Sujet:</strong> {{subject}}</p>
+        <hr>
+        <p><strong>Message:</strong></p>
+        <p>{{message}}</p>
+        ",
+    )
+    .expect("Failed to register contact template");
+    reg
+});
 
-        // Template pour le formulaire de contact
-        hb.register_template_string(
-            "contact",
-            r#"
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <title>Nouveau message de contact</title>
-            </head>
-            <body>
-                <h2>Nouveau message de contact</h2>
-                <p><strong>De :</strong> {{name}} ({{email}})</p>
-                <p><strong>Sujet :</strong> {{subject}}</p>
-                <div><strong>Message :</strong></div>
-                <div style="margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 4px;">
-                    {{message}}
-                </div>
-            </body>
-            </html>
-            "#,
-        )
-        .unwrap();
-
-        hb
-    };
-}
-
+/// Génère le contenu HTML d'un email à partir du template de contact.
+///
+/// # Errors
+///
+/// Cette fonction retourne une erreur si :
+/// - Le template n'est pas trouvé
+/// - Le rendu du template échoue
+/// - Les données fournies sont invalides pour le template
 pub fn render_contact_template(
     name: &str,
     email: &str,
     subject: &str,
     message: &str,
 ) -> Result<String> {
-    TEMPLATES
-        .render(
-            "contact",
-            &json!({
-                "name": name,
-                "email": email,
-                "subject": subject,
-                "message": message
-            }),
-        )
-        .map_err(|e| anyhow::anyhow!("Failed to render template: {}", e))
+    let data = json!({
+        "name": name,
+        "email": email,
+        "subject": subject,
+        "message": message,
+    });
+
+    Ok(TEMPLATES.render("contact", &data)?)
 }
 
 #[cfg(test)]
@@ -60,18 +50,17 @@ mod tests {
 
     #[test]
     fn test_render_contact_template() {
-        let result = render_contact_template(
-            "Test User",
-            "test@example.com",
+        let html = render_contact_template(
+            "John Doe",
+            "john@example.com",
             "Test Subject",
-            "This is a test message",
-        );
+            "Test message",
+        )
+        .unwrap();
 
-        assert!(result.is_ok());
-        let html = result.unwrap();
-        assert!(html.contains("Test User"));
-        assert!(html.contains("test@example.com"));
+        assert!(html.contains("John Doe"));
+        assert!(html.contains("john@example.com"));
         assert!(html.contains("Test Subject"));
-        assert!(html.contains("This is a test message"));
+        assert!(html.contains("Test message"));
     }
 }

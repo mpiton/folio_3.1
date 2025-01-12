@@ -1,20 +1,17 @@
-use crate::AppState;
-use axum::{
-    extract::State,
-    response::{IntoResponse, Json},
-};
+use axum::extract::State;
+use axum::response::IntoResponse;
+use axum::Json;
+use std::sync::Arc;
 
-pub async fn get_rss_items(State(state): State<AppState>) -> impl IntoResponse {
-    let url = "https://example.com/feed.xml"; // À remplacer par l'URL réelle
-    match state.rss_service.fetch_and_store_feed(url).await {
-        Ok(items) => Json(items).into_response(),
-        Err(e) => {
-            tracing::error!("Erreur lors de la récupération des éléments RSS: {}", e);
-            (
-                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-                "Erreur lors de la récupération des éléments RSS",
-            )
-                .into_response()
-        }
+use crate::services::rss::{FeedItem, FeedService};
+
+pub async fn get_rss_feed(State(state): State<Arc<FeedService>>, url: String) -> impl IntoResponse {
+    match state.store_items(&url, &[]).await {
+        Ok(()) => Json::<Vec<FeedItem>>(vec![]).into_response(),
+        Err(e) => (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Error: {e}"),
+        )
+            .into_response(),
     }
 }

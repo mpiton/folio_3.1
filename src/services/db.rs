@@ -1,3 +1,17 @@
+use mongodb::bson::Document;
+
+/// Nettoie la base de données de test en vidant toutes les collections
+pub async fn cleanup_test_db(db: &Database) -> Result<()> {
+    let collections = vec!["contacts", "portfolio"];
+
+    for coll_name in collections {
+        let collection = db.collection::<mongodb::bson::Document>(coll_name);
+        collection.delete_many(doc! {}, None).await?;
+    }
+
+    Ok(())
+}
+
 async fn cleanup_test_dbs() -> Result<(), Box<dyn std::error::Error>> {
     let client = get_client().await?;
     let db_names = client.list_database_names(None, None).await?;
