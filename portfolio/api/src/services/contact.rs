@@ -20,7 +20,7 @@ impl MessageService {
             db,
             config,
             #[cfg(test)]
-            brevo_url: "https://api.brevo.com/v3/smtp/email".to_string(),
+            brevo_url: String::new(),
         }
     }
 
@@ -65,21 +65,29 @@ impl MessageService {
     pub async fn get_recent_contacts(&self, limit: i64) -> Result<Vec<Request>> {
         let collection = self.db.collection::<Document>("contacts");
 
-        let mut cursor = collection
+        let cursor = collection
             .find(doc! {})
             .sort(doc! { "created_at": -1 })
             .limit(limit)
             .await?;
 
         let mut contacts = Vec::new();
-        while let Some(doc) = cursor.try_next().await? {
+        for doc in cursor.try_collect::<Vec<Document>>().await? {
             contacts.push(Request {
-                name: doc.get_str("name")?.to_string(),
-                email: doc.get_str("email")?.to_string(),
-                message: doc.get_str("message")?.to_string(),
+                name: doc
+                    .get_str("name")
+                    .map_err(|e| anyhow::anyhow!(e))?
+                    .to_string(),
+                email: doc
+                    .get_str("email")
+                    .map_err(|e| anyhow::anyhow!(e))?
+                    .to_string(),
+                message: doc
+                    .get_str("message")
+                    .map_err(|e| anyhow::anyhow!(e))?
+                    .to_string(),
             });
         }
-
         Ok(contacts)
     }
 
@@ -112,12 +120,8 @@ impl MessageService {
             },
         ];
 
-        let mut cursor = collection.aggregate(pipeline).await?;
-        let mut stats = Vec::new();
-
-        while let Some(doc) = cursor.try_next().await? {
-            stats.push(doc);
-        }
+        let cursor = collection.aggregate(pipeline).await?;
+        let stats: Vec<Document> = cursor.try_collect().await?;
 
         Ok(serde_json::json!({
             "daily_stats": stats
@@ -209,19 +213,18 @@ mod tests {
 
         // Créer le service avec l'URL du mock server
         let mut config = config;
-        config.brevo_api_key = "test_key".to_string();
-        let service = MessageService {
-            db: db.clone(),
-            config: config.clone(),
-            #[cfg(test)]
-            brevo_url: mock_server.uri(),
-        };
+        config.brevo_api_key = String::from("test_key");
+        let mut service = MessageService::new(db.clone(), config.clone());
+        #[cfg(test)]
+        {
+            service.brevo_url = mock_server.uri();
+        }
 
         // Test avec un formulaire valide
         let form = Request {
-            name: "Test User".to_string(),
-            email: "test@example.com".to_string(),
-            message: "This is a test message".to_string(),
+            name: String::from("Test User"),
+            email: String::from("test@example.com"),
+            message: String::from("This is a test message"),
         };
 
         // Soumettre le formulaire
