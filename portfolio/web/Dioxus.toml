@@ -1,0 +1,19 @@
+[application]
+name = "portfolio"
+default_platform = "web"
+out_dir = "dist"
+asset_dir = "public"
+
+[web.app]
+title = "Portfolio - Mathieu Piton"
+base_path = "/"
+
+[web.watcher]
+reload_html = true
+watch_path = ["src", "public"]
+
+[web.resource]
+style = ["public/style.css"]
+
+[web.resource.dev]
+script = []

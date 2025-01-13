@@ -117,7 +117,11 @@
 ## 💻 Phase 3 : Frontend 🚧
 
 ### Architecture
-- [ ] Setup Dioxus
+- [x] Setup Dioxus
+  - [x] Installation des dépendances
+  - [x] Configuration du projet
+  - [x] Structure des dossiers
+  - [x] Configuration du serveur de développement
 - [ ] Structure des composants
 - [ ] Configuration des routes
 - [ ] État global de l'application
@@ -325,4 +329,4 @@
 - ⏳ À faire
 - ❌ Bloqué
 
-**Dernière mise à jour :** 10/01/2025
+**Dernière mise à jour :** 13/01/2025
