@@ -71,7 +71,7 @@ impl MessageService {
     }
 
     #[cfg(test)]
-    pub fn with_test_collections(mut self, test_name: &str) -> Self {
+    pub fn with_test_collections(mut self, _test_name: &str) -> Self {
         self.db = self.db.clone();
         self
     }
