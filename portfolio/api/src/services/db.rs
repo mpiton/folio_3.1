@@ -19,7 +19,10 @@ use std::time::Duration;
 ///
 /// Cette fonction panique si la variable d'environnement `MONGO_URL` n'est pas définie
 pub async fn initialize() -> Result<()> {
-    let mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
+    let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
+    let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
+    let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+
     println!("Connexion à MongoDB Atlas...");
     let client = Client::with_uri_str(&mongo_url).await?;
     let db = client.database("portfolio");
@@ -54,11 +57,14 @@ async fn init_collections(db: &Database) -> Result<()> {
 
     println!("Collections créées avec succès");
 
-    // Deuxième étape : créer les index
+    // Deuxième étape : supprimer les index existants et créer les nouveaux
     for collection_name in collections.iter() {
+        let collection = db.collection::<Document>(collection_name);
+        println!("Suppression des index existants pour {collection_name}");
+        collection.drop_indexes().await?;
+
         match *collection_name {
             "portfolio" => {
-                let collection = db.collection::<Document>(collection_name);
                 println!("Configuration des index pour portfolio");
 
                 // Index pour l'unicité et la recherche
@@ -86,7 +92,6 @@ async fn init_collections(db: &Database) -> Result<()> {
                 println!("TTL index créé avec succès pour portfolio");
             }
             "contacts" => {
-                let collection = db.collection::<Document>(collection_name);
                 println!("Configuration des index pour contacts");
 
                 // Index pour l'unicité et la recherche
@@ -163,18 +168,23 @@ pub mod test_utils {
     /// # Panics
     ///
     /// Cette fonction panique si la variable d'environnement `MONGO_URL` n'est pas définie
-    pub async fn create_test_db() -> Result<Database> {
-        dotenv::dotenv().ok();
-        let mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
+    pub async fn create_test_db(test_name: &str) -> Result<Database> {
+        std::env::set_var("DOTENV_FILE", ".env.test");
+        dotenv::from_filename(".env.test").ok();
+
+        let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
+        let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
+        let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+
         println!("Connexion à MongoDB Atlas pour les tests...");
         let client = Client::with_uri_str(&mongo_url).await?;
 
-        // Utiliser une base de test fixe
+        // Utiliser la base de test portfolio_test
         let db = client.database("portfolio_test");
         println!("Utilisation de la base de test portfolio_test");
 
         // Initialiser les collections avec un timeout plus long pour Atlas
-        match timeout(TEST_TIMEOUT, init_collections(&db)).await {
+        match timeout(TEST_TIMEOUT, init_test_collections(&db, test_name)).await {
             Ok(result) => {
                 result?;
                 println!("Collections initialisées avec succès");
@@ -192,6 +202,94 @@ pub mod test_utils {
         }
     }
 
+    /// Initialise les collections de test avec des noms uniques.
+    async fn init_test_collections(db: &Database, test_name: &str) -> Result<()> {
+        let collections = [
+            format!("portfolio_{}", test_name),
+            format!("contacts_{}", test_name),
+        ];
+        println!("Début de l'initialisation des collections");
+
+        // Première étape : créer les collections
+        for collection_name in collections.iter() {
+            println!("Vérification de la collection {collection_name}");
+            if !db
+                .list_collection_names()
+                .await?
+                .contains(&collection_name.to_string())
+            {
+                println!("Création de la collection {collection_name}");
+                db.create_collection(collection_name).await?;
+            }
+        }
+
+        println!("Collections créées avec succès");
+
+        // Deuxième étape : supprimer les index existants et créer les nouveaux
+        for collection_name in collections.iter() {
+            let collection = db.collection::<Document>(collection_name);
+            println!("Suppression des index existants pour {collection_name}");
+            collection.drop_indexes().await?;
+
+            if collection_name.starts_with("portfolio") {
+                println!("Configuration des index pour portfolio");
+
+                // Index pour l'unicité et la recherche
+                println!("Création de l'index url/pub_date pour portfolio");
+                let index = IndexModel::builder()
+                    .keys(doc! {
+                        "url": 1,
+                        "pub_date": 1
+                    })
+                    .build();
+                collection.create_index(index).await?;
+                println!("Index url/pub_date créé avec succès");
+
+                // TTL index pour nettoyer les vieux articles (90 jours)
+                println!("Création du TTL index sur pub_date pour portfolio");
+                let ttl_index = IndexModel::builder()
+                    .keys(doc! { "pub_date": 1 })
+                    .options(
+                        mongodb::options::IndexOptions::builder()
+                            .expire_after(Duration::from_secs(90 * 24 * 60 * 60))
+                            .build(),
+                    )
+                    .build();
+                collection.create_index(ttl_index).await?;
+                println!("TTL index créé avec succès pour portfolio");
+            } else if collection_name.starts_with("contacts") {
+                println!("Configuration des index pour contacts");
+
+                // Index pour l'unicité et la recherche
+                println!("Création de l'index email/created_at pour contacts");
+                let index = IndexModel::builder()
+                    .keys(doc! {
+                        "email": 1,
+                        "created_at": -1
+                    })
+                    .build();
+                collection.create_index(index).await?;
+                println!("Index email/created_at créé avec succès");
+
+                // TTL index pour nettoyer les vieux contacts (180 jours)
+                println!("Création du TTL index sur created_at pour contacts");
+                let ttl_index = IndexModel::builder()
+                    .keys(doc! { "created_at": 1 })
+                    .options(
+                        mongodb::options::IndexOptions::builder()
+                            .expire_after(Duration::from_secs(180 * 24 * 60 * 60))
+                            .build(),
+                    )
+                    .build();
+                collection.create_index(ttl_index).await?;
+                println!("TTL index créé avec succès pour contacts");
+            }
+        }
+
+        println!("Initialisation des collections terminée avec succès");
+        Ok(())
+    }
+
     /// Nettoie la base de données de test en vidant toutes les collections.
     ///
     /// # Errors
@@ -199,11 +297,16 @@ pub mod test_utils {
     /// Cette fonction retourne une erreur si :
     /// - La suppression des documents échoue
     /// - Une opération `MongoDB` échoue
-    pub async fn clean_collections(db: &Database) -> Result<()> {
+    pub async fn clean_collections(db: &Database, test_name: &str) -> Result<()> {
         println!("Nettoyage de la base de test {}", db.name());
 
-        // Au lieu de supprimer la base, on vide les collections
-        for collection_name in ["portfolio", "contacts"].iter() {
+        // Au lieu de supprimer la base, on vide les collections spécifiques au test
+        let collections = [
+            format!("portfolio_{}", test_name),
+            format!("contacts_{}", test_name),
+        ];
+
+        for collection_name in collections.iter() {
             let collection = db.collection::<Document>(collection_name);
             collection.delete_many(doc! {}).await?;
             println!("Collection {collection_name} vidée");
@@ -226,12 +329,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_db_initialization() {
-        dotenv::dotenv().ok();
+        std::env::set_var("DOTENV_FILE", ".env.test");
+        dotenv::from_filename(".env.test").ok();
         println!("Démarrage du test d'initialisation de la base de données");
 
         // Exécuter le test avec un timeout global
         match timeout(TEST_TIMEOUT, async {
-            let db = create_test_db()
+            let db = create_test_db("test_db_initialization")
                 .await
                 .expect("Failed to create test database");
             println!("Base de test créée");
@@ -241,7 +345,7 @@ mod tests {
                 .list_collection_names()
                 .await
                 .expect("Failed to list collections");
-            println!("Collections trouvées : {:?}", collections);
+            println!("Collections trouvées : {collections:?}");
             assert!(collections.contains(&"portfolio".to_string()));
             assert!(collections.contains(&"contacts".to_string()));
 
@@ -277,7 +381,7 @@ mod tests {
             );
 
             // Nettoyer la base de test
-            clean_collections(&db)
+            clean_collections(&db, "test_db_initialization")
                 .await
                 .expect("Failed to cleanup test database");
 
@@ -285,11 +389,8 @@ mod tests {
         })
         .await
         {
-            Ok(_) => (),
-            Err(_) => panic!(
-                "Le test a dépassé le délai de {} secondes",
-                TEST_TIMEOUT.as_secs()
-            ),
+            Ok(()) => (),
+            Err(e) => panic!("Le test a dépassé le délai de {TEST_TIMEOUT:?} : {e}"),
         }
     }
 }

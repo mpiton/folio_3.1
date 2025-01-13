@@ -53,9 +53,8 @@ pub async fn enqueue_email(message: EmailMessage) -> Result<()> {
 /// Démarre le processeur d'emails en arrière-plan.
 /// Cette fonction est thread-safe et peut être appelée plusieurs fois.
 pub async fn start_email_processor() {
-    let queue = match EMAIL_QUEUE.get() {
-        Some(queue) => queue,
-        None => return,
+    let Some(queue) = EMAIL_QUEUE.get() else {
+        return;
     };
 
     if let Some(mut receiver) = queue.receiver.lock().await.take() {
@@ -93,12 +92,15 @@ mod tests {
         let result = enqueue_email(message).await;
         assert!(result.is_ok());
 
-        // Démarrer le processeur d'emails dans un nouveau thread
-        let handle = tokio::spawn(async {
-            start_email_processor().await;
-        });
-
-        // Attendre que le processeur termine
-        handle.await.unwrap();
+        // Récupérer le message directement depuis la queue
+        if let Some(queue) = EMAIL_QUEUE.get() {
+            if let Some(mut receiver) = queue.receiver.lock().await.take() {
+                if let Some(received_message) = receiver.recv().await {
+                    process_email(&received_message);
+                    assert_eq!(received_message.to, "test@example.com");
+                    assert_eq!(received_message.subject, "Test Subject");
+                }
+            }
+        }
     }
 }

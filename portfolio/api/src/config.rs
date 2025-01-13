@@ -33,7 +33,10 @@ impl Config {
     pub fn new() -> Self {
         dotenv::dotenv().ok();
 
-        let mongo_url = env::var("MONGO_URL").expect("MONGO_URL must be set");
+        let base_mongo_url = env::var("MONGO_URL").expect("MONGO_URL must be set");
+        let mongo_db = env::var("MONGO_DB").expect("MONGO_DB must be set");
+        let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+
         let host = env::var("HOST").expect("HOST must be set");
         let port = env::var("PORT")
             .expect("PORT must be set")
@@ -70,8 +73,12 @@ impl Config {
     #[cfg(test)]
     #[must_use]
     pub fn test_config() -> Self {
-        dotenv::dotenv().ok();
-        let mongo_url = env::var("MONGO_URL").expect("MONGO_URL must be set");
+        std::env::set_var("DOTENV_FILE", ".env.test");
+        dotenv::from_filename(".env.test").ok();
+        let base_mongo_url = env::var("MONGO_URL").expect("MONGO_URL must be set");
+        let mongo_db = env::var("MONGO_DB").expect("MONGO_DB must be set");
+        let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+
         Self {
             mongo_url,
             host: String::from("127.0.0.1"),
