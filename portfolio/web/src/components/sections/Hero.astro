@@ -53,6 +53,20 @@ const {
   </div>
 </section>
 
+<script>
+  import { FirefliesAnimation } from '../../scripts/fireflies';
+
+  const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
+  if (canvas) {
+    const fireflies = new FirefliesAnimation(canvas);
+
+    // Cleanup on page unload
+    window.addEventListener('unload', () => {
+      fireflies.destroy();
+    });
+  }
+</script>
+
 <style>
   .hero {
     position: relative;
@@ -299,89 +313,3 @@ const {
     z-index: 10;
   }
 </style>
-
-<script>
-import * as THREE from 'three';
-
-// Configuration de la scène Three.js
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-  alpha: true,
-  antialias: true
-});
-
-renderer.setClearColor(0x000000, 0);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-// Chargement de la texture SVG
-const textureLoader = new THREE.TextureLoader();
-const particleTexture = textureLoader.load('/particles/circle.svg');
-
-// Création des particules
-const particlesGeometry = new THREE.BufferGeometry();
-const particlesCount = 200; // Plus de lucioles
-const posArray = new Float32Array(particlesCount * 3);
-
-// Distribution des particules dans un volume plus naturel
-for(let i = 0; i < particlesCount; i++) {
-  posArray[i * 3] = (Math.random() - 0.5) * 40; // Plus large sur X
-  posArray[i * 3 + 1] = Math.random() * 25; // Plus haut sur Y
-  posArray[i * 3 + 2] = (Math.random() - 0.5) * 15; // Plus de profondeur sur Z
-}
-
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-
-const particlesMaterial = new THREE.PointsMaterial({
-  size: 0.5,
-  map: particleTexture,
-  transparent: true,
-  opacity: 0.9,
-  color: '#7AC4AA',
-  sizeAttenuation: true,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false
-});
-
-const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-scene.add(particlesMesh);
-
-camera.position.z = 20;
-
-// Animation avec effet de lucioles
-const clock = new THREE.Clock();
-
-const animate = () => {
-  const elapsedTime = clock.getElapsedTime();
-
-  // Animation plus naturelle des lucioles
-  particlesGeometry.attributes.position.array.forEach((_, index) => {
-    if (index % 3 === 0) {
-      const i = index / 3;
-      particlesGeometry.attributes.position.array[index] += Math.sin(elapsedTime * 0.5 + i) * 0.02;
-      particlesGeometry.attributes.position.array[index + 1] += Math.cos(elapsedTime * 0.3 + i) * 0.02;
-      particlesGeometry.attributes.position.array[index + 2] += Math.sin(elapsedTime * 0.4 + i) * 0.01;
-    }
-  });
-  particlesGeometry.attributes.position.needsUpdate = true;
-
-  // Effet de clignotement plus subtil
-  particlesMaterial.opacity = 0.7 + Math.sin(elapsedTime * 1.5) * 0.3;
-  particlesMaterial.size = 0.5 + Math.sin(elapsedTime * 2 + Math.PI) * 0.2;
-
-  renderer.render(scene, camera);
-  requestAnimationFrame(animate);
-};
-
-animate();
-
-// Gestion du redimensionnement
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-</script>
