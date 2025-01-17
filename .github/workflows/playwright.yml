@@ -4,6 +4,13 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
+permissions:
+  contents: read
+  checks: read
+  actions: read
+  pull-requests: write
+
 jobs:
   test:
     timeout-minutes: 60
