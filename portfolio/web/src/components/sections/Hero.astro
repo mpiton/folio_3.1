@@ -1,0 +1,315 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaLink: string;
+}
+
+const {
+  title = "Mathieu Piton",
+  description = "Développeur web passionné et créatif",
+  ctaText = "Découvrir mon univers",
+  ctaLink = "/about"
+} = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero-header"></div>
+  <canvas id="hero-canvas"></canvas>
+  <div class="reeds reeds-left">
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+  </div>
+  <div class="reeds reeds-right">
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+    <div class="reed"></div>
+  </div>
+  <div class="pond">
+    <div class="pond-ripple"></div>
+    <div class="pond-ripple"></div>
+    <div class="pond-ripple"></div>
+  </div>
+  <div class="hero-content">
+    <h1>{title}</h1>
+    <p>{description}</p>
+    <a href={ctaLink} class="btn cta-button">{ctaText}</a>
+  </div>
+</section>
+
+<script>
+  import { FirefliesAnimation } from '../../scripts/fireflies';
+
+  const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
+  if (canvas) {
+    const fireflies = new FirefliesAnimation(canvas);
+
+    // Cleanup on page unload
+    window.addEventListener('unload', () => {
+      fireflies.destroy();
+    });
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: var(--accent-color);
+  }
+
+  #hero-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 2rem;
+    max-width: 800px;
+  }
+
+  h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 4rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  p {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards 0.2s;
+  }
+
+  .cta-button {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    background-color: var(--primary-color);
+    color: var(--accent-color);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards 0.4s;
+  }
+
+  .cta-button:hover {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 3rem;
+    }
+
+    p {
+      font-size: 1.25rem;
+    }
+
+    .cta-button {
+      padding: 0.875rem 1.75rem;
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+    }
+
+    .cta-button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+  }
+
+  .reeds {
+    position: fixed;
+    bottom: -20px;
+    width: 700px;
+    height: 90vh;
+    z-index: 0;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  .reed {
+    position: absolute;
+    bottom: 0;
+    width: 150px;
+    height: 600px;
+    background-image: url('/reed.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom;
+    transform-origin: bottom;
+  }
+
+  .reeds-left {
+    left: calc(50% - 650px);
+    transform: rotate(-8deg);
+  }
+
+  .reeds-right {
+    right: calc(50% - 650px);
+    transform: rotate(8deg);
+  }
+
+  /* Positions des roseaux gauches */
+  .reeds-left .reed:nth-child(1) { left: 10px; height: 95%; animation: sway 8s ease-in-out infinite; }
+  .reeds-left .reed:nth-child(2) { left: 40px; height: 85%; animation: sway 7s ease-in-out infinite -1s; }
+  .reeds-left .reed:nth-child(3) { left: 70px; height: 90%; animation: sway 9s ease-in-out infinite -3s; }
+  .reeds-left .reed:nth-child(4) { left: 100px; height: 80%; animation: sway 8.5s ease-in-out infinite -2.5s; }
+  .reeds-left .reed:nth-child(5) { left: 130px; height: 88%; animation: sway 8.2s ease-in-out infinite -1.5s; }
+  .reeds-left .reed:nth-child(6) { left: 160px; height: 92%; animation: sway 7.8s ease-in-out infinite -2s; }
+  .reeds-left .reed:nth-child(7) { left: 190px; height: 86%; animation: sway 8.6s ease-in-out infinite -2.8s; }
+  .reeds-left .reed:nth-child(8) { left: 220px; height: 82%; animation: sway 7.4s ease-in-out infinite -3.2s; }
+  .reeds-left .reed:nth-child(9) { left: 250px; height: 94%; animation: sway 8.8s ease-in-out infinite -1.7s; }
+  .reeds-left .reed:nth-child(10) { left: 280px; height: 89%; animation: sway 7.6s ease-in-out infinite -2.3s; }
+
+  /* Positions des roseaux droits */
+  .reeds-right .reed:nth-child(1) { right: 10px; height: 92%; animation: sway 8.3s ease-in-out infinite -3s; }
+  .reeds-right .reed:nth-child(2) { right: 40px; height: 98%; animation: sway 7.5s ease-in-out infinite -4s; }
+  .reeds-right .reed:nth-child(3) { right: 70px; height: 88%; animation: sway 8.7s ease-in-out infinite -2.5s; }
+  .reeds-right .reed:nth-child(4) { right: 100px; height: 85%; animation: sway 9.2s ease-in-out infinite -1.5s; }
+  .reeds-right .reed:nth-child(5) { right: 130px; height: 90%; animation: sway 8.4s ease-in-out infinite -3.5s; }
+  .reeds-right .reed:nth-child(6) { right: 160px; height: 86%; animation: sway 7.9s ease-in-out infinite -2.8s; }
+  .reeds-right .reed:nth-child(7) { right: 190px; height: 94%; animation: sway 8.8s ease-in-out infinite -1.8s; }
+  .reeds-right .reed:nth-child(8) { right: 220px; height: 87%; animation: sway 7.6s ease-in-out infinite -3.7s; }
+  .reeds-right .reed:nth-child(9) { right: 250px; height: 91%; animation: sway 8.2s ease-in-out infinite -2.1s; }
+  .reeds-right .reed:nth-child(10) { right: 280px; height: 89%; animation: sway 7.8s ease-in-out infinite -3.3s; }
+
+  @keyframes sway {
+    0%, 100% {
+      transform: rotate(-3deg) scaleY(1.005);
+      filter: brightness(1);
+    }
+    50% {
+      transform: rotate(3deg) scaleY(0.995);
+      filter: brightness(0.95);
+    }
+  }
+
+  .pond {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 200px;
+    background: linear-gradient(to bottom,
+      rgba(122, 196, 170, 0.2),
+      rgba(87, 142, 126, 0.4)
+    );
+    border-radius: 50% 50% 0 0;
+    filter: blur(5px);
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .pond-ripple {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    animation: ripple 10s infinite linear;
+  }
+
+  .pond-ripple:nth-child(1) {
+    width: 100px;
+    height: 100px;
+    left: 30%;
+    top: 40%;
+    animation-delay: 0s;
+  }
+
+  .pond-ripple:nth-child(2) {
+    width: 160px;
+    height: 160px;
+    left: 50%;
+    top: 30%;
+    animation-delay: -3s;
+  }
+
+  .pond-ripple:nth-child(3) {
+    width: 200px;
+    height: 200px;
+    left: 60%;
+    top: 20%;
+    animation-delay: -6s;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(0.3);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .hero-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+</style>

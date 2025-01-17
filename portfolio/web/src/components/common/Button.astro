@@ -1,0 +1,115 @@
+---
+interface Props {
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  disabled?: boolean;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  type = 'button',
+  class: className = '',
+  disabled = false,
+} = Astro.props;
+---
+
+<button
+  type={type}
+  disabled={disabled}
+  class:list={[
+    'button',
+    `button--${variant}`,
+    `button--${size}`,
+    className,
+    { 'button--disabled': disabled }
+  ]}
+>
+  <slot />
+</button>
+
+<style>
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* Variants */
+  .button--primary {
+    background-color: var(--primary-color);
+    color: var(--accent-color);
+    border: 2px solid var(--primary-color);
+  }
+
+  .button--primary:hover {
+    background-color: transparent;
+    color: var(--primary-color);
+  }
+
+  .button--secondary {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: 2px solid var(--secondary-color);
+  }
+
+  .button--secondary:hover {
+    background-color: var(--accent-color);
+  }
+
+  .button--outline {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+  }
+
+  .button--outline:hover {
+    background-color: var(--primary-color);
+    color: var(--accent-color);
+  }
+
+  .button--ghost {
+    background-color: transparent;
+    color: var(--text-color);
+    border: 2px solid transparent;
+  }
+
+  .button--ghost:hover {
+    background-color: var(--secondary-color);
+  }
+
+  /* Sizes */
+  .button--sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .button--md {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .button--lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+
+  /* Disabled state */
+  .button--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .button--disabled:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--accent-color);
+  }
+</style>

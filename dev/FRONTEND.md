@@ -242,16 +242,19 @@ export default defineConfig({
 - [x] Mise en place du système i18n
 - [ ] Configuration du SEO
 - [x] Setup des tests
+- [x] Configuration de Playwright pour les tests E2E
 
 ### Phase 2: Composants de Base
-- [x] Layout principal
-- [ ] Composants communs
-- [x] Navigation
-- [x] Footer
-- [ ] Système de thème
+- [x] Layout principal avec effets visuels
+- [x] Composants communs
+  - [x] Button (primary/outline variants)
+  - [x] Card (avec variants et hover effects)
+  - [x] Input
+- [x] Navigation responsive
+- [x] Footer avec effet de flou et liens sociaux
 
 ### Phase 3: Pages Principales
-- [ ] Page d'accueil
+- [x] Page d'accueil
 - [x] Page À propos
 - [ ] Page Contact
 - [ ] Flux RSS
