@@ -18,15 +18,17 @@ Ce projet consiste en la création d'un portfolio en ligne pour Mathieu Piton, u
 ## 3. Technologies utilisées
 
     Frontend :
-        Rust avec le framework Dioxus pour le développement de l'interface utilisateur
-        Three.js pour des éléments interactifs en 3D
-        HTML, CSS (préprocesseur comme Sass ou TailwindCSS) pour le style et la mise en page
+        Astro avec TypeScript pour le développement de l'interface utilisateur
+        Three.js pour des éléments interactifs en 3D (si nécessaire)
+        TailwindCSS pour le style et la mise en page
+        MDX pour le contenu structuré
     Backend :
         Rust avec Axum pour l'API et la logique métier
         Base de données MongoDB pour le stockage des données (flux RSS, messages de contact, etc.)
-    Testing : Tests unitaires et d'intégration en Rust avec les outils suivants :
-        Tests unitaires via le module de test intégré de Rust
-        Tests d'intégration avec wiremock pour tester l'API
+    Testing :
+        Tests unitaires via Vitest pour le frontend
+        Tests d'intégration avec Testing Library pour les composants Astro
+        Tests unitaires et d'intégration en Rust pour le backend
     Logo : Intégration du logo existant de Mathieu.
 
 ## 4. Pratiques de développement
@@ -36,14 +38,14 @@ Ce projet consiste en la création d'un portfolio en ligne pour Mathieu Piton, u
 Le développement du portfolio respectera les principes de TDD, à savoir :
 
     Écrire des tests avant le code de production.
-    Tests unitaires : Chaque fonction ou composant sera testé indépendamment dès sa conception.
+    Tests unitaires : Chaque composant et fonction sera testé indépendamment dès sa conception.
     Tests d'intégration : Vérification de l'interaction correcte entre les différentes parties du système (API backend, composants frontend, base de données, etc.).
     Tests fonctionnels : Tests des flux utilisateurs principaux pour vérifier la fonctionnalité du site dans son ensemble.
     Exemples :
         Tester les routes de l'API backend avec des requêtes HTTP simulées
-        Tester le rendu et les interactions des composants Yew/Percy
+        Tester le rendu et les interactions des composants Astro
         Tester l'intégration avec la base de données MongoDB
-        Tester les animations Three.js
+        Tester les animations Three.js (si utilisées)
 
 ### Domain-Driven Design (DDD)
 
@@ -51,8 +53,8 @@ Le projet respectera les principes du DDD pour organiser les données et la logi
 
     Définition des agrégats : Le projet sera divisé en domaines bien distincts. Par exemple, un agrégat pourrait être l'entité "Utilisateur" (Mathieu Piton, avec ses compétences, son expérience, etc.), un autre pourrait être "Contact" (formulaire de contact, validation des champs, etc.).
     Modélisation du domaine : Les objets métiers seront bien définis, avec des règles de validation (ex : validation du formulaire de contact).
-    Isolation des dépendances : Le code sera structuré de manière à ce que les différentes parties du système soient découplées et indépendantes les unes des autres. Par exemple, la logique du formulaire de contact et celle de la présentation des compétences seront isolées.
-    Langage Ubiquitaire : Le code sera rédigé dans un langage compréhensible pour toutes les parties prenantes du projet, avec des noms de classes et de fonctions qui décrivent clairement le domaine.
+    Isolation des dépendances : Le code sera structuré de manière à ce que les différentes parties du système soient découplées et indépendantes les unes des autres.
+    Langage Ubiquitaire : Le code sera rédigé dans un langage compréhensible pour toutes les parties prenantes du projet.
 
 ## 5. Arborescence du site
 
@@ -63,43 +65,54 @@ L'architecture du site sera basée sur une approche DDD, avec une séparation cl
         Interaction avec la base de données MongoDB
         Gestion des requêtes entrantes (formulaire de contact, récupération des flux RSS, etc.)
     Frontend :
-        Application web en Rust avec Dioxus
-        Composants réutilisables pour les différentes sections (header, footer, about, contact, rss)
+        Application web en Astro avec TypeScript
+        Composants réutilisables (.astro)
+        Layouts pour la structure commune
+        Pages pour chaque route
+        Intégration i18n pour le multilingue
         Communication avec l'API backend pour les données dynamiques
-        Intégration des animations Three.js
+        Intégration des animations (si nécessaire)
     Tests :
-        Tests unitaires et d'intégration pour chaque partie du système (API, composants, base de données)
-        Tests fonctionnels pour vérifier le bon fonctionnement global du site
-
-L'architecture suivra le modèle Model-View-Controller (MVC) ou un modèle similaire, mais ajusté aux besoins de l'application. Les données seront structurées de manière à ce que le système puisse évoluer facilement à l'avenir.
+        Tests unitaires et d'intégration pour chaque partie du système
+        Tests de performance et d'accessibilité
+        Tests du SSG/SSR
 
 ## 6. Design et expérience utilisateur
 
     Style visuel :
-        Moderne et épuré avec une utilisation de couleurs sobres et élégantes, comme du noir, blanc et une couleur principale.
-        Animation immersive via Three.js pour un environnement interactif et captivant.
-        Responsivité : Le site doit être parfaitement fonctionnel sur toutes les tailles d'écrans, particulièrement sur les mobiles et tablettes.
+        Moderne et épuré avec une utilisation de couleurs sobres et élégantes
+        Animations fluides et non intrusives
+        Design responsive avec approche mobile-first
+        Optimisation des performances avec Astro
     Tests d'accessibilité : Le design devra respecter les standards WCAG pour l'accessibilité.
 
 ## 7. Gestion des tests et déploiement
 
-    Tests : Tous les tests (unitaires, intégration, fonctionnels) seront écrits en Rust et exécutés via Cargo. Ils seront lancés automatiquement à chaque changement de code via l'intégration continue.
+    Tests :
+        Backend : Tests en Rust exécutés via Cargo
+        Frontend : Tests avec Vitest et Testing Library
+        Tests d'accessibilité automatisés
+        Tests de performance avec Lighthouse
     Déploiement :
-        Le code sera déployé via un service d'intégration continue comme GitHub Actions, où les tests seront exécutés automatiquement avant chaque déploiement.
-        Le site sera hébergé sur Vercel, avec une configuration spécifique pour les applications Rust.
-        La connexion à la base de données MongoDB sera configurée via des variables d'environnement sécurisées.
+        Le code sera déployé via GitHub Actions
+        Frontend : Déploiement sur Vercel
+        Backend : VPS avec Docker
+        Base de données : MongoDB Atlas
 
 ## 8. Livrables
 
-    Code source complet et versionné dans un dépôt Git.
-    Documentation détaillée sur le projet, les choix d'architecture, les tests et les étapes de déploiement.
-    Version finale déployée, avec un accès pour tester la version en ligne avant validation finale.
+    Code source complet et versionné dans un dépôt Git
+    Documentation détaillée sur le projet, les choix d'architecture, les tests et les étapes de déploiement
+    Version finale déployée, avec un accès pour tester la version en ligne avant validation finale
 
 ## 9. Tests d'acceptation
 
 Les tests d'acceptation permettront de vérifier que le site fonctionne comme prévu :
 
     Tests utilisateur sur la prise de contact, dans les deux langues (français et anglais)
-    Tests de performance pour vérifier le temps de chargement du site, notamment les animations en Three.js
-    Tests de sécurité pour le formulaire de contact (protection contre le spam, validation des entrées)
-    Vérification du bon fonctionnement du changement de langue et de l'affichage correct des traductions
+    Tests de performance (Lighthouse, Web Vitals)
+    Tests de sécurité pour le formulaire de contact
+    Vérification du bon fonctionnement du changement de langue
+    Tests d'accessibilité WCAG
+    Tests de génération statique (SSG)
+    Tests de responsive design
