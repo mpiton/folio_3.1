@@ -1,0 +1,487 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import profilePic from '../assets/mathieu-piton.jpg';
+---
+
+<Layout
+    title="À propos - Mathieu Piton"
+    description="Découvrez mon parcours, mes compétences et mon expérience en tant que développeur web spécialisé en Rust et technologies modernes."
+>
+    <main>
+        <section class="about-intro">
+            <Image src={profilePic} alt="Mathieu Piton" />
+            <h1>À propos de moi</h1>
+            <p>Passionné par le développement web depuis mon adolescence, j'ai d'abord exploré cet univers en créant des sites pour des jeux en ligne, en apprenant de manière autodidacte à utiliser différents CMS comme NukedKlan, Webspell et WordPress. Attiré par la programmation, j'ai ensuite élargi mes compétences en étudiant JavaScript et PHP.</p>
+            <p>En 2020, encouragé par des développeurs qui ont reconnu mon potentiel, j'ai décidé de franchir le pas et de me reconvertir professionnellement. J'ai obtenu mon titre de développeur web et web mobile à l'IFPA de Mérignac, me donnant ainsi les clés pour transformer ma passion en métier.</p>
+            <p>Aujourd'hui, je mets mon expertise et mon enthousiasme au service de projets variés, en veillant toujours à proposer des solutions innovantes et à faciliter la vie des utilisateurs. Mon approche ? Allier rigueur et créativité, en restant constamment à l'écoute des besoins de mes clients et de mon équipe.</p>
+        </section>
+
+        <section class="skills">
+            <h2>Mes compétences</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Langages</h3>
+                    <div class="skill">
+                        <div class="skill-name">HTML/CSS</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">JS (JavaScript)</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">PHP</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Python</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Dart</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Rust</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Go</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3>Frameworks Frontend & Hybrids</h3>
+                    <div class="skill">
+                        <div class="skill-name">React</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 80%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Tauri</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Flutter</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Next.js</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">React Native</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Svelte</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Qwik</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h3>Frameworks Backend</h3>
+                    <div class="skill">
+                        <div class="skill-name">Node.js</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Express</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">NestJS</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Laravel</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 55%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Rocket</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Symfony</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    <div class="skill">
+                        <div class="skill-name">Flask</div>
+                        <div class="skill-bar">
+                            <div class="skill-level" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="timeline">
+            <h2>Mon parcours</h2>
+            <div class="timeline-item">
+                <div class="timeline-date">2023 - aujourd'hui</div>
+                <div class="timeline-content">
+                    <h3>Lead développeur - GIE Crédit Municipal Services</h3>
+                    <p>Gestion d'une équipe de développeurs et participation à la planification des projets.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">2020 - aujourd'hui</div>
+                <div class="timeline-content">
+                    <h3>Développeur web - GIE Crédit Municipal Services</h3>
+                    <p>Développement de sites web, d'applications mobiles et de solutions de traitement de données.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">2020</div>
+                <div class="timeline-content">
+                    <h3>Développeur Node.js - Pradeo</h3>
+                    <p>Courte expérience enrichissante au sein d'une entreprise spécialisée dans la sécurité mobile.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-date">2020 - aujourd'hui</div>
+                <div class="timeline-content">
+                    <h3>Développeur web freelance</h3>
+                    <p>Réalisation de projets variés pour des clients : e-commerce, site de rencontre, etc.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="hobbies">
+            <h2>Mes passions</h2>
+            <div class="hobbies-grid">
+                <div class="hobby">
+                    <i class="fas fa-code"></i>
+                    <h3>Développement web</h3>
+                    <p>Ce qui me passionne le plus dans le développement web, c'est de pouvoir créer de A à Z des solutions qui facilitent la vie des utilisateurs.</p>
+                </div>
+                <div class="hobby">
+                    <i class="fas fa-heart"></i>
+                    <h3>Ma famille</h3>
+                    <p>Ma famille est ma priorité absolue. Je suis épanoui dans ma vie personnelle et cela me donne l'énergie pour m'investir pleinement dans mes projets professionnels.</p>
+                </div>
+                <div class="hobby">
+                    <i class="fas fa-book"></i>
+                    <h3>Veille technologique</h3>
+                    <p>Je suis passionné par l'apprentissage continu. Je suis régulièrement des conférences en ligne et je lis de nombreux articles via des flux RSS pour rester à la pointe des nouvelles technologies.</p>
+                </div>
+                <div class="hobby">
+                    <i class="fas fa-hands-helping"></i>
+                    <h3>Contribution open source</h3>
+                    <p>J'aime contribuer à des projets open source que j'utilise, comme la bibliothèque react-emoji. C'est ma façon de redonner à la communauté et de participer à l'amélioration des outils que nous utilisons tous.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <h2>Travaillons ensemble !</h2>
+            <a href="contact.html" class="btn">Me contacter</a>
+        </section>
+    </main>
+</Layout>
+
+<style>
+    :root {
+        --primary-color: #578E7E;
+        --secondary-color: #F5ECD5;
+        --accent-color: #FFFAEC;
+        --text-color: #3D3D3D;
+    }
+
+    main {
+        padding: 0;
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: var(--accent-color);
+    }
+
+    section {
+        margin-bottom: 0;
+        padding: 100px 20px;
+    }
+
+    h1, h2 {
+        font-family: 'Poppins', sans-serif;
+        color: var(--primary-color);
+        margin-bottom: 2rem;
+        text-align: center;
+        font-size: 36px;
+    }
+
+    .about-intro {
+        text-align: center;
+        background-color: var(--secondary-color);
+        padding: 100px 20px;
+    }
+
+    .about-intro img {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        margin-bottom: 2rem;
+        border: 10px solid var(--secondary-color);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .about-intro p {
+        max-width: 800px;
+        margin: 1rem auto;
+        line-height: 1.6;
+        color: var(--text-color);
+        font-size: 18px;
+    }
+
+    .skills {
+        background-color: var(--accent-color);
+        padding: 100px 20px;
+    }
+
+    .skills-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .skill-category {
+        background-color: var(--secondary-color);
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .skill-category h3 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .skill {
+        margin-bottom: 1.5rem;
+    }
+
+    .skill-name {
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    .skill-bar {
+        height: 10px;
+        background: var(--accent-color);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .skill-level {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 5px;
+        transition: width 0.5s ease;
+    }
+
+    .timeline {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 100px 20px;
+        position: relative;
+    }
+
+    .timeline::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        background: var(--primary-color);
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -1px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 4rem;
+        width: 50%;
+        padding: 0 40px;
+    }
+
+    .timeline-item:nth-child(odd) {
+        left: 0;
+    }
+
+    .timeline-item:nth-child(even) {
+        left: 50%;
+    }
+
+    .timeline-date {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 18px;
+    }
+
+    .timeline-content {
+        background: var(--secondary-color);
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline-content h3 {
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .hobbies {
+        background-color: var(--secondary-color);
+        padding: 100px 20px;
+    }
+
+    .hobbies-grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .hobby {
+        background: var(--accent-color);
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .hobby:hover {
+        transform: translateY(-10px);
+    }
+
+    .hobby i {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .hobby h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .hobby p {
+        color: var(--text-color);
+        line-height: 1.5;
+        font-size: 16px;
+    }
+
+    .cta {
+        text-align: center;
+        padding: 100px 20px;
+        background: var(--primary-color);
+        margin-top: 0;
+    }
+
+    .cta h2 {
+        color: var(--accent-color);
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 15px 30px;
+        background-color: #355E57;
+        color: var(--accent-color);
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 18px;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    }
+
+    .btn:hover {
+        background-color: #1D3A33;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .btn::after {
+        content: " 🡒";
+        display: inline-block;
+        margin-left: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    .btn:hover::after {
+        transform: translateX(5px);
+    }
+
+    @media (max-width: 768px) {
+        .skills-grid,
+        .hobbies-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .timeline::after {
+            left: 31px;
+        }
+
+        .timeline-item {
+            width: 100%;
+            padding-left: 70px;
+            padding-right: 25px;
+        }
+
+        .timeline-item:nth-child(even) {
+            left: 0;
+        }
+    }
+</style>

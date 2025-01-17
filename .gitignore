@@ -30,4 +30,15 @@ rust-project.json
 # Backup
 backup/
 
+# Astro
+.astro
+
+# Node
+node_modules/
+
+# vscode
+.vscode/
+
+
+
 # End of https://www.toptal.com/developers/gitignore/api/rust,rust-analyzer,dotenv

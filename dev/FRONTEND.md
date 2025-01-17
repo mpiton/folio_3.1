@@ -2,71 +2,67 @@
 
 ## 0. Conventions & Standards
 
-### Conventions de Codage Rust
+### Conventions de Codage Astro
 1. **Nommage**
-   - Modules : `snake_case` (ex: `mod auth_service`)
-   - Types/Structs/Enums : `PascalCase` (ex: `struct UserProfile`)
-   - Fonctions/Variables : `snake_case` (ex: `fn validate_input()`)
-   - Constantes : `SCREAMING_SNAKE_CASE` (ex: `const MAX_ITEMS: u32 = 100`)
-   - Composants Dioxus : `PascalCase` (ex: `fn HeaderComponent()`)
+   - Composants : `PascalCase` (ex: `Header.astro`)
+   - Scripts : `camelCase` (ex: `useTheme.ts`)
+   - Styles : `kebab-case` (ex: `main-styles.css`)
+   - Variables : `camelCase` (ex: `const userData`)
+   - Constantes : `SCREAMING_SNAKE_CASE` (ex: `const MAX_ITEMS = 100`)
 
 2. **Documentation**
-   - Documentation des modules avec `//! Module-level documentation`
-   - Documentation des fonctions/types avec `/// Function/Type documentation`
-   - Exemples de code dans la documentation avec ```rust
+   - Documentation des composants avec JSDoc
+   - Documentation des fonctions avec commentaires explicatifs
+   - Exemples de code dans la documentation
    - Commentaires en français pour la cohérence
    - Tests comme documentation vivante
 
 3. **Organisation du Code**
-   ```rust
-   // Ordre des imports
-   use std::*;               // Imports standard
-   use external::*;          // Imports externes
-   use crate::*;            // Imports locaux
+   ```astro
+   ---
+   // 1. Imports
+   import { Component } from '@/components';
 
-   // Structure des composants
-   #[component]
-   pub fn ComponentName(cx: Scope) -> Element {
-       // 1. Hooks et états
-       let state = use_state(cx, || initial_value);
-
-       // 2. Callbacks et gestionnaires d'événements
-       let on_click = move |_| { /* ... */ };
-
-       // 3. Logique de rendu
-       render! {
-           div { /* ... */ }
-       }
+   // 2. Props et Types
+   interface Props {
+     title: string;
    }
+
+   // 3. Data Fetching et Logic
+   const { title } = Astro.props;
+   const data = await fetchData();
+   ---
+
+   <!-- 4. Template -->
+   <Component>
+     <h1>{title}</h1>
+   </Component>
+
+   <style>
+   /* 5. Styles */
+   </style>
    ```
 
 4. **Tests**
-   ```rust
-   #[cfg(test)]
-   mod tests {
-       use super::*;
+   ```typescript
+   // tests/components/Header.test.ts
+   import { describe, it, expect } from 'vitest';
+   import { render } from '@testing-library/astro';
+   import Header from '@/components/Header.astro';
 
-       // Tests unitaires
-       #[test]
-       fn test_component_behavior() {
-           // Arrange
-           // Act
-           // Assert
-       }
-
-       // Tests d'intégration
-       #[test]
-       fn test_component_integration() {
-           // ...
-       }
-   }
+   describe('Header', () => {
+     it('renders correctly', async () => {
+       const { getByText } = await render(Header);
+       expect(getByText('Title')).toBeInTheDocument();
+     });
+   });
    ```
 
 5. **Gestion des Erreurs**
-   - Utilisation de `Result` et `Option`
+   - Utilisation de try/catch
    - Messages d'erreur descriptifs en français
-   - Propagation avec l'opérateur `?`
-   - Types d'erreur personnalisés quand nécessaire
+   - Pages d'erreur personnalisées (404, 500)
+   - Gestion des erreurs côté serveur
 
 ### Conventions Git
 1. **Branches**
@@ -84,388 +80,385 @@
 ## 1. Charte Graphique
 
 ### Couleurs
-```scss
+```css
 :root {
-    --primary-color: #578E7E;    // Vert principal
-    --secondary-color: #F5ECD5;  // Beige clair
-    --accent-color: #FFFAEC;    // Blanc cassé
-    --text-color: #3D3D3D;      // Gris foncé
+    --primary-color: #578E7E;    /* Vert principal */
+    --secondary-color: #F5ECD5;  /* Beige clair */
+    --accent-color: #FFFAEC;    /* Blanc cassé */
+    --text-color: #3D3D3D;      /* Gris foncé */
 }
 ```
 
 ### Typographie
-```scss
-// Titres
-font-family: 'Poppins', sans-serif;
-// Corps de texte
-font-family: 'Open Sans', sans-serif;
+```css
+/* Titres */
+--font-heading: 'Poppins', sans-serif;
+/* Corps de texte */
+--font-body: 'Open Sans', sans-serif;
 ```
 
 ### Composants UI
 1. **Boutons**
-   ```scss
-   .btn {
+   ```astro
+   ---
+   interface Props {
+     variant?: 'primary' | 'secondary';
+     size?: 'sm' | 'md' | 'lg';
+   }
+   ---
+   <button class:list={['btn', variant, size]}>
+     <slot />
+   </button>
+
+   <style>
+     .btn {
        background-color: var(--primary-color);
        color: var(--accent-color);
        padding: 10px 20px;
        border-radius: 5px;
        transition: background-color 0.3s;
-   }
+     }
+   </style>
    ```
 
 2. **Cartes**
-   ```scss
-   .card {
+   ```astro
+   <div class="card">
+     <slot />
+   </div>
+
+   <style>
+     .card {
        background-color: var(--accent-color);
        border-radius: 10px;
        box-shadow: 0 0 20px rgba(0,0,0,0.1);
        padding: 40px;
-   }
-   ```
-
-3. **Animations**
-   ```scss
-   // Transitions
-   transition: all 0.3s ease;
-
-   // Hover effects
-   &:hover {
-       transform: translateY(-2px);
-       box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-   }
+     }
+   </style>
    ```
 
 ### Responsive Design
-```scss
-// Breakpoints
-$mobile: 576px;
-$tablet: 768px;
-$desktop: 1024px;
-$large: 1200px;
+```css
+/* Breakpoints */
+--mobile: 576px;
+--tablet: 768px;
+--desktop: 1024px;
+--large: 1200px;
 
-// Media queries
-@media (max-width: $tablet) {
-    // Styles tablette
+/* Media queries */
+@media (max-width: var(--tablet)) {
+    /* Styles tablette */
 }
 
-@media (max-width: $mobile) {
-    // Styles mobile
+@media (max-width: var(--mobile)) {
+    /* Styles mobile */
 }
 ```
 
-## 1. Configuration Initiale & Architecture
-
-### Configuration du Projet Existant
-```bash
-# Se placer dans le dossier web existant
-cd portfolio/web
-
-# Ajout des dépendances essentielles
-cargo add dioxus
-cargo add dioxus-web
-cargo add dioxus-router
-cargo add dioxus-hooks
-cargo add web-sys
-cargo add wasm-bindgen
-cargo add gloo
-cargo add serde
-cargo add serde_json
-cargo add reqwest
-cargo add i18n-embed
-cargo add rust-embed
-```
-
-### Structure du Projet Existante
+## 2. Structure du Projet
 ```
 portfolio/web/
 ├── src/
-│   ├── main.rs
-│   ├── app.rs
 │   ├── components/
-│   │   ├── mod.rs
-│   │   ├── header/
-│   │   ├── footer/
-│   │   ├── about/
-│   │   ├── contact/
-│   │   ├── rss/
-│   │   └── common/
+│   │   ├── common/
+│   │   │   ├── Button.astro
+│   │   │   ├── Card.astro
+│   │   │   └── Input.astro
+│   │   ├── layout/
+│   │   │   ├── Header.astro
+│   │   │   └── Footer.astro
+│   │   └── sections/
+│   │       ├── Hero.astro
+│   │       └── Projects.astro
+│   ├── layouts/
+│   │   ├── Layout.astro
+│   │   └── BlogPost.astro
 │   ├── pages/
-│   │   ├── mod.rs
-│   │   ├── home.rs
-│   │   ├── about.rs
-│   │   ├── contact.rs
-│   │   └── rss.rs
-│   ├── hooks/
-│   │   ├── mod.rs
-│   │   ├── use_i18n.rs
-│   │   └── use_theme.rs
-│   ├── services/
-│   │   ├── mod.rs
-│   │   ├── api.rs
-│   │   └── storage.rs
-│   ├── utils/
-│   │   ├── mod.rs
-│   │   └── seo.rs
+│   │   ├── index.astro
+│   │   ├── about.astro
+│   │   ├── contact.astro
+│   │   └── rss.xml.js
+│   ├── content/
+│   │   ├── blog/
+│   │   └── projects/
 │   ├── i18n/
 │   │   ├── en.json
 │   │   └── fr.json
-│   └── styles/
-│       ├── main.scss
-│       └── components/
+│   ├── styles/
+│   │   ├── global.css
+│   │   └── utils.css
+│   └── utils/
+│       ├── seo.ts
+│       └── api.ts
 ├── public/
-│   ├── index.html
+│   ├── favicon.svg
 │   ├── robots.txt
 │   └── sitemap.xml
-├── tests/
-|    ├── components/
-|    └── pages/
-├── static/
-│   ├── styles/
-│   │   ├── main.scss
-│   │   └── components/
-│   ├── images/
-│   ├── fonts/
-│   └── locales/
-├── tests/
-│   ├── composants/
-│   └── pages/
-└── Cargo.toml
+└── astro.config.mjs
 ```
 
-## 2. Phases de Développement (Approche TDD)
+## 3. Configuration Initiale
 
-### Phase 1: Configuration de Base & Infrastructure de Test
+```bash
+# Création du projet
+npm create astro@latest portfolio-v3
 
-1. **Configuration de Base**
-   - [ ] Configuration de Dioxus avec WASM
-   - [ ] Mise en place de l'environnement de test
-   - [ ] Configuration du traitement SCSS
-   - [ ] Configuration du système i18n
-   - [ ] Configuration du routage
-
-2. **Infrastructure de Test**
-   ```rust
-   // Structure de test exemple
-   #[cfg(test)]
-   mod tests {
-       use super::*;
-       use dioxus::test::*;
-
-       #[test]
-       fn test_component_renders() {
-           let mut test = TestRunner::new();
-           test.run(|cx| {
-               render! { Component {} }
-           });
-           // Assertions
-       }
-   }
-   ```
-
-### Phase 2: Développement des Composants
-
-1. **Composants Communs**
-   - [ ] Bouton
-   ```rust
-   #[test]
-   fn test_button_click() {
-       // Test button interactions
-   }
-   ```
-   - [ ] Input
-   - [ ] Card
-   - [ ] Modal
-   - [ ] Loading Spinner
-   - [ ] Error Boundary
-
-2. **Layout Components**
-   - [ ] Header
-   - [ ] Footer
-   - [ ] Navigation
-   - [ ] Language Switcher
-
-### Phase 3: Composants des Pages
-
-1. **Page d'Accueil**
-   - [ ] Section héro
-   - [ ] Section compétences
-   - [ ] Grille des projets
-   - [ ] Balises SEO
-
-2. **Page À Propos**
-   - [ ] Section biographie
-   - [ ] Chronologie d'expérience
-   - [ ] Matrice de compétences
-   - [ ] Certifications
-
-3. **Page Flux RSS**
-   - [ ] Grille des flux
-   - [ ] Système de filtrage
-   - [ ] Fonctionnalité de recherche
-   - [ ] Pagination
-
-4. **Page Contact**
-   - [ ] Formulaire de contact
-   - [ ] Validation du formulaire
-   - [ ] États succès/erreur
-   - [ ] Intégration anti-spam
-
-## 3. Implémentation de l'Accessibilité
-
-### Approche de Test
-```rust
-#[test]
-fn test_accessibility_attributes() {
-    // Test ARIA attributes
-    // Test keyboard navigation
-    // Test screen reader compatibility
-}
+# Installation des dépendances essentielles
+npm install @astrojs/mdx
+npm install @astrojs/sitemap
+npm install @astrojs/tailwind
+npm install astro-i18next
+npm install sharp
+npm install three @types/three
 ```
 
-### Checklist
-- [ ] ARIA labels
-- [ ] Keyboard navigation
-- [ ] Color contrast
-- [ ] Focus management
-- [ ] Screen reader support
-- [ ] Skip links
-- [ ] Form labels
-- [ ] Error announcements
+### Configuration Astro
+```javascript
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
+import tailwind from '@astrojs/tailwind';
 
-## 4. Implémentation SEO
+export default defineConfig({
+  site: 'https://mathieupiton.fr',
+  integrations: [
+    mdx(),
+    sitemap(),
+    tailwind(),
+  ],
+  i18n: {
+    defaultLocale: 'fr',
+    locales: ['fr', 'en'],
+  },
+});
+```
 
-### Structure des Balises Meta
-```html
+## 4. Phases de Développement
+
+### Phase 1: Configuration & Infrastructure
+- [x] Setup du projet Astro
+- [x] Configuration des intégrations
+- [x] Mise en place du système i18n
+- [ ] Configuration du SEO
+- [x] Setup des tests
+
+### Phase 2: Composants de Base
+- [x] Layout principal
+- [ ] Composants communs
+- [x] Navigation
+- [x] Footer
+- [ ] Système de thème
+
+### Phase 3: Pages Principales
+- [ ] Page d'accueil
+- [x] Page À propos
+- [ ] Page Contact
+- [ ] Flux RSS
+
+### Phase 4: Optimisation
+- [x] Performance de base
+- [ ] Accessibilité
+- [ ] SEO avancé
+- [ ] Analytics
+
+## 5. Tests
+
+### Tests E2E avec Playwright
+```typescript
+// tests/about.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('about page has required content', async ({ page }) => {
+  await page.goto('/about');
+
+  // Vérification du titre
+  await expect(page.getByText('À propos de moi')).toBeVisible();
+
+  // Vérification des sections
+  await expect(page.locator('.skills')).toBeVisible();
+  await expect(page.locator('.contact-cta')).toBeVisible();
+
+  // Vérification des compétences
+  const skillCategories = await page.locator('.skill-category h3').allTextContents();
+  expect(skillCategories).toHaveLength(3);
+  expect(skillCategories).toContain('Langages');
+  expect(skillCategories).toContain('Frameworks Frontend & Hybrids');
+  expect(skillCategories).toContain('Frameworks Backend');
+});
+```
+
+### Configuration Playwright
+```javascript
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: 'html',
+  use: {
+    baseURL: 'http://localhost:4321',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+  ],
+  webServer: {
+    command: 'npm run dev',
+    port: 4321,
+    reuseExistingServer: !process.env.CI,
+  },
+});
+```
+
+## 6. Implémentation SEO
+
+### Configuration de Base
+```typescript
+// src/utils/seo.ts
+export const defaultSEO = {
+  title: 'Mathieu Piton - Développeur Full Stack',
+  description: 'Portfolio de Mathieu Piton, développeur Full Stack spécialisé en Rust et TypeScript',
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    url: 'https://mathieupiton.fr',
+    site_name: 'Mathieu Piton',
+  },
+};
+```
+
+### Utilisation dans les Pages
+```astro
+---
+import { defaultSEO } from '../utils/seo';
+---
 <head>
-    <title>%PAGE_TITLE% | Mathieu Piton</title>
-    <meta name="description" content="%PAGE_DESCRIPTION%">
-    <meta name="keywords" content="%PAGE_KEYWORDS%">
-    <meta property="og:title" content="%PAGE_TITLE%">
-    <meta property="og:description" content="%PAGE_DESCRIPTION%">
-    <meta property="og:image" content="%PAGE_IMAGE%">
-    <link rel="canonical" href="%PAGE_URL%">
-    <meta name="robots" content="index, follow">
+  <title>{defaultSEO.title}</title>
+  <meta name="description" content={defaultSEO.description} />
+  <meta property="og:title" content={defaultSEO.title} />
+  <!-- ... autres meta tags ... -->
 </head>
 ```
 
-### Implementation Tasks
-- [ ] Dynamic meta tags
-- [ ] Structured data
-- [ ] Sitemap generation
-- [ ] robots.txt configuration
-- [ ] Canonical URLs
-- [ ] Alternate language links
+## 7. Internationalisation
 
-## 5. Internationalisation
-
-### Structure
-```rust
-// i18n/en.json
-{
-    "common": {
-        "menu": {
-            "home": "Home",
-            "about": "About",
-            "contact": "Contact"
-        }
-    }
-}
+### Configuration i18n
+```typescript
+// astro-i18next.config.ts
+export default {
+  defaultLocale: 'fr',
+  locales: ['fr', 'en'],
+  namespaces: ['common', 'home', 'about'],
+  defaultNamespace: 'common',
+};
 ```
 
-### Implementation
-- [ ] Language detection
-- [ ] Language switching
-- [ ] URL localization
-- [ ] Content translation
-- [ ] RTL support
-- [ ] Date/number formatting
-
-## 6. Optimisation des Performances
-
-### Approche de Test
-```rust
-#[test]
-fn test_performance_metrics() {
-    // Test load time
-    // Test bundle size
-    // Test rendering performance
-}
+### Utilisation
+```astro
+---
+import { t } from 'astro-i18next';
+---
+<h1>{t('home.title')}</h1>
 ```
 
-### Tasks
-- [ ] Code splitting
-- [ ] Asset optimization
-- [ ] Lazy loading
-- [ ] Cache strategy
-- [ ] Bundle analysis
-- [ ] Performance monitoring
+## 8. Tests et Qualité
 
-## 7. Stratégie de Test
+### Configuration des Tests
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
 
-### Unit Tests
-- Components
-- Hooks
-- Utils
-- Services
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./tests/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+  },
+});
+```
 
-### Integration Tests
-- Page flows
-- User journeys
-- API integration
+### Exemples de Tests
+```typescript
+// Tests de composants
+import { render } from '@testing-library/astro';
+import MyComponent from '../src/components/MyComponent.astro';
 
-### E2E Tests
-- Critical paths
-- User scenarios
-- Cross-browser testing
+test('MyComponent renders correctly', async () => {
+  const { getByText } = await render(MyComponent);
+  expect(getByText('Hello')).toBeInTheDocument();
+});
+```
 
-## 8. Pipeline de Déploiement
+## 9. Déploiement
 
-### Steps
-1. Build optimization
-2. Asset compression
-3. Environment configuration
-4. CI/CD setup
-5. Monitoring implementation
+### Configuration CI/CD
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Deploy
+        uses: cloudflare/wrangler-action@2.0.0
+```
 
-## Métriques de Réussite
+## 10. Métriques de Réussite
 
-- [ ] Lighthouse score > 90
+- [ ] Lighthouse score > 95
 - [ ] WCAG 2.1 AA compliance
-- [ ] 100% test coverage
-- [ ] < 2s initial load time
-- [ ] < 100ms TTI
+- [ ] Tests coverage > 80%
+- [ ] < 1s initial load time
+- [ ] < 50ms TTI
 - [ ] Perfect accessibility score
-- [ ] SEO score > 90
+- [ ] SEO score > 95
 
-## Directives de Développement
+## 11. Directives de Développement
 
-1. **TDD Process**
-   - Write test first
-   - Implement feature
-   - Refactor
-   - Verify accessibility
-   - Optimize performance
+1. **Performance First**
+   - Utilisation d'images optimisées
+   - Code splitting automatique
+   - Prefetching intelligent
+   - Minification des assets
 
-2. **Qualité du Code**
-   - Utilisation des idiomes Rust
-   - Respect des bonnes pratiques Dioxus
-   - Documentation des APIs publiques
-   - Maintien d'un style cohérent
+2. **Accessibilité**
+   - ARIA labels
+   - Contraste des couleurs
+   - Navigation au clavier
+   - Support lecteur d'écran
 
-3. **Accessibility First**
-   - Test with screen readers
-   - Ensure keyboard navigation
-   - Maintain ARIA compliance
-   - Regular accessibility audits
+3. **SEO**
+   - Meta tags dynamiques
+   - Sitemap automatique
+   - Structured data
+   - Canonical URLs
 
-4. **SEO Best Practices**
-   - Semantic HTML
-   - Meta tags optimization
-   - Performance optimization
-   - Mobile responsiveness
-
-5. **Performance Budget**
-   - Initial bundle < 100KB
-   - Page load < 2s
-   - TTI < 100ms
-   - FCP < 1s
+4. **Maintenance**
+   - Documentation claire
+   - Tests automatisés
+   - Code review systématique
+   - Monitoring des performances

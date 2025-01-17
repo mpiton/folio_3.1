@@ -6,12 +6,12 @@ L'objectif principal de ce projet est de créer un portfolio en ligne pour Mathi
 
 ## 2. Approche technique
 
-Le projet sera développé à 100% en Rust, en utilisant les technologies suivantes :
+Le projet sera développé avec les technologies suivantes :
 
-- Frontend : Rust avec le framework Dioxus pour le développement de l'interface utilisateur
+- Frontend : Astro avec TypeScript pour le développement de l'interface utilisateur
 - Backend : Axum pour l'API et la logique métier (migration depuis Actix Web terminée)
 - Base de données : MongoDB pour le stockage des données (flux RSS, messages de contact, etc.)
-- Tests : Tests unitaires et d'intégration avec wiremock pour les tests HTTP
+- Tests : Tests E2E avec Playwright pour le frontend, tests unitaires et d'intégration avec wiremock pour les tests HTTP
 - Email : Service Brevo (anciennement Sendinblue) pour l'envoi d'emails
 - Cache : Cache en mémoire avec tokio pour les flux RSS
 
@@ -41,15 +41,30 @@ portfolio/
   │   └── Cargo.toml
   ├── web/
   │   ├── src/
-  │   │   ├── main.rs
   │   │   ├── components/
+  │   │   │   ├── common/
+  │   │   │   ├── layout/
+  │   │   │   └── sections/
+  │   │   ├── layouts/
+  │   │   │   └── Layout.astro
   │   │   ├── pages/
-  │   │   └── services/
-  │   ├── static/
+  │   │   │   ├── index.astro
+  │   │   │   ├── about.astro
+  │   │   │   ├── contact.astro
+  │   │   │   └── rss.xml.js
+  │   │   ├── content/
+  │   │   ├── styles/
+  │   │   └── utils/
+  │   ├── public/
   │   ├── tests/
-  │   └── Cargo.toml
+  │   │   └── e2e/
+  │   │       └── about.spec.ts
+  │   └── astro.config.mjs
   ├── db/
   │   └── mongodb/
+  ├── .github/
+  │   └── workflows/
+  │       └── playwright.yml
   ├── .gitignore
   └── README.md
 ```
@@ -79,30 +94,46 @@ portfolio/
    - Indexation pour les performances
    - Tests avec base de données de test
 
-### Frontend (Web)
+### Frontend (Web) 🚧
 
-[En attente - Migration vers Dioxus]
+1. Pages ⏳
+   - [x] Layout principal
+   - [x] Page À propos
+   - [ ] Page d'accueil
+   - [ ] Page Contact
+   - [ ] Flux RSS
+
+2. Composants ⏳
+   - [x] Header avec navigation
+   - [x] Footer
+   - [x] Section À propos
+   - [ ] Formulaire de contact
+   - [ ] Grille de projets
+   - [ ] Affichage des flux RSS
+
+3. Intégrations ✅
+   - [x] Tailwind CSS
+   - [x] MDX
+   - [x] Sitemap
+   - [x] i18n (astro-i18next)
 
 ## 5. Tests
 
-Les tests sont écrits en suivant l'approche TDD et couvrent :
+1. Tests Backend ✅
+   - Tests unitaires ✅
+   - Tests d'intégration ✅
 
-1. Tests unitaires ✅
-   - Validation des formulaires
-   - Détection de spam
-   - Parsing des flux RSS
-   - Templates d'emails
+2. Tests Frontend 🚧
+   - [x] Configuration Playwright
+   - [x] Tests E2E de base
+   - [x] Tests de la page À propos
+   - [ ] Tests de la page d'accueil
+   - [ ] Tests du formulaire de contact
+   - [ ] Tests des flux RSS
+   - [ ] Tests de navigation
+   - [ ] Tests i18n
 
-2. Tests d'intégration ✅
-   - Endpoints API
-   - Synchronisation RSS
-   - File d'attente d'emails
-
-3. Mocks ✅
-   - Requêtes HTTP avec wiremock
-   - Base de données de test
-
-## 6. Sécurité
+## 6. Sécurité ⏳
 
 1. Protection anti-spam ✅
    - Rate limiting par IP
@@ -114,7 +145,7 @@ Les tests sont écrits en suivant l'approche TDD et couvrent :
    - Indexes uniques pour éviter les doublons
    - Validation des données
 
-## 7. Performance
+## 7. Performance ⏳
 
 1. Cache ✅
    - Mise en cache des flux RSS
@@ -125,13 +156,21 @@ Les tests sont écrits en suivant l'approche TDD et couvrent :
    - Requêtes paginées
    - Upsert pour éviter les doublons
 
+3. Frontend 🚧
+   - [x] Optimisation des images
+   - [x] Lazy loading
+   - [ ] Code splitting
+   - [ ] Bundle optimization
+   - [ ] Prefetching
+
 ## 8. Prochaines étapes
 
 1. Frontend
-   - Migration vers Dioxus
-   - Mise en place de l'architecture
-   - Développement des composants
-   - Tests unitaires et d'intégration
+   - Compléter les pages manquantes
+   - Ajouter les composants réutilisables
+   - Finaliser l'internationalisation
+   - Optimiser les performances
+   - Compléter les tests E2E
 
 2. Optimisations
    - Documentation API OpenAPI/Swagger
@@ -166,48 +205,48 @@ Le déploiement se fera sur :
 
 Pour assurer la cohérence et la lisibilité du code, les conventions suivantes seront appliquées :
 
-1. Style de code
-- Nommage des variables, fonctions et fichiers en `snake_case`
-   - Nommage des types, traits et structures en `PascalCase`
-   - Nommage des constantes en `SCREAMING_SNAKE_CASE`
-- Indentation avec 4 espaces
-- Largeur de ligne maximale de 100 caractères
+1. Style de code Frontend (Astro)
+   - Composants en `PascalCase.astro`
+   - Scripts en `camelCase.ts`
+   - Styles en `kebab-case.css`
+   - Variables en `camelCase`
+   - Constantes en `SCREAMING_SNAKE_CASE`
 
 2. Documentation
    - Commentaires en français
-   - Documentation des fonctions publiques obligatoire
-   - Exemples de code dans la documentation
+   - Documentation JSDoc pour les composants
+   - Documentation TypeScript pour les types
    - Tests comme documentation vivante
 
-3. Organisation du code
-   - Un module par fichier
-   - Tests dans le même fichier que le code testé
-   - Imports groupés et ordonnés (std, externes, crate)
-   - Utilisation des modules pour organiser le code
+3. Organisation du code Frontend
+   - Un composant par fichier
+   - Tests dans des fichiers séparés
+   - Imports groupés et ordonnés
+   - Utilisation des layouts Astro
 
-4. Tests
-   - Tests unitaires pour chaque fonction publique
-   - Tests d'intégration pour les fonctionnalités complètes
-   - Tests de documentation comme exemples
-   - Utilisation de fixtures pour les données de test
+4. Tests Frontend
+   - Tests unitaires pour les composants
+   - Tests d'intégration pour les pages
+   - Tests d'accessibilité
+   - Tests de performance
 
-5. Gestion des erreurs
-   - Utilisation de `Result` et `Option`
-   - Messages d'erreur descriptifs
-   - Propagation des erreurs avec `?`
-   - Types d'erreur personnalisés quand nécessaire
+5. Gestion des erreurs Frontend
+   - Gestion des erreurs côté client
+   - Pages d'erreur personnalisées
+   - Fallbacks pour le contenu dynamique
+   - Validation des formulaires côté client
 
-6. Performance
-   - Éviter les allocations inutiles
-   - Utiliser des références quand possible
-   - Optimiser les requêtes MongoDB
-   - Mettre en cache les données fréquemment utilisées
+6. Performance Frontend
+   - Optimisation des images avec @astrojs/image
+   - Code splitting automatique
+   - Prefetching intelligent
+   - Optimisation du CSS
 
-7. Sécurité
-   - Validation des entrées utilisateur
-   - Protection contre les injections
-   - Gestion sécurisée des secrets
-   - Logs sécurisés (pas d'informations sensibles)
+7. Sécurité Frontend
+   - Protection XSS
+   - CSP headers
+   - Validation des entrées
+   - Sécurisation des formulaires
 
 8. Git
    - Messages de commit descriptifs en français
