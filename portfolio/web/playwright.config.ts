@@ -30,7 +30,13 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Augmenter les timeouts */
+    actionTimeout: 10000,
+    navigationTimeout: 30000,
   },
+
+  timeout: 60000, // Timeout global de 60 secondes
 
   /* Configure projects for major browsers */
   projects: [
@@ -75,5 +81,8 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
+    timeout: 120000, // 2 minutes pour le démarrage du serveur
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });

@@ -5,6 +5,9 @@ interface Props {
   type?: 'button' | 'submit' | 'reset';
   class?: string;
   disabled?: boolean;
+  id?: string;
+  'data-testid'?: string;
+  [key: string]: any; // Pour permettre d'autres attributs HTML
 }
 
 const {
@@ -13,6 +16,11 @@ const {
   type = 'button',
   class: className = '',
   disabled = false,
+  // Extraire les attributs connus
+  id,
+  'data-testid': dataTestId,
+  // Récupérer les autres attributs
+  ...rest
 } = Astro.props;
 ---
 
@@ -26,6 +34,9 @@ const {
     className,
     { 'button--disabled': disabled }
   ]}
+  id={id}
+  data-testid={dataTestId}
+  {...rest}
 >
   <slot />
 </button>

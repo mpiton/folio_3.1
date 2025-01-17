@@ -138,20 +138,19 @@
 - [ ] Page d'accueil
   - [ ] Hero section
   - [x] About section
-  - [ ] Projects grid
   - [ ] Contact form
 - [x] Section À propos
 - [ ] Formulaire de contact
 - [ ] Affichage des flux RSS
 - [x] Footer
-- [ ] Composants réutilisables
-  - [ ] Boutons (.astro)
-  - [ ] Cards (.astro)
-  - [ ] Inputs (.astro)
-  - [ ] Modals (.astro)
-  - [ ] Toasts/Notifications
-  - [ ] Loaders
-  - [ ] Pagination
+- [x] Composants réutilisables
+  - [x] Boutons (.astro)
+  - [x] Cards (.astro)
+  - [x] Inputs (.astro)
+  - [x] Modals (.astro)
+  - [x] Toasts/Notifications
+  - [x] Loaders
+  - [x] Pagination
 
 ### Intégrations ⏳
 - [x] Configuration MDX
