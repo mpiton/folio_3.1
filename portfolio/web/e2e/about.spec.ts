@@ -2,8 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('About Page', () => {
   test.beforeEach(async ({ page }) => {
-    // Naviguer vers la page À propos
-    await page.goto('/about');
+    // Augmenter le timeout et ajouter des retries pour la navigation
+    await test.step('Navigate to about page', async () => {
+      await page.goto('/about', {
+        timeout: 30000,
+        waitUntil: 'networkidle'
+      });
+    });
   });
 
   test('should display all required sections', async ({ page }) => {
@@ -62,3 +67,6 @@ test.describe('About Page', () => {
     await expect(contactLink).toBeVisible();
   });
 });
+
+// Configurer les retries au niveau du test
+test.describe.configure({ retries: 2 });

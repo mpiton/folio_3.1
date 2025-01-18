@@ -1,4 +1,5 @@
-use axum::{extract::State, response::IntoResponse, Json};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use serde_json::json;
 use std::sync::Arc;
 
 use crate::models::contact::Request;
@@ -9,11 +10,30 @@ pub async fn handle_message(
     Json(form): Json<Request>,
 ) -> impl IntoResponse {
     match state.submit_contact(form).await {
-        Ok(()) => "Message envoyé avec succès".into_response(),
-        Err(e) => (
-            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Error: {e}"),
+        Ok(()) => (
+            StatusCode::OK,
+            Json(json!({
+                "status": "success",
+                "message": "Message envoyé avec succès"
+            })),
         )
             .into_response(),
+        Err(e) => {
+            let error_msg = e.to_string();
+            let status = if error_msg.contains("Validation error") {
+                StatusCode::BAD_REQUEST
+            } else {
+                StatusCode::INTERNAL_SERVER_ERROR
+            };
+
+            (
+                status,
+                Json(json!({
+                    "status": "error",
+                    "message": error_msg
+                })),
+            )
+                .into_response()
+        }
     }
 }

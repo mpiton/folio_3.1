@@ -24,8 +24,8 @@ test:
 build:
 	cargo build --release
 
-run:
-	cargo run
+run-api:
+	cargo run --bin portfolio-api
 
 check:
 	cargo check && cargo clippy
