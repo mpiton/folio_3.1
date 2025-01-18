@@ -1,0 +1,237 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ContactForm from "../components/sections/ContactForm.astro";
+---
+
+<Layout title="Contact - Mathieu Piton">
+    <main class="contact-page">
+        <section class="contact">
+            <div class="contact-container">
+                <h1>Me contacter</h1>
+                <div class="contact-grid">
+                    <ContactForm class="contact-form-wrapper" />
+
+                    <div class="contact-info">
+                        <h2>Informations de contact</h2>
+                        <ul class="contact-details">
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:mathieu.piton@example.com"
+                                    >mathieu.piton@example.com</a
+                                >
+                            </li>
+                            <li>
+                                <i class="fas fa-phone"></i>
+                                <a href="tel:+33612345678">+33 6 12 34 56 78</a>
+                            </li>
+                        </ul>
+
+                        <h2>Réseaux sociaux</h2>
+                        <ul class="social-links">
+                            <li>
+                                <a
+                                    href="https://linkedin.com/in/mathieupiton"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="LinkedIn"
+                                >
+                                    <i class="fab fa-linkedin"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://github.com/mathieupiton"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="GitHub"
+                                >
+                                    <i class="fab fa-github"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://twitter.com/mathieupiton"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Twitter"
+                                >
+                                    <i class="fab fa-x-twitter"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<style>
+    .contact-page {
+        min-height: 100vh;
+        padding: 8rem 2rem 4rem;
+        background-color: var(--accent-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .contact {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .contact-container {
+        background-color: var(--bg-color);
+        border-radius: 1.5rem;
+        box-shadow: 0 8px 32px rgba(87, 142, 126, 0.1);
+        padding: 3rem;
+        border: 1px solid var(--primary-color);
+    }
+
+    h1 {
+        font-size: 3rem;
+        color: var(--text-color);
+        text-align: center;
+        margin-bottom: 3rem;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 4rem;
+        align-items: start;
+    }
+
+    .contact-form-wrapper {
+        padding: 0;
+    }
+
+    .contact-info {
+        background-color: var(--secondary-color);
+        padding: 2.5rem;
+        border-radius: 1rem;
+        color: var(--text-color);
+        border: 1px solid var(--primary-color);
+    }
+
+    .contact-info h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        font-family: var(--font-heading);
+        font-weight: 500;
+    }
+
+    .contact-info h2:not(:first-child) {
+        margin-top: 2.5rem;
+    }
+
+    .contact-details {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem;
+    }
+
+    .contact-details li {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        font-size: 1.1rem;
+    }
+
+    .contact-details i {
+        color: var(--primary-color);
+        font-size: 1.25rem;
+        width: 1.5rem;
+        text-align: center;
+    }
+
+    .contact-details a {
+        color: var(--text-color);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .contact-details a::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 1px;
+        bottom: -2px;
+        left: 0;
+        background-color: var(--primary-color);
+        transition: width 0.3s ease;
+    }
+
+    .contact-details a:hover {
+        color: var(--primary-color);
+    }
+
+    .contact-details a:hover::after {
+        width: 100%;
+    }
+
+    .social-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 1.25rem;
+    }
+
+    .social-links a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        background-color: var(--primary-color);
+        color: var(--accent-color);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+        background-color: var(--text-color);
+        transform: translateY(-2px);
+    }
+
+    .social-links i {
+        font-size: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .contact-page {
+            padding: 6rem 1rem 2rem;
+        }
+
+        .contact-container {
+            padding: 2rem;
+        }
+
+        .contact-grid {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-info {
+            padding: 2rem;
+        }
+
+        .social-links {
+            justify-content: center;
+        }
+    }
+</style>

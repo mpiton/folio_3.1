@@ -11,6 +11,7 @@ pub struct Config {
     pub recipient_email: String,
     pub sender_name: String,
     pub sender_email: String,
+    pub frontend_url: String,
 }
 
 impl Config {
@@ -27,6 +28,7 @@ impl Config {
     /// - `RECIPIENT_EMAIL`
     /// - `SENDER_NAME`
     /// - `SENDER_EMAIL`
+    /// - `FRONTEND_URL`
     ///
     /// La variable `RSS_CACHE_DURATION` est optionnelle et vaut 3600 par défaut.
     #[must_use]
@@ -47,6 +49,8 @@ impl Config {
             .parse()
             .expect("RSS_CACHE_DURATION must be a valid number");
 
+        let frontend_url = env::var("FRONTEND_URL").expect("FRONTEND_URL must be set");
+
         // Configuration Brevo
         let brevo_api_key = env::var("BREVO_API_KEY").expect("BREVO_API_KEY must be set");
         let recipient_email = env::var("RECIPIENT_EMAIL").expect("RECIPIENT_EMAIL must be set");
@@ -62,6 +66,7 @@ impl Config {
             recipient_email,
             sender_name,
             sender_email,
+            frontend_url,
         }
     }
 
@@ -88,6 +93,7 @@ impl Config {
             recipient_email: String::from("test@example.com"),
             sender_name: String::from("Test Sender"),
             sender_email: String::from("test@sender.com"),
+            frontend_url: String::from("http://localhost:3000"),
         }
     }
 }

@@ -1,128 +1,239 @@
 ---
 interface Props {
-  type?: 'text' | 'email' | 'password' | 'tel' | 'number';
-  name: string;
-  label: string;
-  placeholder?: string;
-  required?: boolean;
-  error?: string;
-  class?: string;
-  value?: string | number;
-  min?: number;
-  max?: number;
-  pattern?: string;
+    label: string;
+    type?: astroHTML.JSX.HTMLInputTypeAttribute;
+    name: string;
+    placeholder?: string;
+    required?: boolean;
+    class?: string;
+    value?: string;
+    "data-testid"?: string;
+    error?: string;
 }
 
 const {
-  type = 'text',
-  name,
-  label,
-  placeholder = '',
-  required = false,
-  error = '',
-  class: className = '',
-  value = '',
-  min,
-  max,
-  pattern,
+    label,
+    type = "text",
+    name,
+    placeholder,
+    required = false,
+    class: className = "",
+    value = "",
+    "data-testid": testId,
+    error,
 } = Astro.props;
-
-const id = `input-${name}`;
 ---
 
-<div class:list={['input-wrapper', className]}>
-  <label for={id} class="input-label">
-    {label}
-    {required && <span class="input-required">*</span>}
-  </label>
-
-  <input
-    type={type}
-    id={id}
-    name={name}
-    placeholder={placeholder}
-    required={required}
-    class:list={['input-field', { 'input-field--error': error }]}
-    value={value}
-    min={min}
-    max={max}
-    pattern={pattern}
-    aria-describedby={error ? `${id}-error` : undefined}
-  />
-
-  {error && (
-    <p class="input-error" id={`${id}-error`} role="alert">
-      {error}
-    </p>
-  )}
+<div class:list={["input-wrapper", className]}>
+    <label for={name}>
+        {label}
+        {required && <span class="required">*</span>}
+    </label>
+    <div class:list={["input-container", { error: !!error }]}>
+        {
+            type === "email" && (
+                <i class="input-icon fas fa-envelope" aria-hidden="true" />
+            )
+        }
+        {
+            type === "text" && name === "name" && (
+                <i class="input-icon fas fa-user" aria-hidden="true" />
+            )
+        }
+        {
+            type === "text" && name === "subject" && (
+                <i class="input-icon fas fa-heading" aria-hidden="true" />
+            )
+        }
+        <input
+            type={type}
+            id={name}
+            name={name}
+            placeholder={placeholder}
+            required={required}
+            value={value}
+            data-testid={testId}
+            class:list={{ error: !!error }}
+        />
+    </div>
+    {
+        error && (
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle" aria-hidden="true" />
+                {error}
+            </div>
+        )
+    }
 </div>
 
 <style>
-  .input-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .input-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-color);
-  }
-
-  .input-required {
-    color: #dc2626;
-    margin-left: 0.25rem;
-  }
-
-  .input-field {
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--secondary-color);
-    border-radius: 0.5rem;
-    background-color: var(--accent-color);
-    color: var(--text-color);
-    font-size: 1rem;
-    width: 100%;
-    transition: all 0.2s;
-  }
-
-  .input-field:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(87, 142, 126, 0.2);
-  }
-
-  .input-field::placeholder {
-    color: #9ca3af;
-  }
-
-  .input-field--error {
-    border-color: #dc2626;
-  }
-
-  .input-field--error:focus {
-    border-color: #dc2626;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
-  }
-
-  .input-error {
-    font-size: 0.875rem;
-    color: #dc2626;
-    margin-top: 0.25rem;
-  }
-
-  /* Disabled state */
-  .input-field:disabled {
-    background-color: #f3f4f6;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-
-  /* Media queries */
-  @media (max-width: 768px) {
-    .input-field {
-      font-size: 16px; /* Prevent zoom on iOS */
+    .input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
-  }
+
+    label {
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 0.95rem;
+        font-family: var(--font-heading);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: color 0.2s ease;
+    }
+
+    .required {
+        color: var(--error-color);
+    }
+
+    .input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        color: #9ca3af;
+        font-size: 1rem;
+        transition: color 0.2s ease;
+        pointer-events: none;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        padding-left: 2.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: var(--font-body);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    /* État par défaut avec une bordure visible */
+    input {
+        border: 1px solid #d1d5db;
+    }
+
+    /* État hover */
+    .input-container:hover input:not(:focus):not(.error) {
+        border-color: var(--primary-color);
+        box-shadow: 0 2px 4px rgba(87, 142, 126, 0.05);
+    }
+
+    .input-container:hover .input-icon {
+        color: var(--primary-color);
+    }
+
+    /* État focus avec outline visible */
+    input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(87, 142, 126, 0.1);
+        padding-left: 2.75rem;
+    }
+
+    input:focus + .input-icon,
+    input:not(:placeholder-shown) + .input-icon {
+        color: var(--primary-color);
+    }
+
+    input::placeholder {
+        color: #9ca3af;
+        opacity: 0.8;
+    }
+
+    /* État d'erreur */
+    input.error {
+        border-color: var(--error-color);
+        background-color: #fef2f2;
+        padding-left: 2.75rem;
+    }
+
+    input.error:focus {
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    input.error + .input-icon {
+        color: var(--error-color);
+    }
+
+    .error-message {
+        color: #991b1b;
+        font-size: 0.875rem;
+        margin-top: 0.375rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: #fee2e2;
+        border: 1px solid #fecaca;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        animation: slideIn 0.2s ease-out;
+    }
+
+    .error-message i {
+        font-size: 1rem;
+        color: #dc2626;
+    }
+
+    .input-container.error input {
+        border-color: #dc2626;
+        background-color: #fef2f2;
+    }
+
+    .input-container.error input:focus {
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .input-container.error .input-icon {
+        color: #dc2626;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .error-message {
+            background-color: rgb(127 29 29 / 0.1);
+            border-color: rgb(127 29 29 / 0.2);
+            color: #f87171;
+        }
+
+        .error-message i {
+            color: #f87171;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-0.25rem);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Support de la réduction des animations */
+    @media (prefers-reduced-motion: reduce) {
+        .error-message {
+            animation: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        input {
+            padding: 0.75rem;
+            padding-left: 2.5rem;
+        }
+
+        .input-icon {
+            left: 0.875rem;
+        }
+    }
 </style>

@@ -249,18 +249,22 @@ export default defineConfig({
 - [x] Composants communs
   - [x] Button (primary/outline variants)
   - [x] Card (avec variants et hover effects)
-  - [x] Input
+  - [x] Input (avec validation et gestion des erreurs)
+  - [x] Toast (avec animations et gestion du temps)
+  - [x] Modal (avec différentes tailles et gestion des clics)
 - [x] Navigation responsive
 - [x] Footer avec effet de flou et liens sociaux
 
 ### Phase 3: Pages Principales
 - [x] Page d'accueil
 - [x] Page À propos
-- [ ] Page Contact
+- [x] Page Contact avec formulaire et validation
 - [ ] Flux RSS
 
 ### Phase 4: Optimisation
 - [x] Performance de base
+- [x] Tests E2E robustes
+- [x] Gestion des erreurs
 - [ ] Accessibilité
 - [ ] SEO avancé
 - [ ] Analytics
@@ -269,25 +273,29 @@ export default defineConfig({
 
 ### Tests E2E avec Playwright
 ```typescript
-// tests/about.spec.ts
-import { test, expect } from '@playwright/test';
+// Configuration améliorée
+test.beforeEach(async ({ page }) => {
+  // Attente du serveur et navigation avec retry
+  await page.goto('/components', {
+    waitUntil: 'networkidle',
+    timeout: 30000
+  });
 
-test('about page has required content', async ({ page }) => {
-  await page.goto('/about');
+  // Attente de la stabilité de la page
+  await page.waitForLoadState('domcontentloaded');
+});
 
-  // Vérification du titre
-  await expect(page.getByText('À propos de moi')).toBeVisible();
+// Tests des composants
+test('should show and auto-dismiss toast', async ({ page }) => {
+  // Attente de la stabilité des boutons
+  const button = page.getByRole('button', { name: 'Show Success Toast' });
+  await button.waitFor({ state: 'visible', timeout: 15000 });
+  await button.click();
 
-  // Vérification des sections
-  await expect(page.locator('.skills')).toBeVisible();
-  await expect(page.locator('.contact-cta')).toBeVisible();
-
-  // Vérification des compétences
-  const skillCategories = await page.locator('.skill-category h3').allTextContents();
-  expect(skillCategories).toHaveLength(3);
-  expect(skillCategories).toContain('Langages');
-  expect(skillCategories).toContain('Frameworks Frontend & Hybrids');
-  expect(skillCategories).toContain('Frameworks Backend');
+  // Vérification du toast
+  const toast = page.locator('.toast--success.toast--cloned');
+  await toast.waitFor({ state: 'visible', timeout: 15000 });
+  await expect(toast).toHaveClass(/toast--visible/);
 });
 ```
 

@@ -96,26 +96,48 @@ portfolio/
 
 ### Frontend (Web) 🚧
 
-1. Pages ⏳
+1. Pages ✅
    - [x] Layout principal
    - [x] Page À propos
-   - [ ] Page d'accueil
-   - [ ] Page Contact
+   - [x] Page d'accueil
+   - [x] Page Contact
    - [ ] Flux RSS
 
-2. Composants ⏳
+2. Composants ✅
    - [x] Header avec navigation
    - [x] Footer
    - [x] Section À propos
-   - [ ] Formulaire de contact
+   - [x] Formulaire de contact avec validation
+   - [x] Composants communs
+     - [x] Modal (small/large)
+     - [x] Toast (success/error)
+     - [x] Input avec validation
+     - [x] Button avec variants
    - [ ] Grille de projets
    - [ ] Affichage des flux RSS
 
-3. Intégrations ✅
-   - [x] Tailwind CSS
-   - [x] MDX
-   - [x] Sitemap
-   - [x] i18n (astro-i18next)
+2. Tests Frontend ⏳
+   - [x] Configuration Playwright
+   - [x] Tests E2E de base
+   - [x] Tests de la page À propos
+   - [x] Tests de la page d'accueil
+   - [x] Tests du formulaire de contact
+   - [x] Tests des composants communs
+     - [x] Modal tests
+     - [x] Toast tests
+     - [x] Input validation
+   - [ ] Tests des flux RSS
+   - [x] Tests de navigation
+   - [ ] Tests i18n
+
+3. Performance Frontend ⏳
+   - [x] Optimisation des images
+   - [x] Lazy loading
+   - [x] Gestion des erreurs robuste
+   - [x] Tests E2E fiables
+   - [ ] Code splitting
+   - [ ] Bundle optimization
+   - [ ] Prefetching
 
 ## 5. Tests
 
@@ -127,10 +149,14 @@ portfolio/
    - [x] Configuration Playwright
    - [x] Tests E2E de base
    - [x] Tests de la page À propos
-   - [ ] Tests de la page d'accueil
-   - [ ] Tests du formulaire de contact
+   - [x] Tests de la page d'accueil
+   - [x] Tests du formulaire de contact
+   - [x] Tests des composants communs
+     - [x] Modal tests
+     - [x] Toast tests
+     - [x] Input validation
    - [ ] Tests des flux RSS
-   - [ ] Tests de navigation
+   - [x] Tests de navigation
    - [ ] Tests i18n
 
 ## 6. Sécurité ⏳

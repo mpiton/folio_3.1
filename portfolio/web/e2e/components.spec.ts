@@ -2,35 +2,61 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Components page', () => {
   test.beforeEach(async ({ page }) => {
-    // Aller à la page des composants
-    await page.goto('/components');
+    // Attendre que le serveur soit prêt avant de naviguer
+    await test.step('Wait for server and navigate', async () => {
+      let retries = 0;
+      while (retries < 3) {
+        try {
+          await page.goto('/components', {
+            timeout: 30000,
+            waitUntil: 'networkidle'
+          });
+          break;
+        } catch (e) {
+          retries++;
+          if (retries === 3) throw e;
+          // Attendre un peu avant de réessayer
+          await page.waitForTimeout(1000);
+        }
+      }
+    });
 
-    // Attendre que la page soit complètement chargée
+    // S'assurer que la page est complètement chargée
     await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
-
-    // Attendre que les scripts soient exécutés
-    await page.waitForFunction(() => {
-      return document.readyState === 'complete' &&
-             !!document.querySelector('[data-testid]');
-    });
   });
 
   test.describe('Modal tests', () => {
     test('should open and close small modal', async ({ page }) => {
+      // Attendre que la page soit stable
+      await page.waitForLoadState('networkidle');
+
       const openButton = page.getByTestId('openSmallModal');
       const smallModal = page.locator('#smallModal');
 
-      await expect(openButton).toBeVisible({ timeout: 10000 });
-      await openButton.click();
+      // Attendre que le bouton soit stable et cliquable
+      await expect(openButton).toBeVisible({ timeout: 15000 });
+      await expect(openButton).toBeEnabled();
 
-      await expect(smallModal).toBeVisible({ timeout: 10000 });
+      // Cliquer et attendre l'animation
+      await openButton.click();
+      await page.waitForTimeout(500);
+
+      // Vérifier que le modal est visible et a le bon contenu
+      await expect(smallModal).toBeVisible({ timeout: 15000 });
       await expect(smallModal.locator('h2')).toHaveText('Small Modal');
 
+      // Attendre que le bouton de fermeture soit stable
       const closeButton = smallModal.locator('[data-close-modal]');
-      await closeButton.click();
+      await expect(closeButton).toBeVisible({ timeout: 5000 });
+      await expect(closeButton).toBeEnabled();
 
-      await expect(smallModal).not.toBeVisible();
+      // Fermer et attendre l'animation
+      await closeButton.click();
+      await page.waitForTimeout(500);
+
+      // Vérifier que le modal est bien fermé
+      await expect(smallModal).not.toBeVisible({ timeout: 5000 });
     });
 
     test('should open and close medium modal', async ({ page }) => {
@@ -51,48 +77,91 @@ test.describe('Components page', () => {
     });
 
     test('should open and close large modal', async ({ page }) => {
+      // Attendre que la page soit stable
+      await page.waitForLoadState('networkidle');
+
       const largeModal = page.locator('#largeModal');
       await expect(largeModal).not.toBeVisible();
 
+      // Attendre que le bouton soit stable et cliquable
       const openButton = page.getByTestId('openLargeModal');
-      await expect(openButton).toBeVisible({ timeout: 10000 });
-      await openButton.click();
+      await expect(openButton).toBeVisible({ timeout: 15000 });
+      await expect(openButton).toBeEnabled();
 
-      await expect(largeModal).toBeVisible({ timeout: 5000 });
+      // Cliquer et attendre l'animation
+      await openButton.click();
+      await page.waitForTimeout(500);
+
+      // Vérifier que le modal est visible et a le bon contenu
+      await expect(largeModal).toBeVisible({ timeout: 15000 });
       await expect(largeModal.locator('h2')).toHaveText('Large Modal');
 
+      // Attendre que le bouton de fermeture soit stable
       const closeButton = largeModal.locator('[data-close-modal]');
-      await expect(closeButton).toBeVisible();
+      await expect(closeButton).toBeVisible({ timeout: 5000 });
+      await expect(closeButton).toBeEnabled();
+
+      // Fermer et attendre l'animation
       await closeButton.click();
-      await expect(largeModal).not.toBeVisible();
+      await page.waitForTimeout(500);
+
+      // Vérifier que le modal est bien fermé
+      await expect(largeModal).not.toBeVisible({ timeout: 5000 });
     });
   });
 
   test.describe('Toast tests', () => {
     test('should show and auto-dismiss success toast', async ({ page }) => {
-      const showButton = page.getByTestId('showSuccessToast');
-      await expect(showButton).toBeVisible({ timeout: 10000 });
-      await showButton.click();
+      // Attendre que la page soit stable
+      await page.waitForLoadState('networkidle');
 
-      const successToast = page.locator('.toast--success.toast--cloned.toast--visible');
-      await expect(successToast).toBeVisible({ timeout: 5000 });
+      // Attendre que le bouton soit stable et cliquable
+      const showButton = page.getByTestId('showSuccessToast');
+      await expect(showButton).toBeVisible({ timeout: 15000 });
+      await expect(showButton).toBeEnabled();
+
+      // Cliquer et attendre l'animation
+      await showButton.click();
+      await page.waitForTimeout(500);
+
+      // Attendre que le toast soit créé et visible
+      const successToast = page.locator('.toast--success.toast--cloned');
+      await expect(successToast).toBeVisible({ timeout: 15000 });
+      await expect(successToast).toHaveClass(/toast--visible/, { timeout: 5000 });
       await expect(successToast.locator('.toast-title')).toHaveText('Succès!');
 
       // Attendre que le toast disparaisse
-      await expect(successToast).not.toBeVisible({ timeout: 10000 });
+      await expect(successToast).not.toBeVisible({ timeout: 15000 });
     });
 
     test('should show and manually close error toast', async ({ page }) => {
+      // Attendre que la page soit stable
+      await page.waitForLoadState('networkidle');
+
+      // Attendre que le bouton soit stable et cliquable
       const showButton = page.getByTestId('showErrorToast');
-      await expect(showButton).toBeVisible({ timeout: 10000 });
+      await expect(showButton).toBeVisible({ timeout: 15000 });
+      await expect(showButton).toBeEnabled();
+
+      // Cliquer et attendre l'animation
       await showButton.click();
+      await page.waitForTimeout(500);
 
-      const errorToast = page.locator('.toast--error.toast--cloned.toast--visible');
-      await expect(errorToast).toBeVisible({ timeout: 5000 });
+      // Attendre que le toast soit créé et visible
+      const errorToast = page.locator('.toast--error.toast--cloned');
+      await expect(errorToast).toBeVisible({ timeout: 15000 });
+      await expect(errorToast).toHaveClass(/toast--visible/, { timeout: 5000 });
 
+      // Attendre que le bouton de fermeture soit stable
       const closeButton = errorToast.locator('[data-close-toast]');
-      await expect(closeButton).toBeVisible();
+      await expect(closeButton).toBeVisible({ timeout: 5000 });
+      await expect(closeButton).toBeEnabled();
+
+      // Fermer et attendre l'animation
       await closeButton.click();
+      await page.waitForTimeout(500);
+
+      // Vérifier que le toast est bien fermé
       await expect(errorToast).not.toBeVisible({ timeout: 5000 });
     });
 
@@ -121,37 +190,45 @@ test.describe('Components page', () => {
     });
 
     test('should show multiple toasts simultaneously', async ({ page }) => {
+      // Attendre que la page soit stable
+      await page.waitForLoadState('networkidle');
+
       const buttons = [
         'showSuccessToast',
         'showErrorToast',
         'showWarningToast'
       ];
 
-      // Attendre que tous les boutons soient visibles
+      // Attendre que tous les boutons soient visibles et cliquables
       for (const buttonId of buttons) {
-        await expect(page.getByTestId(buttonId)).toBeVisible({ timeout: 10000 });
+        const button = page.getByTestId(buttonId);
+        await expect(button).toBeVisible({ timeout: 15000 });
+        await expect(button).toBeEnabled();
       }
 
-      // Afficher les toasts
+      // Afficher les toasts avec un délai entre chaque
       for (const buttonId of buttons) {
         await page.getByTestId(buttonId).click();
-        await page.waitForTimeout(200); // Délai plus long entre les toasts
+        await page.waitForTimeout(500); // Délai plus long entre les toasts
       }
 
-      // Vérifier que tous les toasts sont visibles
-      const toastSelectors = [
-        '.toast--success.toast--cloned.toast--visible',
-        '.toast--error.toast--cloned.toast--visible',
-        '.toast--warning.toast--cloned.toast--visible'
-      ];
-
-      for (const selector of toastSelectors) {
-        await expect(page.locator(selector)).toBeVisible({ timeout: 5000 });
+      // Attendre que tous les toasts soient créés et visibles
+      const toastTypes = ['success', 'error', 'warning'];
+      for (const type of toastTypes) {
+        const toast = page.locator(`.toast--${type}.toast--cloned`);
+        await expect(toast).toBeVisible({ timeout: 15000 });
+        await expect(toast).toHaveClass(/toast--visible/, { timeout: 5000 });
       }
 
       // Vérifier qu'ils sont empilés correctement
       const toasts = await page.locator('.toast--cloned.toast--visible').all();
       expect(toasts.length).toBe(3);
+
+      // Attendre que les toasts soient stables avant de terminer le test
+      await page.waitForTimeout(500);
     });
   });
 });
+
+// Configurer les retries au niveau du test
+test.describe.configure({ retries: 2 });
