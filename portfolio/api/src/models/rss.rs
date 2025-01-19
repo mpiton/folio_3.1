@@ -38,3 +38,12 @@ pub struct ParsedItem {
     pub description: String,
     pub pub_date: Option<DateTime<Utc>>,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RssItem {
+    pub title: String,
+    pub url: String,
+    pub pub_date: DateTime<Utc>,
+    pub description: String,
+    pub image_url: String,
+}

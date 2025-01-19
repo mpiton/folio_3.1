@@ -1,9 +1,17 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import ContactForm from "../components/sections/ContactForm.astro";
+import { defaultSEO } from "../utils/seo";
+
+const seoData = {
+    ...defaultSEO,
+    title: "Contact - Mathieu Piton",
+    description:
+        "Contactez-moi pour discuter de vos projets de développement web ou pour toute autre question. Je suis à votre écoute pour vous aider à concrétiser vos idées.",
+};
 ---
 
-<Layout title="Contact - Mathieu Piton">
+<Layout seo={seoData}>
     <main class="contact-page">
         <section class="contact">
             <div class="contact-container">

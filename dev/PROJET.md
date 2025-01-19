@@ -101,7 +101,7 @@ portfolio/
    - [x] Page À propos
    - [x] Page d'accueil
    - [x] Page Contact
-   - [ ] Flux RSS
+   - [x] Flux RSS
 
 2. Composants ✅
    - [x] Header avec navigation
@@ -113,8 +113,7 @@ portfolio/
      - [x] Toast (success/error)
      - [x] Input avec validation
      - [x] Button avec variants
-   - [ ] Grille de projets
-   - [ ] Affichage des flux RSS
+   - [x] Affichage des flux RSS
 
 2. Tests Frontend ⏳
    - [x] Configuration Playwright
@@ -126,7 +125,7 @@ portfolio/
      - [x] Modal tests
      - [x] Toast tests
      - [x] Input validation
-   - [ ] Tests des flux RSS
+   - [x] Tests des flux RSS
    - [x] Tests de navigation
    - [ ] Tests i18n
 
@@ -155,7 +154,7 @@ portfolio/
      - [x] Modal tests
      - [x] Toast tests
      - [x] Input validation
-   - [ ] Tests des flux RSS
+   - [x] Tests des flux RSS
    - [x] Tests de navigation
    - [ ] Tests i18n
 

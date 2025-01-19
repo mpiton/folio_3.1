@@ -125,7 +125,7 @@
   - [x] Configuration du serveur de développement
 - [x] Structure des composants
   - [x] Layouts de base
-  - [ ] Composants communs
+  - [x] Composants communs
   - [ ] Sections de page
 - [x] Configuration des routes
 - [ ] Configuration du SSG/SSR
@@ -135,13 +135,13 @@
 ### Composants 🚧
 - [x] Header multilingue
 - [x] Navigation responsive
-- [ ] Page d'accueil
-  - [ ] Hero section
+- [x] Page d'accueil
+  - [x] Hero section
   - [x] About section
-  - [ ] Contact form
+  - [x] Contact form
 - [x] Section À propos
-- [ ] Formulaire de contact
-- [ ] Affichage des flux RSS
+- [x] Formulaire de contact
+- [x] Affichage des flux RSS
 - [x] Footer
 - [x] Composants réutilisables
   - [x] Boutons (.astro)
@@ -174,9 +174,9 @@
 - [x] Configuration Playwright
 - [x] Tests E2E de base
 - [x] Tests de la page À propos
-- [ ] Tests de la page d'accueil
-- [ ] Tests du formulaire de contact
-- [ ] Tests des flux RSS
+- [x] Tests de la page d'accueil
+- [x] Tests du formulaire de contact
+- [x] Tests des flux RSS
 - [ ] Tests de navigation
 - [ ] Tests i18n
 - [ ] Tests des images
@@ -238,14 +238,12 @@
 - [ ] Temps moyen de session > 2min
 
 ## 🔄 Maintenance Continue
-- [ ] Monitoring des performances
 - [ ] Mises à jour de sécurité
 - [ ] Backup régulier MongoDB
 - [ ] Analyse des logs
 - [ ] Mises à jour des dépendances
 - [ ] Revue de code régulière
 - [ ] Optimisation continue
-- [ ] Analyse des métriques
 - [ ] Feedback utilisateurs
 - [ ] Veille technologique
 - [ ] Maintenance des indexes MongoDB
