@@ -1,6 +1,6 @@
 use crate::{config::Config, models::rss::RssItem};
 use anyhow::Result;
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{DateTime, Utc};
 use futures_util::TryStreamExt;
 use mongodb::bson::{doc, Document};
 use mongodb::Database;
@@ -100,7 +100,7 @@ impl FeedService {
                             .ok()
                             .and_then(|date_str| DateTime::parse_from_rfc3339(date_str).ok())
                             .map(|dt| dt.with_timezone(&Utc))
-                            .unwrap_or_else(|| Utc::now()),
+                            .unwrap_or_else(Utc::now),
                         description: doc.get_str("description").unwrap_or_default().to_string(),
                         image_url: doc
                             .get_str("image_url")
@@ -168,7 +168,7 @@ impl FeedService {
                             .pub_date()
                             .and_then(|date_str| DateTime::parse_from_rfc2822(date_str).ok())
                             .map(|dt| dt.with_timezone(&Utc))
-                            .unwrap_or_else(|| Utc::now());
+                            .unwrap_or_else(Utc::now);
 
                         let image_url = Self::extract_image_url(item).unwrap_or_else(|| {
                             format!(
