@@ -1,9 +1,5 @@
 [advisories]
 db-path = "~/.cargo/advisory-db"
-vulnerability = "deny"
-unmaintained = "warn"
-yanked = "warn"
-notice = "warn"
 ignore = [
     # instant est une dépendance indirecte de wiremock (dev-dependency)
     "RUSTSEC-2024-0384",
