@@ -169,19 +169,73 @@ pub mod test_utils {
     ///
     /// Cette fonction panique si la variable d'environnement `MONGO_URL` n'est pas définie
     pub async fn create_test_db(test_name: &str) -> Result<Database> {
+        // Charger les variables d'environnement depuis le fichier .env.test
         std::env::set_var("DOTENV_FILE", ".env.test");
-        dotenv::from_filename(".env.test").ok();
+        match dotenvy::from_filename(".env.test") {
+            Ok(_) => println!("Fichier .env.test chargé avec succès"),
+            Err(e) => println!("Erreur lors du chargement du fichier .env.test : {}", e),
+        }
 
-        let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
-        let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
+        let base_mongo_url = match std::env::var("MONGO_URL") {
+            Ok(url) => {
+                println!("URL MongoDB de base : {}", url);
+                url
+            }
+            Err(e) => {
+                println!("Erreur lors de la récupération de MONGO_URL : {}", e);
+                return Err(anyhow::anyhow!("MONGO_URL n'est pas définie"));
+            }
+        };
+
+        let mongo_db = match std::env::var("MONGO_DB") {
+            Ok(db) => {
+                println!("Base de données MongoDB : {}", db);
+                db
+            }
+            Err(e) => {
+                println!("Erreur lors de la récupération de MONGO_DB : {}", e);
+                return Err(anyhow::anyhow!("MONGO_DB n'est pas définie"));
+            }
+        };
+
         let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+        println!("URL MongoDB complète : {}", mongo_url);
 
         println!("Connexion à MongoDB Atlas pour les tests...");
-        let client = Client::with_uri_str(&mongo_url).await?;
+        let client = match Client::with_uri_str(&mongo_url).await {
+            Ok(client) => {
+                println!("Client MongoDB créé avec succès");
+                client
+            }
+            Err(e) => {
+                println!("Erreur lors de la création du client MongoDB : {}", e);
+                return Err(anyhow::anyhow!(
+                    "Impossible de se connecter à MongoDB : {}",
+                    e
+                ));
+            }
+        };
 
         // Utiliser la base de test portfolio_test
         let db = client.database("portfolio_test");
         println!("Utilisation de la base de test portfolio_test");
+
+        // Vérifier que la connexion fonctionne
+        match db.list_collection_names().await {
+            Ok(collections) => {
+                println!(
+                    "Connexion à la base de données réussie. Collections existantes : {:?}",
+                    collections
+                );
+            }
+            Err(e) => {
+                println!("Erreur lors de la vérification de la connexion : {}", e);
+                return Err(anyhow::anyhow!(
+                    "Impossible de lister les collections : {}",
+                    e
+                ));
+            }
+        }
 
         // Initialiser les collections avec un timeout plus long pour Atlas
         match timeout(TEST_TIMEOUT, init_test_collections(&db, test_name)).await {
@@ -330,7 +384,7 @@ mod tests {
     #[tokio::test]
     async fn test_db_initialization() {
         std::env::set_var("DOTENV_FILE", ".env.test");
-        dotenv::from_filename(".env.test").ok();
+        dotenvy::from_filename(".env.test").ok();
         println!("Démarrage du test d'initialisation de la base de données");
 
         // Exécuter le test avec un timeout global

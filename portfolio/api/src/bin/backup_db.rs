@@ -14,7 +14,7 @@ mod tests {
 
     fn create_test_config(temp_dir: &TempDir) -> BackupConfig {
         std::env::set_var("DOTENV_FILE", ".env.test");
-        dotenv::from_filename(".env.test").ok();
+        dotenvy::from_filename(".env.test").ok();
         let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
         let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
@@ -30,7 +30,7 @@ mod tests {
     #[test]
     async fn test_backup_config_from_env() {
         std::env::set_var("DOTENV_FILE", ".env.test");
-        dotenv::from_filename(".env.test").ok();
+        dotenvy::from_filename(".env.test").ok();
 
         let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
@@ -144,7 +144,7 @@ struct BackupConfig {
 
 impl BackupConfig {
     fn from_env() -> Self {
-        dotenv::dotenv().ok();
+        dotenvy::dotenv().ok();
         let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
         let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
