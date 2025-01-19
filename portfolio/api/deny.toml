@@ -1,14 +1,11 @@
 [advisories]
 db-path = "~/.cargo/advisory-db"
-vulnerability = "deny"
-unmaintained = "warn"
-yanked = "warn"
-notice = "warn"
+criteria = { vulnerability = "deny", unmaintained = "warn", yanked = "warn", notice = "warn" }
 
 [licenses]
+default = "deny"
 unlicensed = "deny"
 allow = ["MIT", "Apache-2.0", "BSD-3-Clause", "ISC", "Zlib", "MPL-2.0"]
-default = "deny"
 confidence-threshold = 0.8
 
 [bans]
