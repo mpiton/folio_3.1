@@ -265,9 +265,60 @@ export default defineConfig({
 - [x] Performance de base
 - [x] Tests E2E robustes
 - [x] Gestion des erreurs
-- [ ] Accessibilité
-- [ ] SEO avancé
-- [ ] Analytics
+- [x] Accessibilité
+- [x] SEO avancé
+- [x] Analytics
+- [x] Sécurité
+  - [x] Validation des formulaires côté client
+  - [x] Protection XSS
+  - [x] Gestion des erreurs API
+  - [x] Headers de sécurité
+  - [x] CSP configuration
+  - [x] Rate limiting handling
+
+### Phase 5: Intégration API
+- [x] Configuration des endpoints
+  - [x] Contact form `/api/contact`
+  - [x] RSS feed `/api/rss`
+  - [x] Health check `/health`
+- [x] Gestion des erreurs API
+  - [x] Timeouts
+  - [x] Rate limiting
+  - [x] Validation errors
+  - [x] Network errors
+- [x] Feedback utilisateur
+  - [x] Loading states
+  - [x] Error messages
+  - [x] Success notifications
+  - [x] Rate limit warnings
+
+### Phase 6: Tests
+- [x] Tests E2E API integration
+  ```typescript
+  // tests/api/contact.spec.ts
+  test('should handle rate limiting', async ({ page }) => {
+    // Simulate multiple rapid requests
+    for (let i = 0; i < 5; i++) {
+      await page.click('#submit-contact');
+    }
+
+    // Check for rate limit warning
+    await expect(page.locator('.toast--error')).toContainText('Trop de requêtes');
+  });
+  ```
+
+- [x] Tests de sécurité
+  ```typescript
+  // tests/security/xss.spec.ts
+  test('should sanitize user input', async ({ page }) => {
+    await page.fill('#message', '<script>alert("xss")</script>');
+    await page.click('#submit');
+
+    // Verify sanitized output
+    const content = await page.textContent('.message-content');
+    expect(content).not.toContain('<script>');
+  });
+  ```
 
 ## 5. Tests
 
