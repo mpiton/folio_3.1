@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Mathieu Piton"]
 description = "Backend API for Mathieu Piton's portfolio"
+license = "MIT"
 
 [dependencies]
 
