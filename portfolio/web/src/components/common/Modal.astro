@@ -1,206 +1,234 @@
 ---
 interface Props {
-  id: string;
-  title?: string;
-  size?: 'sm' | 'md' | 'lg';
-  class?: string;
-  showCloseButton?: boolean;
-  closeOnClickOutside?: boolean;
+    id: string;
+    title?: string;
+    size?: "sm" | "md" | "lg";
+    class?: string;
+    showCloseButton?: boolean;
+    closeOnClickOutside?: boolean;
 }
 
 const {
-  id,
-  title,
-  size = 'md',
-  class: className = '',
-  showCloseButton = true,
-  closeOnClickOutside = true,
+    id,
+    title,
+    size = "md",
+    class: className = "",
+    showCloseButton = true,
+    closeOnClickOutside = true,
 } = Astro.props;
 ---
 
-<dialog id={id} class:list={['modal', `modal--${size}`, className]}>
-  <div class="modal-content">
-    {showCloseButton && (
-      <button class="modal-close" aria-label="Fermer la modal" data-close-modal>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="modal-close-icon">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    )}
-    {title && <h2 class="modal-title">{title}</h2>}
-    <div class="modal-body">
-      <slot />
+<dialog id={id} class:list={["modal", `modal--${size}`, className]}>
+    <div class="modal-content">
+        {
+            showCloseButton && (
+                <button
+                    class="modal-close"
+                    aria-label="Fermer la modal"
+                    data-close-modal
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="modal-close-icon"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            )
+        }
+        {title && <h2 class="modal-title">{title}</h2>}
+        <div class="modal-body">
+            <slot />
+        </div>
     </div>
-  </div>
 </dialog>
 
 <script>
-  class ModalManager {
-    private modal: HTMLDialogElement;
-    private closeButton: HTMLButtonElement | null;
-    private closeOnClickOutside: boolean;
+    class ModalManager {
+        private modal: HTMLDialogElement;
+        private closeButton: HTMLButtonElement | null;
+        private closeOnClickOutside: boolean;
 
-    constructor(modal: HTMLDialogElement) {
-      this.modal = modal;
-      this.closeButton = modal.querySelector('[data-close-modal]');
-      this.closeOnClickOutside = modal.classList.contains('modal--close-outside');
-      this.init();
+        constructor(modal: HTMLDialogElement) {
+            this.modal = modal;
+            this.closeButton = modal.querySelector("[data-close-modal]");
+            this.closeOnClickOutside = true;
+            this.init();
+        }
+
+        private init() {
+            if (this.closeButton) {
+                this.closeButton.addEventListener("click", () => this.close());
+            }
+
+            this.modal.addEventListener("click", (e) => {
+                const rect = this.modal.getBoundingClientRect();
+                const isInDialog =
+                    e.clientX >= rect.left &&
+                    e.clientX <= rect.right &&
+                    e.clientY >= rect.top &&
+                    e.clientY <= rect.bottom;
+
+                if (e.target === this.modal && !isInDialog) {
+                    this.close();
+                }
+            });
+
+            // Gestion de la touche Echap
+            this.modal.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    this.close();
+                }
+            });
+        }
+
+        open() {
+            this.modal.showModal();
+            document.body.style.overflow = "hidden";
+        }
+
+        close() {
+            this.modal.close();
+            document.body.style.overflow = "";
+        }
+
+        destroy() {
+            if (this.closeButton) {
+                this.closeButton.removeEventListener("click", () =>
+                    this.close()
+                );
+            }
+            this.modal.removeEventListener("click", (e) => {
+                if (e.target === this.modal) {
+                    this.close();
+                }
+            });
+        }
     }
 
-    private init() {
-      if (this.closeButton) {
-        this.closeButton.addEventListener('click', () => this.close());
-      }
-
-      if (this.closeOnClickOutside) {
-        this.modal.addEventListener('click', (e) => {
-          if (e.target === this.modal) {
-            this.close();
-          }
+    // Initialisation des modals
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("dialog.modal").forEach((modal) => {
+            if (modal instanceof HTMLDialogElement) {
+                const modalManager = new ModalManager(modal);
+                const modalId = modal.id;
+                const openButton = document.querySelector(
+                    `[data-testid="open${modalId.charAt(0).toUpperCase() + modalId.slice(1)}"]`
+                );
+                if (openButton) {
+                    openButton.addEventListener("click", () =>
+                        modalManager.open()
+                    );
+                }
+            }
         });
-      }
-
-      // Gestion de la touche Echap
-      this.modal.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          this.close();
-        }
-      });
-    }
-
-    open() {
-      this.modal.showModal();
-      document.body.style.overflow = 'hidden';
-    }
-
-    close() {
-      this.modal.close();
-      document.body.style.overflow = '';
-    }
-
-    destroy() {
-      if (this.closeButton) {
-        this.closeButton.removeEventListener('click', () => this.close());
-      }
-      this.modal.removeEventListener('click', (e) => {
-        if (e.target === this.modal) {
-          this.close();
-        }
-      });
-    }
-  }
-
-  // Initialisation des modals
-  document.querySelectorAll('dialog.modal').forEach((modal) => {
-    if (modal instanceof HTMLDialogElement) {
-      const modalManager = new ModalManager(modal);
-      const modalId = modal.id;
-      const openButton = document.querySelector(`[data-testid="open${modalId.charAt(0).toUpperCase() + modalId.slice(1)}"]`);
-      if (openButton) {
-        openButton.addEventListener('click', () => modalManager.open());
-      }
-    }
-  });
+    });
 </script>
 
 <style>
-  .modal {
-    padding: 0;
-    border: none;
-    border-radius: 1rem;
-    background-color: var(--accent-color);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    max-height: 90vh;
-    margin: auto;
-    overflow: hidden;
-  }
-
-  .modal::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-  }
-
-  /* Sizes */
-  .modal--sm {
-    width: 95%;
-    max-width: 400px;
-  }
-
-  .modal--md {
-    width: 95%;
-    max-width: 600px;
-  }
-
-  .modal--lg {
-    width: 95%;
-    max-width: 800px;
-  }
-
-  .modal-content {
-    position: relative;
-    padding: 2rem;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    padding: 0.5rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-color);
-    opacity: 0.6;
-    transition: opacity 0.2s;
-  }
-
-  .modal-close:hover {
-    opacity: 1;
-  }
-
-  .modal-close-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  .modal-title {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.5rem;
-    color: var(--text-color);
-    margin: 0 0 1.5rem;
-  }
-
-  .modal-body {
-    max-height: calc(90vh - 8rem);
-    overflow-y: auto;
-  }
-
-  /* Animations */
-  @keyframes modalOpen {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
+    .modal {
+        padding: 0;
+        border: none;
+        border-radius: 1rem;
+        background-color: var(--accent-color);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        max-height: 90vh;
+        margin: auto;
+        overflow: hidden;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    .modal::backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
     }
-  }
 
-  dialog[open] {
-    animation: modalOpen 0.3s ease-out;
-  }
+    /* Sizes */
+    .modal--sm {
+        width: 95%;
+        max-width: 400px;
+    }
 
-  /* Media queries */
-  @media (max-width: 768px) {
+    .modal--md {
+        width: 95%;
+        max-width: 600px;
+    }
+
+    .modal--lg {
+        width: 95%;
+        max-width: 800px;
+    }
+
     .modal-content {
-      padding: 1.5rem;
+        position: relative;
+        padding: 2rem;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-color);
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+    .modal-close:hover {
+        opacity: 1;
+    }
+
+    .modal-close-icon {
+        width: 1.5rem;
+        height: 1.5rem;
     }
 
     .modal-title {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
+        font-family: "Poppins", sans-serif;
+        font-size: 1.5rem;
+        color: var(--text-color);
+        margin: 0 0 1.5rem;
     }
-  }
+
+    .modal-body {
+        max-height: calc(90vh - 8rem);
+        overflow-y: auto;
+    }
+
+    /* Animations */
+    @keyframes modalOpen {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    dialog[open] {
+        animation: modalOpen 0.3s ease-out;
+    }
+
+    /* Media queries */
+    @media (max-width: 768px) {
+        .modal-content {
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+    }
 </style>

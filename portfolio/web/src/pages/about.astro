@@ -1,20 +1,44 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { Image } from 'astro:assets';
-import profilePic from '../assets/mathieu-piton.jpg';
+import Layout from "../layouts/Layout.astro";
+import { Image } from "astro:assets";
+import profilePic from "../assets/mathieu-piton.jpg";
+import { defaultSEO } from "../utils/seo";
+
+const seoData = {
+    ...defaultSEO,
+    title: "À propos - Mathieu Piton",
+    description:
+        "Découvrez mon parcours, mes compétences et mon expérience en tant que développeur web spécialisé en Rust et technologies modernes.",
+};
 ---
 
-<Layout
-    title="À propos - Mathieu Piton"
-    description="Découvrez mon parcours, mes compétences et mon expérience en tant que développeur web spécialisé en Rust et technologies modernes."
->
+<Layout seo={seoData}>
     <main>
         <section class="about-intro">
             <Image src={profilePic} alt="Mathieu Piton" />
             <h1>À propos de moi</h1>
-            <p>Passionné par le développement web depuis mon adolescence, j'ai d'abord exploré cet univers en créant des sites pour des jeux en ligne, en apprenant de manière autodidacte à utiliser différents CMS comme NukedKlan, Webspell et WordPress. Attiré par la programmation, j'ai ensuite élargi mes compétences en étudiant JavaScript et PHP.</p>
-            <p>En 2020, encouragé par des développeurs qui ont reconnu mon potentiel, j'ai décidé de franchir le pas et de me reconvertir professionnellement. J'ai obtenu mon titre de développeur web et web mobile à l'IFPA de Mérignac, me donnant ainsi les clés pour transformer ma passion en métier.</p>
-            <p>Aujourd'hui, je mets mon expertise et mon enthousiasme au service de projets variés, en veillant toujours à proposer des solutions innovantes et à faciliter la vie des utilisateurs. Mon approche ? Allier rigueur et créativité, en restant constamment à l'écoute des besoins de mes clients et de mon équipe.</p>
+            <p>
+                Passionné par le développement web depuis mon adolescence, j'ai
+                d'abord exploré cet univers en créant des sites pour des jeux en
+                ligne, en apprenant de manière autodidacte à utiliser différents
+                CMS comme NukedKlan, Webspell et WordPress. Attiré par la
+                programmation, j'ai ensuite élargi mes compétences en étudiant
+                JavaScript et PHP.
+            </p>
+            <p>
+                En 2020, encouragé par des développeurs qui ont reconnu mon
+                potentiel, j'ai décidé de franchir le pas et de me reconvertir
+                professionnellement. J'ai obtenu mon titre de développeur web et
+                web mobile à l'IFPA de Mérignac, me donnant ainsi les clés pour
+                transformer ma passion en métier.
+            </p>
+            <p>
+                Aujourd'hui, je mets mon expertise et mon enthousiasme au
+                service de projets variés, en veillant toujours à proposer des
+                solutions innovantes et à faciliter la vie des utilisateurs. Mon
+                approche ? Allier rigueur et créativité, en restant constamment
+                à l'écoute des besoins de mes clients et de mon équipe.
+            </p>
         </section>
 
         <section class="skills">
@@ -164,28 +188,40 @@ import profilePic from '../assets/mathieu-piton.jpg';
                 <div class="timeline-date">2023 - aujourd'hui</div>
                 <div class="timeline-content">
                     <h3>Lead développeur - GIE Crédit Municipal Services</h3>
-                    <p>Gestion d'une équipe de développeurs et participation à la planification des projets.</p>
+                    <p>
+                        Gestion d'une équipe de développeurs et participation à
+                        la planification des projets.
+                    </p>
                 </div>
             </div>
             <div class="timeline-item">
                 <div class="timeline-date">2020 - aujourd'hui</div>
                 <div class="timeline-content">
                     <h3>Développeur web - GIE Crédit Municipal Services</h3>
-                    <p>Développement de sites web, d'applications mobiles et de solutions de traitement de données.</p>
+                    <p>
+                        Développement de sites web, d'applications mobiles et de
+                        solutions de traitement de données.
+                    </p>
                 </div>
             </div>
             <div class="timeline-item">
                 <div class="timeline-date">2020</div>
                 <div class="timeline-content">
                     <h3>Développeur Node.js - Pradeo</h3>
-                    <p>Courte expérience enrichissante au sein d'une entreprise spécialisée dans la sécurité mobile.</p>
+                    <p>
+                        Courte expérience enrichissante au sein d'une entreprise
+                        spécialisée dans la sécurité mobile.
+                    </p>
                 </div>
             </div>
             <div class="timeline-item">
                 <div class="timeline-date">2020 - aujourd'hui</div>
                 <div class="timeline-content">
                     <h3>Développeur web freelance</h3>
-                    <p>Réalisation de projets variés pour des clients : e-commerce, site de rencontre, etc.</p>
+                    <p>
+                        Réalisation de projets variés pour des clients :
+                        e-commerce, site de rencontre, etc.
+                    </p>
                 </div>
             </div>
         </section>
@@ -196,22 +232,40 @@ import profilePic from '../assets/mathieu-piton.jpg';
                 <div class="hobby">
                     <i class="fas fa-code"></i>
                     <h3>Développement web</h3>
-                    <p>Ce qui me passionne le plus dans le développement web, c'est de pouvoir créer de A à Z des solutions qui facilitent la vie des utilisateurs.</p>
+                    <p>
+                        Ce qui me passionne le plus dans le développement web,
+                        c'est de pouvoir créer de A à Z des solutions qui
+                        facilitent la vie des utilisateurs.
+                    </p>
                 </div>
                 <div class="hobby">
                     <i class="fas fa-heart"></i>
                     <h3>Ma famille</h3>
-                    <p>Ma famille est ma priorité absolue. Je suis épanoui dans ma vie personnelle et cela me donne l'énergie pour m'investir pleinement dans mes projets professionnels.</p>
+                    <p>
+                        Ma famille est ma priorité absolue. Je suis épanoui dans
+                        ma vie personnelle et cela me donne l'énergie pour
+                        m'investir pleinement dans mes projets professionnels.
+                    </p>
                 </div>
                 <div class="hobby">
                     <i class="fas fa-book"></i>
                     <h3>Veille technologique</h3>
-                    <p>Je suis passionné par l'apprentissage continu. Je suis régulièrement des conférences en ligne et je lis de nombreux articles via des flux RSS pour rester à la pointe des nouvelles technologies.</p>
+                    <p>
+                        Je suis passionné par l'apprentissage continu. Je suis
+                        régulièrement des conférences en ligne et je lis de
+                        nombreux articles via des flux RSS pour rester à la
+                        pointe des nouvelles technologies.
+                    </p>
                 </div>
                 <div class="hobby">
                     <i class="fas fa-hands-helping"></i>
                     <h3>Contribution open source</h3>
-                    <p>J'aime contribuer à des projets open source que j'utilise, comme la bibliothèque react-emoji. C'est ma façon de redonner à la communauté et de participer à l'amélioration des outils que nous utilisons tous.</p>
+                    <p>
+                        J'aime contribuer à des projets open source que
+                        j'utilise, comme la bibliothèque react-emoji. C'est ma
+                        façon de redonner à la communauté et de participer à
+                        l'amélioration des outils que nous utilisons tous.
+                    </p>
                 </div>
             </div>
         </section>
@@ -225,10 +279,10 @@ import profilePic from '../assets/mathieu-piton.jpg';
 
 <style>
     :root {
-        --primary-color: #578E7E;
-        --secondary-color: #F5ECD5;
-        --accent-color: #FFFAEC;
-        --text-color: #3D3D3D;
+        --primary-color: #578e7e;
+        --secondary-color: #f5ecd5;
+        --accent-color: #fffaec;
+        --text-color: #3d3d3d;
     }
 
     main {
@@ -243,8 +297,9 @@ import profilePic from '../assets/mathieu-piton.jpg';
         padding: 100px 20px;
     }
 
-    h1, h2 {
-        font-family: 'Poppins', sans-serif;
+    h1,
+    h2 {
+        font-family: "Poppins", sans-serif;
         color: var(--primary-color);
         margin-bottom: 2rem;
         text-align: center;
@@ -298,7 +353,7 @@ import profilePic from '../assets/mathieu-piton.jpg';
         color: var(--primary-color);
         margin-bottom: 1.5rem;
         font-size: 1.2rem;
-        font-family: 'Poppins', sans-serif;
+        font-family: "Poppins", sans-serif;
     }
 
     .skill {
@@ -334,7 +389,7 @@ import profilePic from '../assets/mathieu-piton.jpg';
     }
 
     .timeline::after {
-        content: '';
+        content: "";
         position: absolute;
         width: 2px;
         background: var(--primary-color);
@@ -377,7 +432,7 @@ import profilePic from '../assets/mathieu-piton.jpg';
         color: var(--primary-color);
         margin-bottom: 0.5rem;
         font-size: 1.1rem;
-        font-family: 'Poppins', sans-serif;
+        font-family: "Poppins", sans-serif;
     }
 
     .hobbies {
@@ -416,7 +471,7 @@ import profilePic from '../assets/mathieu-piton.jpg';
         color: var(--primary-color);
         margin-bottom: 1rem;
         font-size: 1.2rem;
-        font-family: 'Poppins', sans-serif;
+        font-family: "Poppins", sans-serif;
     }
 
     .hobby p {
@@ -439,16 +494,19 @@ import profilePic from '../assets/mathieu-piton.jpg';
     .btn {
         display: inline-block;
         padding: 15px 30px;
-        background-color: #355E57;
+        background-color: #355e57;
         color: var(--accent-color);
         text-decoration: none;
         border-radius: 50px;
         font-size: 18px;
-        transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        transition:
+            background-color 0.3s ease,
+            box-shadow 0.3s ease,
+            transform 0.3s ease;
     }
 
     .btn:hover {
-        background-color: #1D3A33;
+        background-color: #1d3a33;
         box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
         transform: translateY(-2px);
     }

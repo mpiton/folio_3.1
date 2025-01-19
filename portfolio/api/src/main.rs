@@ -6,7 +6,7 @@ use axum::{
 use portfolio_api::{
     config::Config,
     middleware::RateLimiter,
-    routes::{contact::handle_message, health::check},
+    routes::{contact::handle_message, health::check, rss::get_feeds},
     services::{contact::MessageService, db, rss::FeedService},
 };
 use std::sync::Arc;
@@ -96,11 +96,12 @@ async fn main() {
     let app = Router::new()
         .route("/health", get(check))
         .route("/api/contact", axum::routing::post(handle_message))
+        .with_state(message_service)
+        .route("/api/rss", get(get_feeds))
+        .with_state(feed_service)
         .layer(cors)
         .layer(trace_layer)
-        .layer(rate_limiter)
-        .with_state(message_service)
-        .with_state(feed_service);
+        .layer(rate_limiter);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
     tracing::info!("Server running on {addr}");

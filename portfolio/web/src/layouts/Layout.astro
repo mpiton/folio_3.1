@@ -1,18 +1,16 @@
 ---
-interface Props {
-    title: string;
-    description?: string;
-}
-
 import { Image } from "astro:assets";
 import logo from "../assets/logo.webp";
 import favicon from "../assets/favicon.png";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import type { SEOProps } from "../utils/seo";
 
-const {
-    title,
-    description = "Portfolio de Mathieu Piton, développeur web spécialisé en Rust et technologies modernes",
-} = Astro.props;
+interface Props {
+    seo: SEOProps;
+}
+
+const { seo } = Astro.props;
+const { title, description, openGraph } = seo;
 ---
 
 <!doctype html>
@@ -24,6 +22,26 @@ const {
         <link rel="icon" type="image/png" href={favicon.src} />
         <meta name="generator" content={Astro.generator} />
         <title>{title}</title>
+
+        <!-- OpenGraph tags -->
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        {
+            openGraph?.type && (
+                <meta property="og:type" content={openGraph.type} />
+            )
+        }
+        {
+            openGraph?.locale && (
+                <meta property="og:locale" content={openGraph.locale} />
+            )
+        }
+        {openGraph?.url && <meta property="og:url" content={openGraph.url} />}
+        {
+            openGraph?.site_name && (
+                <meta property="og:site_name" content={openGraph.site_name} />
+            )
+        }
     </head>
     <body>
         <header id="main-header">

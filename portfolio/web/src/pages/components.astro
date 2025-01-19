@@ -1,492 +1,575 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Button from '../components/common/Button.astro';
-import Card from '../components/common/Card.astro';
-import Input from '../components/common/Input.astro';
-import Modal from '../components/common/Modal.astro';
-import Toast from '../components/common/Toast.astro';
-import Loader from '../components/common/Loader.astro';
-import Pagination from '../components/common/Pagination.astro';
+import Layout from "../layouts/Layout.astro";
+import Button from "../components/common/Button.astro";
+import Card from "../components/common/Card.astro";
+import Input from "../components/common/Input.astro";
+import Modal from "../components/common/Modal.astro";
+import Toast from "../components/common/Toast.astro";
+import Loader from "../components/common/Loader.astro";
+import Pagination from "../components/common/Pagination.astro";
+import { defaultSEO } from "../utils/seo";
+
+const seoData = {
+    ...defaultSEO,
+    title: "Composants | Portfolio",
+    description: "Documentation des composants utilisés dans le portfolio.",
+};
 ---
 
-<Layout title="Composants | Portfolio">
-  <main class="container">
-    <h1>Documentation des Composants</h1>
+<Layout seo={seoData}>
+    <main class="container">
+        <h1>Documentation des Composants</h1>
 
-    <section class="section">
-      <h2>Boutons</h2>
-      <div class="component-grid">
-        <Card>
-          <h3>Variantes</h3>
-          <div class="button-group">
-            <Button>Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="outline">Outline</Button>
-            <Button variant="ghost">Ghost</Button>
-          </div>
-        </Card>
+        <section class="section">
+            <h2>Boutons</h2>
+            <div class="component-grid">
+                <Card>
+                    <h3>Variantes</h3>
+                    <div class="button-group">
+                        <Button>Primary</Button>
+                        <Button variant="secondary">Secondary</Button>
+                        <Button variant="outline">Outline</Button>
+                        <Button variant="ghost">Ghost</Button>
+                    </div>
+                </Card>
 
-        <Card>
-          <h3>Tailles</h3>
-          <div class="button-group">
-            <Button size="sm">Small</Button>
-            <Button size="md">Medium</Button>
-            <Button size="lg">Large</Button>
-          </div>
-        </Card>
+                <Card>
+                    <h3>Tailles</h3>
+                    <div class="button-group">
+                        <Button size="sm">Small</Button>
+                        <Button size="md" data-testid="mediumButton"
+                            >Medium</Button
+                        >
+                        <Button size="lg">Large</Button>
+                    </div>
+                </Card>
 
-        <Card>
-          <h3>États</h3>
-          <div class="button-group">
-            <Button>Normal</Button>
-            <Button disabled>Désactivé</Button>
-          </div>
-        </Card>
-      </div>
-    </section>
+                <Card>
+                    <h3>États</h3>
+                    <div class="button-group">
+                        <Button>Normal</Button>
+                        <Button disabled>Désactivé</Button>
+                    </div>
+                </Card>
+            </div>
+        </section>
 
-    <section class="section">
-      <h2>Cartes</h2>
-      <div class="component-grid">
-        <Card variant="default">
-          <h3>Card Default</h3>
-          <p>Une carte avec un style par défaut.</p>
-        </Card>
+        <section class="section">
+            <h2>Cartes</h2>
+            <div class="component-grid">
+                <Card variant="default">
+                    <h3>Card Default</h3>
+                    <p>Une carte avec un style par défaut.</p>
+                </Card>
 
-        <Card variant="elevated">
-          <h3>Card Elevated</h3>
-          <p>Une carte avec une ombre plus prononcée.</p>
-        </Card>
+                <Card variant="elevated">
+                    <h3>Card Elevated</h3>
+                    <p>Une carte avec une ombre plus prononcée.</p>
+                </Card>
 
-        <Card variant="bordered">
-          <h3>Card Bordered</h3>
-          <p>Une carte avec une bordure visible.</p>
-        </Card>
+                <Card variant="bordered">
+                    <h3>Card Bordered</h3>
+                    <p>Une carte avec une bordure visible.</p>
+                </Card>
 
-        <Card interactive>
-          <h3>Card Interactive</h3>
-          <p>Une carte avec des effets au survol.</p>
-        </Card>
-      </div>
-    </section>
+                <Card interactive>
+                    <h3>Card Interactive</h3>
+                    <p>Une carte avec des effets au survol.</p>
+                </Card>
+            </div>
+        </section>
 
-    <section class="section">
-      <h2>Champs de formulaire</h2>
-      <div class="component-grid">
-        <Card>
-          <h3>Types de base</h3>
-          <div class="input-group">
-            <Input
-              type="text"
-              name="text"
-              label="Texte"
-              placeholder="Entrez du texte"
-            />
-            <Input
-              type="email"
-              name="email"
-              label="Email"
-              placeholder="exemple@email.com"
-              required
-            />
-            <Input
-              type="password"
-              name="password"
-              label="Mot de passe"
-              placeholder="••••••••"
-            />
-          </div>
-        </Card>
+        <section class="section">
+            <h2>Champs de formulaire</h2>
+            <div class="component-grid">
+                <Card>
+                    <h3>Types de base</h3>
+                    <div class="input-group">
+                        <Input
+                            type="text"
+                            name="text"
+                            label="Texte"
+                            placeholder="Entrez du texte"
+                        />
+                        <Input
+                            type="email"
+                            name="email"
+                            label="Email"
+                            placeholder="exemple@email.com"
+                            required
+                        />
+                        <Input
+                            type="password"
+                            name="password"
+                            label="Mot de passe"
+                            placeholder="••••••••"
+                        />
+                    </div>
+                </Card>
 
-        <Card>
-          <h3>États et validation</h3>
-          <div class="input-group">
-            <Input
-              type="text"
-              name="required"
-              label="Champ requis"
-              required
-              placeholder="Ce champ est obligatoire"
-            />
-            <Input
-              type="text"
-              name="error"
-              label="Avec erreur"
-              error="Ce champ contient une erreur"
-              value="Valeur incorrecte"
-            />
-          </div>
-        </Card>
-      </div>
-    </section>
+                <Card>
+                    <h3>États et validation</h3>
+                    <div class="input-group">
+                        <Input
+                            type="text"
+                            name="required"
+                            label="Champ requis"
+                            required
+                            placeholder="Ce champ est obligatoire"
+                        />
+                        <Input
+                            type="text"
+                            name="error"
+                            label="Avec erreur"
+                            error="Ce champ contient une erreur"
+                            value="Valeur incorrecte"
+                        />
+                    </div>
+                </Card>
+            </div>
+        </section>
 
-    <section class="section">
-      <h2>Modales</h2>
-      <div class="component-grid">
-        <Card>
-          <h3>Tailles de Modal</h3>
-          <div class="button-group">
-            <Button variant="primary" id="openSmallModal" data-testid="openSmallModal">Small Modal</Button>
-            <Button variant="primary" id="openMediumModal" data-testid="openMediumModal">Medium Modal</Button>
-            <Button variant="primary" id="openLargeModal" data-testid="openLargeModal">Large Modal</Button>
-          </div>
+        <section class="section">
+            <h2>Modales</h2>
+            <div class="component-grid">
+                <Card>
+                    <h3>Tailles de Modal</h3>
+                    <div class="button-group">
+                        <Button
+                            variant="primary"
+                            id="openSmallModal"
+                            data-testid="openSmallModal">Small Modal</Button
+                        >
+                        <Button
+                            variant="primary"
+                            id="openMediumModal"
+                            data-testid="openMediumModal">Medium Modal</Button
+                        >
+                        <Button
+                            variant="primary"
+                            id="openLargeModal"
+                            data-testid="openLargeModal">Large Modal</Button
+                        >
+                    </div>
 
-          <Modal id="smallModal" size="sm" title="Small Modal">
-            <p>Ceci est une petite modale.</p>
-          </Modal>
+                    <Modal id="smallModal" size="sm" title="Small Modal">
+                        <p>Ceci est une petite modale.</p>
+                    </Modal>
 
-          <Modal id="mediumModal" size="md" title="Medium Modal">
-            <p>Ceci est une modale de taille moyenne.</p>
-          </Modal>
+                    <Modal id="mediumModal" size="md" title="Medium Modal">
+                        <p>Ceci est une modale de taille moyenne.</p>
+                    </Modal>
 
-          <Modal id="largeModal" size="lg" title="Large Modal">
-            <p>Ceci est une grande modale avec beaucoup de contenu possible.</p>
-          </Modal>
-        </Card>
-      </div>
-    </section>
+                    <Modal id="largeModal" size="lg" title="Large Modal">
+                        <p>
+                            Ceci est une grande modale avec beaucoup de contenu
+                            possible.
+                        </p>
+                    </Modal>
+                </Card>
+            </div>
+        </section>
 
-    <section class="section">
-      <h2>Notifications</h2>
-      <div class="component-grid">
-        <Card>
-          <h3>Types de Toast</h3>
-          <div class="button-group">
-            <Button variant="primary" id="showSuccessToast" data-testid="showSuccessToast">Success Toast</Button>
-            <Button variant="primary" id="showErrorToast" data-testid="showErrorToast">Error Toast</Button>
-            <Button variant="primary" id="showWarningToast" data-testid="showWarningToast">Warning Toast</Button>
-            <Button variant="primary" id="showInfoToast" data-testid="showInfoToast">Info Toast</Button>
-          </div>
+        <section class="section">
+            <h2>Notifications</h2>
+            <div class="component-grid">
+                <Card>
+                    <h3>Types de Toast</h3>
+                    <div class="button-group">
+                        <Button
+                            variant="primary"
+                            id="showSuccessToast"
+                            data-testid="showSuccessToast">Success Toast</Button
+                        >
+                        <Button
+                            variant="primary"
+                            id="showErrorToast"
+                            data-testid="showErrorToast">Error Toast</Button
+                        >
+                        <Button
+                            variant="primary"
+                            id="showWarningToast"
+                            data-testid="showWarningToast">Warning Toast</Button
+                        >
+                        <Button
+                            variant="primary"
+                            id="showInfoToast"
+                            data-testid="showInfoToast">Info Toast</Button
+                        >
+                    </div>
 
-          <Toast
-            id="successToast"
-            type="success"
-            title="Succès!"
-            message="L'opération a été effectuée avec succès."
-          />
+                    <Toast
+                        id="successToast"
+                        type="success"
+                        title="Succès!"
+                        message="L'opération a été effectuée avec succès."
+                    />
 
-          <Toast
-            id="errorToast"
-            type="error"
-            title="Erreur!"
-            message="Une erreur s'est produite lors de l'opération."
-          />
+                    <Toast
+                        id="errorToast"
+                        type="error"
+                        title="Erreur!"
+                        message="Une erreur s'est produite lors de l'opération."
+                    />
 
-          <Toast
-            id="warningToast"
-            type="warning"
-            title="Attention!"
-            message="Veuillez vérifier les informations saisies."
-          />
+                    <Toast
+                        id="warningToast"
+                        type="warning"
+                        title="Attention!"
+                        message="Veuillez vérifier les informations saisies."
+                    />
 
-          <Toast
-            id="infoToast"
-            type="info"
-            title="Information"
-            message="Une mise à jour est disponible."
-          />
-        </Card>
-      </div>
-    </section>
+                    <Toast
+                        id="infoToast"
+                        type="info"
+                        title="Information"
+                        message="Une mise à jour est disponible."
+                    />
+                </Card>
+            </div>
+        </section>
 
-    <section class="section">
-      <h2>Loaders</h2>
-      <div class="component-grid">
-        <Card>
-          <h3>Types de Loader</h3>
-          <div class="loader-group">
-            <Loader variant="spinner" label="Chargement spinner" />
-            <Loader variant="dots" label="Chargement points" />
-            <Loader variant="pulse" label="Chargement pulse" />
-          </div>
-        </Card>
+        <section class="section">
+            <h2>Loaders</h2>
+            <div class="component-grid">
+                <Card>
+                    <h3>Types de Loader</h3>
+                    <div class="loader-group">
+                        <Loader variant="spinner" label="Chargement spinner" />
+                        <Loader variant="dots" label="Chargement points" />
+                        <Loader variant="pulse" label="Chargement pulse" />
+                    </div>
+                </Card>
 
-        <Card>
-          <h3>Tailles de Loader</h3>
-          <div class="loader-group">
-            <Loader size="sm" label="Petit loader" />
-            <Loader size="md" label="Loader moyen" />
-            <Loader size="lg" label="Grand loader" />
-          </div>
-        </Card>
+                <Card>
+                    <h3>Tailles de Loader</h3>
+                    <div class="loader-group">
+                        <Loader size="sm" label="Petit loader" />
+                        <Loader size="md" label="Loader moyen" />
+                        <Loader size="lg" label="Grand loader" />
+                    </div>
+                </Card>
 
-        <Card>
-          <h3>Couleurs de Loader</h3>
-          <div class="loader-group">
-            <Loader color="var(--primary-color)" label="Loader primaire" />
-            <Loader color="#EF4444" label="Loader rouge" />
-            <Loader color="#3B82F6" label="Loader bleu" />
-          </div>
-        </Card>
-      </div>
-    </section>
+                <Card>
+                    <h3>Couleurs de Loader</h3>
+                    <div class="loader-group">
+                        <Loader
+                            color="var(--primary-color)"
+                            label="Loader primaire"
+                        />
+                        <Loader color="#EF4444" label="Loader rouge" />
+                        <Loader color="#3B82F6" label="Loader bleu" />
+                    </div>
+                </Card>
+            </div>
+        </section>
 
-    <section class="section">
-      <h2>Pagination</h2>
-      <div class="pagination-examples">
-        <Card padding="lg">
-          <h3>Pagination simple</h3>
-          <div class="pagination-wrapper">
-            <Pagination
-              currentPage={1}
-              totalPages={5}
-              baseUrl="#"
-            />
-          </div>
-        </Card>
+        <section class="section">
+            <h2>Pagination</h2>
+            <div class="pagination-examples">
+                <Card padding="lg">
+                    <h3>Pagination simple</h3>
+                    <div class="pagination-wrapper">
+                        <Pagination
+                            currentPage={1}
+                            totalPages={5}
+                            baseUrl="#"
+                        />
+                    </div>
+                </Card>
 
-        <Card padding="lg">
-          <h3>Pagination avec ellipsis</h3>
-          <div class="pagination-wrapper">
-            <Pagination
-              currentPage={5}
-              totalPages={10}
-              baseUrl="#"
-            />
-          </div>
-        </Card>
+                <Card padding="lg">
+                    <h3>Pagination avec ellipsis</h3>
+                    <div class="pagination-wrapper">
+                        <Pagination
+                            currentPage={5}
+                            totalPages={10}
+                            baseUrl="#"
+                        />
+                    </div>
+                </Card>
 
-        <Card padding="lg">
-          <h3>Pagination active</h3>
-          <div class="pagination-wrapper">
-            <Pagination
-              currentPage={3}
-              totalPages={5}
-              baseUrl="#"
-            />
-          </div>
-        </Card>
-      </div>
-    </section>
-  </main>
+                <Card padding="lg">
+                    <h3>Pagination active</h3>
+                    <div class="pagination-wrapper">
+                        <Pagination
+                            currentPage={3}
+                            totalPages={5}
+                            baseUrl="#"
+                        />
+                    </div>
+                </Card>
+            </div>
+        </section>
+    </main>
 </Layout>
 
 <script>
-  class ComponentsDemo {
-    constructor() {
-      this.initializeModals();
-      this.initializeToasts();
-    }
-
-    initializeModals() {
-      // Les modales sont déjà initialisées par le composant Modal
-    }
-
-    initializeToasts() {
-      const toastButtons = document.querySelectorAll('[data-testid^="show"][data-testid$="Toast"]');
-      toastButtons.forEach(button => {
-        if (button instanceof HTMLElement) {
-          const toastType = button.dataset.testid?.replace('show', '').replace('Toast', '').toLowerCase();
-          const originalToast = document.querySelector(`#${toastType}Toast`);
-
-          if (originalToast && originalToast instanceof HTMLElement) {
-            button.addEventListener('click', () => {
-              // Supprimer les anciens toasts du même type
-              document.querySelectorAll(`.toast--${toastType}.toast--cloned`).forEach(oldToast => {
-                oldToast.remove();
-              });
-
-              // Cloner et préparer le nouveau toast
-              const clonedToast = originalToast.cloneNode(true) as HTMLElement;
-              clonedToast.classList.add('toast--cloned');
-              document.body.appendChild(clonedToast);
-
-              // Forcer un reflow pour assurer que les transitions fonctionnent
-              clonedToast.getBoundingClientRect();
-
-              // Ajouter la classe visible immédiatement
-              clonedToast.classList.add('toast--visible');
-
-              // Gérer la fermeture automatique
-              const duration = parseInt(clonedToast.dataset.duration || '5000', 10);
-              let closeTimeout = setTimeout(() => {
-                clonedToast.classList.remove('toast--visible');
-                setTimeout(() => clonedToast.remove(), 300);
-              }, duration);
-
-              // Gérer le bouton de fermeture
-              const closeButton = clonedToast.querySelector('[data-close-toast]');
-              if (closeButton) {
-                closeButton.addEventListener('click', () => {
-                  clearTimeout(closeTimeout);
-                  clonedToast.classList.remove('toast--visible');
-                  setTimeout(() => clonedToast.remove(), 300);
-                });
-              }
-
-              // Gérer la pause au survol
-              let remainingTime = duration;
-              let startTime = Date.now();
-
-              clonedToast.addEventListener('mouseenter', () => {
-                clearTimeout(closeTimeout);
-                remainingTime = Math.max(0, remainingTime - (Date.now() - startTime));
-              });
-
-              clonedToast.addEventListener('mouseleave', () => {
-                startTime = Date.now();
-                if (remainingTime > 0) {
-                  closeTimeout = setTimeout(() => {
-                    clonedToast.classList.remove('toast--visible');
-                    setTimeout(() => clonedToast.remove(), 300);
-                  }, remainingTime);
-                }
-              });
-            });
-          }
+    class ComponentsDemo {
+        constructor() {
+            this.initializeModals();
+            this.initializeToasts();
         }
-      });
-    }
-  }
 
-  // Initialiser la démo immédiatement si le DOM est prêt, sinon attendre
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new ComponentsDemo());
-  } else {
-    new ComponentsDemo();
-  }
+        initializeModals() {
+            // Les modales sont déjà initialisées par le composant Modal
+        }
+
+        initializeToasts() {
+            const toastButtons = document.querySelectorAll(
+                '[data-testid^="show"][data-testid$="Toast"]'
+            );
+            toastButtons.forEach((button) => {
+                if (button instanceof HTMLElement) {
+                    const toastType = button.dataset.testid
+                        ?.replace("show", "")
+                        .replace("Toast", "")
+                        .toLowerCase();
+                    const originalToast = document.querySelector(
+                        `#${toastType}Toast`
+                    );
+
+                    if (originalToast && originalToast instanceof HTMLElement) {
+                        button.addEventListener("click", () => {
+                            // Supprimer les anciens toasts du même type
+                            document
+                                .querySelectorAll(
+                                    `.toast--${toastType}.toast--cloned`
+                                )
+                                .forEach((oldToast) => {
+                                    oldToast.remove();
+                                });
+
+                            // Cloner et préparer le nouveau toast
+                            const clonedToast = originalToast.cloneNode(
+                                true
+                            ) as HTMLElement;
+                            clonedToast.classList.add("toast--cloned");
+                            document.body.appendChild(clonedToast);
+
+                            // Forcer un reflow pour assurer que les transitions fonctionnent
+                            clonedToast.getBoundingClientRect();
+
+                            // Ajouter la classe visible immédiatement
+                            clonedToast.classList.add("toast--visible");
+
+                            // Gérer la fermeture automatique
+                            const duration = parseInt(
+                                clonedToast.dataset.duration || "5000",
+                                10
+                            );
+                            let closeTimeout = setTimeout(() => {
+                                clonedToast.classList.remove("toast--visible");
+                                setTimeout(() => clonedToast.remove(), 300);
+                            }, duration);
+
+                            // Gérer le bouton de fermeture
+                            const closeButton =
+                                clonedToast.querySelector("[data-close-toast]");
+                            if (closeButton) {
+                                closeButton.addEventListener("click", () => {
+                                    clearTimeout(closeTimeout);
+                                    clonedToast.classList.remove(
+                                        "toast--visible"
+                                    );
+                                    setTimeout(() => clonedToast.remove(), 300);
+                                });
+                            }
+
+                            // Gérer la pause au survol
+                            let remainingTime = duration;
+                            let startTime = Date.now();
+
+                            clonedToast.addEventListener("mouseenter", () => {
+                                clearTimeout(closeTimeout);
+                                remainingTime = Math.max(
+                                    0,
+                                    remainingTime - (Date.now() - startTime)
+                                );
+                            });
+
+                            clonedToast.addEventListener("mouseleave", () => {
+                                startTime = Date.now();
+                                if (remainingTime > 0) {
+                                    closeTimeout = setTimeout(() => {
+                                        clonedToast.classList.remove(
+                                            "toast--visible"
+                                        );
+                                        setTimeout(
+                                            () => clonedToast.remove(),
+                                            300
+                                        );
+                                    }, remainingTime);
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    // Initialiser la démo immédiatement si le DOM est prêt, sinon attendre
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => new ComponentsDemo()
+        );
+    } else {
+        new ComponentsDemo();
+    }
 </script>
 
 <style>
-  :root {
-    --primary-color: #578E7E;
-    --secondary-color: #F5ECD5;
-    --accent-color: #FFFAEC;
-    --text-color: #3D3D3D;
-  }
+    :root {
+        --primary-color: #578e7e;
+        --secondary-color: #f5ecd5;
+        --accent-color: #fffaec;
+        --text-color: #3d3d3d;
+    }
 
-  main {
-    padding: 0;
-    max-width: 100%;
-    margin: 0 auto;
-    background-color: var(--accent-color);
-  }
+    main {
+        padding: 0;
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: var(--accent-color);
+    }
 
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
 
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    color: var(--primary-color);
-    font-family: 'Poppins', sans-serif;
-    text-align: center;
-  }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        font-family: "Poppins", sans-serif;
+        text-align: center;
+    }
 
-  .section {
-    margin-bottom: 3rem;
-  }
+    .section {
+        margin-bottom: 3rem;
+    }
 
-  h2 {
-    font-size: 1.875rem;
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
-    font-family: 'Poppins', sans-serif;
-    text-align: center;
-  }
+    h2 {
+        font-size: 1.875rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        font-family: "Poppins", sans-serif;
+        text-align: center;
+    }
 
-  h3 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    color: var(--text-color);
-    font-family: 'Poppins', sans-serif;
-  }
+    h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: var(--text-color);
+        font-family: "Poppins", sans-serif;
+    }
 
-  p {
-    color: var(--text-color);
-    line-height: 1.6;
-  }
+    p {
+        color: var(--text-color);
+        line-height: 1.6;
+    }
 
-  .component-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
-  }
+    .component-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
 
-  .button-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+    .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
 
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
 
-  .loader-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    align-items: center;
-  }
+    .loader-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        align-items: center;
+    }
 
-  .pagination-examples {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
+    .pagination-examples {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
 
-  .pagination-wrapper {
-    max-width: 100%;
-    overflow-x: auto;
-  }
+    .pagination-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+    }
 
-  .toast-container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    z-index: 1000;
-  }
+    .toast-container {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        z-index: 1000;
+    }
 
-  /* Styles des toasts */
-  .toast:not(.toast--cloned) {
-    display: none !important;
-  }
+    /* Styles des toasts */
+    .toast:not(.toast--cloned) {
+        display: none !important;
+    }
 
-  .toast--cloned {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    transform: translateY(100%);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    z-index: 1000;
-  }
+    .toast--cloned {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        transform: translateY(100%);
+        opacity: 0;
+        transition:
+            transform 0.3s ease,
+            opacity 0.3s ease;
+        z-index: 1000;
+    }
 
-  .toast--cloned.toast--visible {
-    transform: translateY(0);
-    opacity: 1;
-  }
+    .toast--cloned.toast--visible {
+        transform: translateY(0);
+        opacity: 1;
+    }
 
-  /* Gestion de l'empilement des toasts */
-  .toast--cloned:nth-child(1) { bottom: 1rem; }
-  .toast--cloned:nth-child(2) { bottom: 5rem; }
-  .toast--cloned:nth-child(3) { bottom: 9rem; }
-  .toast--cloned:nth-child(4) { bottom: 13rem; }
+    /* Gestion de l'empilement des toasts */
+    .toast--cloned:nth-child(1) {
+        bottom: 1rem;
+    }
+    .toast--cloned:nth-child(2) {
+        bottom: 5rem;
+    }
+    .toast--cloned:nth-child(3) {
+        bottom: 9rem;
+    }
+    .toast--cloned:nth-child(4) {
+        bottom: 13rem;
+    }
 
-  .modal {
-    display: none;
-  }
+    .modal {
+        display: none;
+    }
 
-  .modal--open {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+    .modal--open {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
 </style>

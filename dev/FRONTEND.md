@@ -256,10 +256,10 @@ export default defineConfig({
 - [x] Footer avec effet de flou et liens sociaux
 
 ### Phase 3: Pages Principales
-- [x] Page d'accueil
+- [x] Page d'accueil avec Hero section
 - [x] Page À propos
 - [x] Page Contact avec formulaire et validation
-- [ ] Flux RSS
+- [x] Flux RSS
 
 ### Phase 4: Optimisation
 - [x] Performance de base
