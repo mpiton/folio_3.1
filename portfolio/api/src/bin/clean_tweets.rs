@@ -60,7 +60,7 @@ mod tests {
     #[tokio::test]
     async fn test_clean_tweets() {
         std::env::set_var("DOTENV_FILE", ".env.test");
-        dotenv::from_filename(".env.test").ok();
+        dotenvy::from_filename(".env.test").ok();
 
         let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");

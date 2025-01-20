@@ -1,11 +1,13 @@
+use axum::http::HeaderValue;
 use axum::{
     http::{HeaderName, Method},
+    middleware::map_response,
     routing::get,
     Router,
 };
 use portfolio_api::{
     config::Config,
-    middleware::RateLimiter,
+    middleware::{MongoSanitizer, RateLimiter},
     routes::{contact::handle_message, health::check, rss::get_feeds},
     services::{contact::MessageService, db, rss::FeedService},
 };
@@ -13,6 +15,26 @@ use std::sync::Arc;
 use std::{net::SocketAddr, time::Duration};
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+async fn add_security_headers(mut response: axum::response::Response) -> axum::response::Response {
+    let headers = response.headers_mut();
+    headers.insert("X-Frame-Options", HeaderValue::from_static("DENY"));
+    headers.insert(
+        "X-Content-Type-Options",
+        HeaderValue::from_static("nosniff"),
+    );
+    headers.insert(
+        "X-XSS-Protection",
+        HeaderValue::from_static("1; mode=block"),
+    );
+    headers.insert(
+        "Content-Security-Policy",
+        HeaderValue::from_static(
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'",
+        ),
+    );
+    response
+}
 
 #[tokio::main]
 async fn main() {
@@ -99,9 +121,11 @@ async fn main() {
         .with_state(message_service)
         .route("/api/rss", get(get_feeds))
         .with_state(feed_service)
-        .layer(cors)
+        .layer(MongoSanitizer::new())
+        .layer(rate_limiter)
         .layer(trace_layer)
-        .layer(rate_limiter);
+        .layer(cors)
+        .layer(map_response(add_security_headers));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
     tracing::info!("Server running on {addr}");

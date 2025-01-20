@@ -17,6 +17,10 @@ pub struct Config {
     pub rss_source_collection: String,
 }
 
+fn env_or_default(key: &str, default: &str) -> String {
+    env::var(key).unwrap_or_else(|_| default.to_string())
+}
+
 impl Config {
     /// Crée une nouvelle instance de Config à partir des variables d'environnement.
     ///
@@ -39,24 +43,24 @@ impl Config {
     /// La variable `RSS_CACHE_DURATION` est optionnelle et vaut 3600 par défaut.
     #[must_use]
     pub fn new() -> Self {
-        dotenv::dotenv().ok();
+        // Charger les variables d'environnement depuis le fichier .env
+        dotenvy::dotenv().ok();
 
         Self {
-            mongo_url: env::var("MONGO_URL").expect("MONGO_URL must be set"),
-            host: env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
-            port: env::var("PORT")
-                .unwrap_or_else(|_| "8080".to_string())
+            mongo_url: env_or_default("MONGO_URL", "mongodb://localhost:27017"),
+            frontend_url: env_or_default("FRONTEND_URL", "http://localhost:3000"),
+            brevo_api_key: env_or_default("BREVO_API_KEY", ""),
+            recipient_email: env_or_default("RECIPIENT_EMAIL", ""),
+            sender_name: env_or_default("SENDER_NAME", ""),
+            sender_email: env_or_default("SENDER_EMAIL", ""),
+            host: env_or_default("HOST", "127.0.0.1"),
+            port: env_or_default("PORT", "3000")
                 .parse()
                 .expect("PORT must be a number"),
             rss_cache_duration: env::var("RSS_CACHE_DURATION")
                 .unwrap_or_else(|_| "3600".to_string())
                 .parse()
                 .expect("RSS_CACHE_DURATION must be a number"),
-            brevo_api_key: env::var("BREVO_API_KEY").expect("BREVO_API_KEY must be set"),
-            recipient_email: env::var("RECIPIENT_EMAIL").expect("RECIPIENT_EMAIL must be set"),
-            sender_name: env::var("SENDER_NAME").expect("SENDER_NAME must be set"),
-            sender_email: env::var("SENDER_EMAIL").expect("SENDER_EMAIL must be set"),
-            frontend_url: env::var("FRONTEND_URL").expect("FRONTEND_URL must be set"),
             rss_source_url: env::var("RSS_SOURCE_URL").expect("RSS_SOURCE_URL must be set"),
             rss_source_db: env::var("RSS_SOURCE_DB").expect("RSS_SOURCE_DB must be set"),
             rss_source_collection: env::var("RSS_SOURCE_COLLECTION")
@@ -72,8 +76,8 @@ impl Config {
     #[cfg(test)]
     #[must_use]
     pub fn test_config() -> Self {
-        std::env::set_var("DOTENV_FILE", ".env.test");
-        dotenv::from_filename(".env.test").ok();
+        // Charger les variables d'environnement depuis le fichier .env.test
+        dotenvy::from_filename(".env.test").ok();
         let base_mongo_url = env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = env::var("MONGO_DB").expect("MONGO_DB must be set");
         let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);

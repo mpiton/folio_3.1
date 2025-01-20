@@ -5,6 +5,8 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Exécution hebdomadaire pour les audits de sécurité
 
 permissions:
   contents: read
@@ -85,3 +87,43 @@ jobs:
       run: |
         cd portfolio/api
         cargo test --verbose -- --test-threads=1
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Install cargo-deny
+        run: cargo install cargo-deny
+
+      - name: Run cargo-audit
+        run: |
+          cd portfolio/api
+          cargo audit
+
+      - name: Run cargo-deny check advisories
+        run: |
+          cd portfolio/api
+          cargo deny check advisories
+
+      - name: Create Security Report
+        if: failure()
+        run: |
+          echo "## Security Audit Results" > ${{ github.workspace }}-SECURITY_REPORT.md
+          echo "Security vulnerabilities were found. Please review the job logs for details." >> ${{ github.workspace }}-SECURITY_REPORT.md
+
+      - name: Comment PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@d70566966bbb446d06887700f68d905602745985
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('${{ github.workspace }}-SECURITY_REPORT.md', 'utf8');
+            github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: report
+            });

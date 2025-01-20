@@ -96,10 +96,10 @@
 - [x] Rate limiting
 - [x] Validation des entrées
 - [x] Tests de sécurité de base
-- [ ] Audit de sécurité complet
-- [ ] Tests de pénétration
-- [ ] Gestion des secrets
-- [ ] Détection d'intrusion
+- [x] Audit de sécurité complet
+- [x] Tests de pénétration
+- [x] Gestion des secrets
+- [x] Détection d'intrusion
 
 ### Tests Backend ✅
 - [x] Tests unitaires (>80% coverage)
@@ -113,6 +113,9 @@
 - [x] Tests isolés avec collections uniques
 - [x] Tests asynchrones avec gestion des verrous
 - [x] Tests de nettoyage automatique des données
+- [x] Tests des middlewares de sécurité
+- [x] Tests de validation des entrées
+- [x] Tests de rate limiting
 
 ## 💻 Phase 3 : Frontend 🚧
 
@@ -253,15 +256,25 @@
 - [ ] Optimisation de la synchronisation RSS
 
 ## 🔒 Sécurité
-- [ ] Audit de sécurité
-- [ ] Tests de pénétration
-- [ ] Configuration HTTPS
-- [ ] Protection CSRF
-- [ ] Protection XSS
-- [ ] Rate limiting
-- [ ] Validation des entrées
-- [ ] Gestion des sessions
-- [ ] Logs de sécurité
+- [x] Audit de sécurité
+- [x] Tests de pénétration
+- [x] Configuration HTTPS
+- [x] Protection CSRF
+- [x] Protection XSS
+- [x] Rate limiting
+- [x] Validation des entrées
+- [x] Gestion des sessions
+- [x] Logs de sécurité
+- [x] Headers de sécurité
+  - [x] X-Frame-Options
+  - [x] X-Content-Type-Options
+  - [x] X-XSS-Protection
+  - [x] Content-Security-Policy
+- [x] Protection contre les injections MongoDB
+- [x] Sanitization des entrées
+- [x] Validation des formulaires
+- [x] Rate limiting par IP
+- [x] Monitoring des tentatives d'injection
 
 ## 📱 Responsive & Compatibilité
 - [ ] Tests sur mobiles
