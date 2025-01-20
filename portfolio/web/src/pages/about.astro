@@ -15,7 +15,11 @@ const seoData = {
 <Layout seo={seoData}>
     <main>
         <section class="about-intro">
-            <Image src={profilePic} alt="Mathieu Piton" />
+            <Image
+                src={profilePic}
+                alt="Mathieu Piton"
+                class="rounded-full mx-auto"
+            />
             <h1>À propos de moi</h1>
             <p>
                 Passionné par le développement web depuis mon adolescence, j'ai
@@ -278,13 +282,6 @@ const seoData = {
 </Layout>
 
 <style>
-    :root {
-        --primary-color: #578e7e;
-        --secondary-color: #f5ecd5;
-        --accent-color: #fffaec;
-        --text-color: #3d3d3d;
-    }
-
     main {
         padding: 0;
         max-width: 100%;
@@ -299,7 +296,7 @@ const seoData = {
 
     h1,
     h2 {
-        font-family: "Poppins", sans-serif;
+        font-family: var(--font-heading);
         color: var(--primary-color);
         margin-bottom: 2rem;
         text-align: center;
@@ -318,7 +315,7 @@ const seoData = {
         border-radius: 50%;
         margin-bottom: 2rem;
         border: 10px solid var(--secondary-color);
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 10px rgba(87, 142, 126, 0.2);
     }
 
     .about-intro p {
@@ -346,14 +343,14 @@ const seoData = {
         background-color: var(--secondary-color);
         padding: 2rem;
         border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 20px rgba(87, 142, 126, 0.1);
     }
 
     .skill-category h3 {
         color: var(--primary-color);
         margin-bottom: 1.5rem;
         font-size: 1.2rem;
-        font-family: "Poppins", sans-serif;
+        font-family: var(--font-heading);
     }
 
     .skill {
@@ -393,8 +390,8 @@ const seoData = {
         position: absolute;
         width: 2px;
         background: var(--primary-color);
-        top: 0;
-        bottom: 0;
+        top: 200px;
+        bottom: 100px;
         left: 50%;
         margin-left: -1px;
     }
@@ -425,14 +422,14 @@ const seoData = {
         background: var(--secondary-color);
         padding: 1.5rem;
         border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 20px rgba(87, 142, 126, 0.1);
     }
 
     .timeline-content h3 {
         color: var(--primary-color);
         margin-bottom: 0.5rem;
         font-size: 1.1rem;
-        font-family: "Poppins", sans-serif;
+        font-family: var(--font-heading);
     }
 
     .hobbies {
@@ -453,7 +450,7 @@ const seoData = {
         padding: 2rem;
         border-radius: 10px;
         text-align: center;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 20px rgba(87, 142, 126, 0.1);
         transition: transform 0.3s ease;
     }
 
@@ -471,7 +468,7 @@ const seoData = {
         color: var(--primary-color);
         margin-bottom: 1rem;
         font-size: 1.2rem;
-        font-family: "Poppins", sans-serif;
+        font-family: var(--font-heading);
     }
 
     .hobby p {
@@ -488,14 +485,14 @@ const seoData = {
     }
 
     .cta h2 {
-        color: var(--accent-color);
+        color: var(--text-light);
     }
 
     .btn {
         display: inline-block;
         padding: 15px 30px;
-        background-color: #355e57;
-        color: var(--accent-color);
+        background-color: var(--accent-color);
+        color: var(--primary-color);
         text-decoration: none;
         border-radius: 50px;
         font-size: 18px;
@@ -506,8 +503,8 @@ const seoData = {
     }
 
     .btn:hover {
-        background-color: #1d3a33;
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        background-color: var(--secondary-color);
+        box-shadow: 0 6px 10px rgba(87, 142, 126, 0.2);
         transform: translateY(-2px);
     }
 
