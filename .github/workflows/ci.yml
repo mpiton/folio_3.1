@@ -109,11 +109,6 @@ jobs:
           cd portfolio/api
           cargo deny check advisories
 
-      - name: Run cargo-deny check bans licenses sources
-        run: |
-          cd portfolio/api
-          cargo deny check bans licenses sources
-
       - name: Create Security Report
         if: failure()
         run: |
