@@ -119,30 +119,12 @@ test.describe('Components page', () => {
       await page.waitForLoadState('domcontentloaded');
       await page.waitForLoadState('networkidle');
 
-      // Cliquer sur tous les boutons avec un délai entre chaque
+      // Cliquer sur tous les boutons et vérifier chaque toast immédiatement
       for (const type of toastTypes) {
         const button = page.getByTestId(`show${type}Toast`);
         await button.click();
 
         // Attendre que le toast soit créé et devienne visible
-        await page.waitForSelector(`.toast--${type.toLowerCase()}.toast--cloned`, {
-          state: 'attached',
-          timeout: 15000
-        });
-
-        // Attendre que la classe toast--visible soit ajoutée
-        await page.waitForFunction(
-          (type) => {
-            const toast = document.querySelector(`.toast--${type.toLowerCase()}.toast--cloned`);
-            return toast && toast.classList.contains('toast--visible');
-          },
-          type.toLowerCase(),
-          { timeout: 15000 }
-        );
-      }
-
-      // Vérifier que tous les toasts sont visibles
-      for (const type of toastTypes) {
         const toast = page.locator(`.toast--${type.toLowerCase()}.toast--cloned`).first();
         await expect(toast).toBeVisible({ timeout: 15000 });
         await expect(toast).toHaveClass(new RegExp(`toast--${type.toLowerCase()}.*toast--visible`), { timeout: 15000 });

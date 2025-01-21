@@ -54,7 +54,9 @@ const itemsWithDateObjects = items.map((item) => ({
 
     let currentPage = 1;
     let isLoading = false;
-    const loadMoreBtn = document.getElementById("loadMore") as HTMLButtonElement | null;
+    const loadMoreBtn = document.getElementById(
+        "loadMore"
+    ) as HTMLButtonElement | null;
     const articlesContainer = document.querySelector(".articles-grid");
 
     function formatArticleDate(item: RssItem): string {
@@ -62,7 +64,7 @@ const itemsWithDateObjects = items.map((item) => ({
         return date.toLocaleDateString("fr-FR", {
             year: "numeric",
             month: "long",
-            day: "numeric"
+            day: "numeric",
         });
     }
 
@@ -71,7 +73,7 @@ const itemsWithDateObjects = items.map((item) => ({
             <article class="bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div class="relative h-48 overflow-hidden">
                     <img
-                        src="${item.image_url || item.imageUrl || 'https://placehold.co/600x400'}"
+                        src="${item.image_url || item.imageUrl || "https://placehold.co/600x400"}"
                         alt="${item.title}"
                         loading="lazy"
                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
@@ -86,7 +88,7 @@ const itemsWithDateObjects = items.map((item) => ({
                     </p>
                     <p class="text-base text-text mb-6 line-clamp-3">${item.description}</p>
                     <a
-                        href="${item.url || item.link || '#'}"
+                        href="${item.url || item.link || "#"}"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="inline-block text-primary font-semibold hover:text-primary-dark transition-colors duration-300"
@@ -107,14 +109,17 @@ const itemsWithDateObjects = items.map((item) => ({
             loadMoreBtn.disabled = true;
             loadMoreBtn.textContent = "Chargement...";
 
-            const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
-            const response = await fetch(`${API_URL}/api/rss?page=${currentPage + 1}&limit=9`);
+            const API_URL =
+                import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
+            const response = await fetch(
+                `${API_URL}/api/rss?page=${currentPage + 1}&limit=9`
+            );
 
             if (!response.ok) {
                 throw new Error(`Erreur HTTP: ${response.status}`);
             }
 
-            const newItems = await response.json() as RssItem[];
+            const newItems = (await response.json()) as RssItem[];
 
             if (!Array.isArray(newItems) || newItems.length === 0) {
                 loadMoreBtn.textContent = "Plus d'articles disponibles";
@@ -124,13 +129,15 @@ const itemsWithDateObjects = items.map((item) => ({
 
             // Ajouter les nouveaux articles
             for (const item of newItems) {
-                articlesContainer.insertAdjacentHTML("beforeend", createArticleHtml(item));
+                articlesContainer.insertAdjacentHTML(
+                    "beforeend",
+                    createArticleHtml(item)
+                );
             }
 
             currentPage++;
             loadMoreBtn.textContent = "Charger plus d'articles";
             loadMoreBtn.disabled = false;
-
         } catch (error) {
             console.error("Erreur:", error);
             loadMoreBtn.textContent = "Erreur lors du chargement";

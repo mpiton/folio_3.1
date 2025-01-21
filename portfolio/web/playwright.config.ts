@@ -32,17 +32,11 @@ export default defineConfig({
     trace: 'on-first-retry',
 
     /* Augmenter les timeouts */
-    actionTimeout: 15000,
-    navigationTimeout: 30000,
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
   },
 
-  timeout: 60000, // Timeout global de 60 secondes
-
-  /* Configure environment variables for testing */
-  env: {
-    MODE: 'test',
-    PUBLIC_API_URL: 'http://localhost:8080'
-  },
+  timeout: 60_000, // Timeout global de 60 secondes
 
   /* Configure projects for major browsers */
   projects: [
@@ -87,7 +81,7 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000, // 2 minutes pour le démarrage du serveur
+    timeout: 120_000, // 2 minutes pour le démarrage du serveur
     stdout: 'pipe',
     stderr: 'pipe',
   },
