@@ -36,7 +36,7 @@ export class FirefliesAnimation {
       alpha: true,
       antialias: true
     });
-    this.renderer.setClearColor(0x000000, 0);
+    this.renderer.setClearColor(0x00_00_00, 0);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }

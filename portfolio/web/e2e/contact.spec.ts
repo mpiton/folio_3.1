@@ -8,13 +8,13 @@ test.describe('Contact Form', () => {
 
   test('should show validation errors for empty required fields', async ({ page }) => {
     // Attendre que le formulaire soit chargé
-    await page.waitForSelector('[data-testid="contact-submit"]', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('[data-testid="contact-submit"]', { state: 'visible', timeout: 10_000 });
 
     // Click submit without filling any fields
     await page.getByTestId('contact-submit').click();
 
     // Check for error messages with increased timeout
-    await page.waitForSelector('.error-message', { state: 'visible', timeout: 10000 });
+    await page.waitForSelector('.error-message', { state: 'visible', timeout: 10_000 });
     const errorMessages = await page.locator('.error-message').all();
     expect(errorMessages).toHaveLength(4); // name, email, subject, message
   });
@@ -35,8 +35,8 @@ test.describe('Contact Form', () => {
     await expect(emailContainer).toHaveClass(/error/, { timeout: 5000 });
 
     // Check for email error message with increased timeout
-    const emailError = await page.locator('.error-message').filter({ hasText: /email.*valide/i });
-    await expect(emailError).toBeVisible({ timeout: 15000 });
+    const emailError = page.locator('.error-message').filter({ hasText: /email.*valide/i });
+    await expect(emailError).toBeVisible({ timeout: 15_000 });
   });
 
   test('should submit form successfully and show success toast', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('Contact Form', () => {
     // Attendre que le formulaire soit complètement chargé
     await page.waitForSelector('[data-testid="contact-submit"]', {
       state: 'visible',
-      timeout: 30000
+      timeout: 30_000
     });
 
     // Fill form with valid data
@@ -73,27 +73,27 @@ test.describe('Contact Form', () => {
     // Attendre que le toast soit créé et visible avec un timeout plus long
     await page.waitForSelector('.toast--success.toast--cloned', {
       state: 'attached',
-      timeout: 30000
+      timeout: 30_000
     });
 
     // Attendre que la classe toast--visible soit ajoutée
     await page.waitForFunction(
       () => {
         const toast = document.querySelector('.toast--success.toast--cloned');
-        return toast && toast.classList.contains('toast--visible');
+        return toast?.classList.contains('toast--visible');
       },
-      { timeout: 30000 }
+      { timeout: 30_000 }
     );
 
     const successToast = page.locator('.toast--success.toast--cloned').first();
-    await expect(successToast).toBeVisible({ timeout: 30000 });
-    await expect(successToast).toHaveClass(/toast--success.*toast--visible/, { timeout: 30000 });
+    await expect(successToast).toBeVisible({ timeout: 30_000 });
+    await expect(successToast).toHaveClass(/toast--success.*toast--visible/, { timeout: 30_000 });
 
     // Verify form was reset with longer timeout
-    await expect(page.getByTestId('contact-name')).toHaveValue('', { timeout: 15000 });
-    await expect(page.getByTestId('contact-email')).toHaveValue('', { timeout: 15000 });
-    await expect(page.getByTestId('contact-subject')).toHaveValue('', { timeout: 15000 });
-    await expect(page.getByTestId('contact-message')).toHaveValue('', { timeout: 15000 });
+    await expect(page.getByTestId('contact-name')).toHaveValue('', { timeout: 15_000 });
+    await expect(page.getByTestId('contact-email')).toHaveValue('', { timeout: 15_000 });
+    await expect(page.getByTestId('contact-subject')).toHaveValue('', { timeout: 15_000 });
+    await expect(page.getByTestId('contact-message')).toHaveValue('', { timeout: 15_000 });
   });
 
   test('should show error toast when submission fails', async ({ page }) => {
@@ -129,12 +129,12 @@ test.describe('Contact Form', () => {
     // Attendre que le toast soit créé et visible
     await page.waitForSelector('.toast--error.toast--cloned.toast--visible', {
       state: 'visible',
-      timeout: 15000
+      timeout: 15_000
     });
 
     // Vérifier que le toast est visible
     const toast = page.locator('.toast--error.toast--cloned.toast--visible').first();
-    await expect(toast).toBeVisible({ timeout: 15000 });
+    await expect(toast).toBeVisible({ timeout: 15_000 });
 
     // Verify form was not reset
     await expect(page.getByTestId('contact-name')).toHaveValue('Test User');
@@ -155,7 +155,7 @@ test.describe('Contact Form Validation', () => {
             while (retries < 3) {
                 try {
                     await page.goto('/contact', {
-                        timeout: 30000,
+                        timeout: 30_000,
                         waitUntil: 'networkidle'
                     });
                     break;

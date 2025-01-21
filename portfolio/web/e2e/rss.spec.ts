@@ -37,7 +37,7 @@ test.describe('RSS Page', () => {
             while (retries < 3) {
                 try {
                     await page.goto('/rss', {
-                        timeout: 30000,
+                        timeout: 30_000,
                         waitUntil: 'networkidle'
                     });
                     break;
@@ -62,18 +62,18 @@ test.describe('RSS Page', () => {
 
         // Vérifier que le titre de la page est correct
         const title = page.getByRole('heading', { name: 'Mes flux RSS favoris' });
-        await expect(title).toBeVisible({ timeout: 30000 });
+        await expect(title).toBeVisible({ timeout: 30_000 });
 
         // Vérifier qu'il y a 9 articles avec un timeout plus long
         const articles = page.locator('.articles-grid article');
-        await expect(articles).toHaveCount(9, { timeout: 30000 });
+        await expect(articles).toHaveCount(9, { timeout: 30_000 });
 
         // Vérifier que chaque article a les éléments requis avec un timeout plus long
         const firstArticle = articles.first();
-        await expect(firstArticle.locator('img')).toBeVisible({ timeout: 30000 });
-        await expect(firstArticle.locator('h3')).toBeVisible({ timeout: 30000 });
-        await expect(firstArticle.locator('a')).toBeVisible({ timeout: 30000 });
-        await expect(firstArticle.locator('.text-sm')).toBeVisible({ timeout: 30000 });
+        await expect(firstArticle.locator('img')).toBeVisible({ timeout: 30_000 });
+        await expect(firstArticle.locator('h3')).toBeVisible({ timeout: 30_000 });
+        await expect(firstArticle.locator('a')).toBeVisible({ timeout: 30_000 });
+        await expect(firstArticle.locator('.text-sm')).toBeVisible({ timeout: 30_000 });
     });
 
     test('should load more articles when clicking load more button', async ({ page }) => {
@@ -83,22 +83,22 @@ test.describe('RSS Page', () => {
 
         // Compter le nombre initial d'articles avec un timeout plus long
         const articles = page.locator('.articles-grid article');
-        await expect(articles).toHaveCount(9, { timeout: 30000 });
+        await expect(articles).toHaveCount(9, { timeout: 30_000 });
 
         // Cliquer sur le bouton "Charger plus"
         const loadMoreBtn = page.locator('#loadMore');
-        await expect(loadMoreBtn).toBeVisible({ timeout: 30000 });
+        await expect(loadMoreBtn).toBeVisible({ timeout: 30_000 });
         await loadMoreBtn.click();
 
         // Attendre que les nouveaux articles soient chargés avec un timeout plus long
-        await expect(articles).toHaveCount(18, { timeout: 30000 });
+        await expect(articles).toHaveCount(18, { timeout: 30_000 });
 
         // Vérifier que les nouveaux articles sont correctement formatés avec un timeout plus long
         const lastArticle = articles.last();
-        await expect(lastArticle.locator('img')).toBeVisible({ timeout: 30000 });
-        await expect(lastArticle.locator('h3')).toBeVisible({ timeout: 30000 });
-        await expect(lastArticle.locator('a')).toBeVisible({ timeout: 30000 });
-        await expect(lastArticle.locator('.text-sm')).toBeVisible({ timeout: 30000 });
+        await expect(lastArticle.locator('img')).toBeVisible({ timeout: 30_000 });
+        await expect(lastArticle.locator('h3')).toBeVisible({ timeout: 30_000 });
+        await expect(lastArticle.locator('a')).toBeVisible({ timeout: 30_000 });
+        await expect(lastArticle.locator('.text-sm')).toBeVisible({ timeout: 30_000 });
     });
 
     test('should handle empty response gracefully', async ({ page }) => {

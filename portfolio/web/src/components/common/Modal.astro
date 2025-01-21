@@ -18,7 +18,11 @@ const {
 } = Astro.props;
 ---
 
-<dialog id={id} class:list={["modal", `modal--${size}`, className]}>
+<dialog
+    id={id}
+    class:list={["modal", `modal--${size}`, className]}
+    {...closeOnClickOutside && { "data-close-on-click-outside": "" }}
+>
     <div class="modal-content">
         {
             showCloseButton && (
@@ -59,7 +63,9 @@ const {
         constructor(modal: HTMLDialogElement) {
             this.modal = modal;
             this.closeButton = modal.querySelector("[data-close-modal]");
-            this.closeOnClickOutside = true;
+            this.closeOnClickOutside = modal.hasAttribute(
+                "data-close-on-click-outside"
+            );
             this.init();
         }
 
@@ -69,6 +75,8 @@ const {
             }
 
             this.modal.addEventListener("click", (e) => {
+                if (!this.closeOnClickOutside) return;
+
                 const rect = this.modal.getBoundingClientRect();
                 const isInDialog =
                     e.clientX >= rect.left &&
