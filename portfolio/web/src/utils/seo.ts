@@ -11,7 +11,7 @@ export interface SEOProps {
 
 export const defaultSEO: SEOProps = {
     title: 'Mathieu Piton - Développeur Full Stack',
-    description: 'Portfolio de Mathieu Piton, développeur Full Stack spécialisé en Rust et TypeScript',
+    description: 'Portfolio de Mathieu Piton, développeur Full Stack spécialisé en Node.js',
     openGraph: {
         type: 'website',
         locale: 'fr_FR',
