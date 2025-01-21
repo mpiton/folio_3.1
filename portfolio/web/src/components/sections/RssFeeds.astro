@@ -5,7 +5,7 @@ interface RssItem {
     title: string;
     description: string;
     link: string;
-    pubDate: Date;
+    pubDate: string;
     imageUrl: string;
 }
 
@@ -14,6 +14,12 @@ interface Props {
 }
 
 const { items } = Astro.props;
+
+// Convertir les dates des items
+const itemsWithDateObjects = items.map((item) => ({
+    ...item,
+    pubDate: new Date(item.pubDate),
+}));
 ---
 
 <section class="px-4 py-8 md:py-12">
@@ -21,11 +27,13 @@ const { items } = Astro.props;
         <div
             class="articles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
         >
-            {items.map((item) => <RssCard {...item} />)}
+            {itemsWithDateObjects.map((item) => <RssCard {...item} />)}
         </div>
         <button
             class="block mx-auto px-8 py-4 text-lg font-semibold bg-primary hover:bg-primary-dark text-accent rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             id="loadMore"
+            type="button"
+            aria-label="Charger plus d'articles"
         >
             Charger plus d'articles
         </button>
@@ -33,21 +41,106 @@ const { items } = Astro.props;
 </section>
 
 <script>
-    const loadMoreBtn = document.getElementById("loadMore");
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener("click", async () => {
-            try {
-                // TODO: Implémenter la logique de chargement des articles supplémentaires
-                const response = await fetch("/api/rss?page=2");
-                if (!response.ok)
-                    throw new Error("Erreur lors du chargement des articles");
+    interface RssItem {
+        title: string;
+        description: string;
+        link?: string;
+        url?: string;
+        pubDate?: string;
+        pub_date?: string;
+        imageUrl?: string;
+        image_url?: string;
+    }
 
-                const newItems = await response.json();
-                // TODO: Ajouter les nouveaux articles au conteneur
-            } catch (error) {
-                console.error("Erreur:", error);
-                // TODO: Afficher un message d'erreur à l'utilisateur
-            }
+    let currentPage = 1;
+    let isLoading = false;
+    const loadMoreBtn = document.getElementById("loadMore") as HTMLButtonElement | null;
+    const articlesContainer = document.querySelector(".articles-grid");
+
+    function formatArticleDate(item: RssItem): string {
+        const date = new Date(item.pub_date || item.pubDate || Date.now());
+        return date.toLocaleDateString("fr-FR", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
         });
+    }
+
+    function createArticleHtml(item: RssItem): string {
+        return `
+            <article class="bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="relative h-48 overflow-hidden">
+                    <img
+                        src="${item.image_url || item.imageUrl || 'https://placehold.co/600x400'}"
+                        alt="${item.title}"
+                        loading="lazy"
+                        class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-heading font-semibold text-text mb-2 line-clamp-2">
+                        ${item.title}
+                    </h3>
+                    <p class="text-sm text-text-light mb-4">
+                        ${formatArticleDate(item)}
+                    </p>
+                    <p class="text-base text-text mb-6 line-clamp-3">${item.description}</p>
+                    <a
+                        href="${item.url || item.link || '#'}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-block text-primary font-semibold hover:text-primary-dark transition-colors duration-300"
+                    >
+                        Lire l'article
+                        <span class="sr-only">Ouvrir ${item.title} dans un nouvel onglet</span>
+                    </a>
+                </div>
+            </article>
+        `;
+    }
+
+    async function loadMoreArticles() {
+        if (!articlesContainer || !loadMoreBtn || isLoading) return;
+
+        try {
+            isLoading = true;
+            loadMoreBtn.disabled = true;
+            loadMoreBtn.textContent = "Chargement...";
+
+            const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
+            const response = await fetch(`${API_URL}/api/rss?page=${currentPage + 1}&limit=9`);
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+
+            const newItems = await response.json() as RssItem[];
+
+            if (!Array.isArray(newItems) || newItems.length === 0) {
+                loadMoreBtn.textContent = "Plus d'articles disponibles";
+                loadMoreBtn.disabled = true;
+                return;
+            }
+
+            // Ajouter les nouveaux articles
+            for (const item of newItems) {
+                articlesContainer.insertAdjacentHTML("beforeend", createArticleHtml(item));
+            }
+
+            currentPage++;
+            loadMoreBtn.textContent = "Charger plus d'articles";
+            loadMoreBtn.disabled = false;
+
+        } catch (error) {
+            console.error("Erreur:", error);
+            loadMoreBtn.textContent = "Erreur lors du chargement";
+            loadMoreBtn.disabled = true;
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener("click", loadMoreArticles);
     }
 </script>

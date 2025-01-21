@@ -17,7 +17,7 @@ const seoData = {
 ---
 
 <Layout seo={seoData}>
-    <main class="container">
+    <main class="container my-12">
         <h1>Documentation des Composants</h1>
 
         <section class="section">
@@ -337,7 +337,12 @@ const seoData = {
                                     `.toast--${toastType}.toast--cloned`
                                 )
                                 .forEach((oldToast) => {
-                                    oldToast.remove();
+                                    if (oldToast instanceof HTMLElement) {
+                                        const manager = new window.ToastManager(
+                                            oldToast
+                                        );
+                                        manager.close();
+                                    }
                                 });
 
                             // Cloner et préparer le nouveau toast
@@ -347,61 +352,11 @@ const seoData = {
                             clonedToast.classList.add("toast--cloned");
                             document.body.appendChild(clonedToast);
 
-                            // Forcer un reflow pour assurer que les transitions fonctionnent
-                            clonedToast.getBoundingClientRect();
-
-                            // Ajouter la classe visible immédiatement
-                            clonedToast.classList.add("toast--visible");
-
-                            // Gérer la fermeture automatique
-                            const duration = parseInt(
-                                clonedToast.dataset.duration || "5000",
-                                10
+                            // Créer et initialiser le ToastManager
+                            const toastManager = new window.ToastManager(
+                                clonedToast
                             );
-                            let closeTimeout = setTimeout(() => {
-                                clonedToast.classList.remove("toast--visible");
-                                setTimeout(() => clonedToast.remove(), 300);
-                            }, duration);
-
-                            // Gérer le bouton de fermeture
-                            const closeButton =
-                                clonedToast.querySelector("[data-close-toast]");
-                            if (closeButton) {
-                                closeButton.addEventListener("click", () => {
-                                    clearTimeout(closeTimeout);
-                                    clonedToast.classList.remove(
-                                        "toast--visible"
-                                    );
-                                    setTimeout(() => clonedToast.remove(), 300);
-                                });
-                            }
-
-                            // Gérer la pause au survol
-                            let remainingTime = duration;
-                            let startTime = Date.now();
-
-                            clonedToast.addEventListener("mouseenter", () => {
-                                clearTimeout(closeTimeout);
-                                remainingTime = Math.max(
-                                    0,
-                                    remainingTime - (Date.now() - startTime)
-                                );
-                            });
-
-                            clonedToast.addEventListener("mouseleave", () => {
-                                startTime = Date.now();
-                                if (remainingTime > 0) {
-                                    closeTimeout = setTimeout(() => {
-                                        clonedToast.classList.remove(
-                                            "toast--visible"
-                                        );
-                                        setTimeout(
-                                            () => clonedToast.remove(),
-                                            300
-                                        );
-                                    }, remainingTime);
-                                }
-                            });
+                            toastManager.show();
                         });
                     }
                 }
