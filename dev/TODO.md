@@ -119,7 +119,7 @@
 
 ## 💻 Phase 3 : Frontend 🚧
 
-### Architecture ⏳
+### Architecture ✅
 - [x] Setup Astro
   - [x] Installation du projet
   - [x] Configuration TypeScript
@@ -129,11 +129,11 @@
 - [x] Structure des composants
   - [x] Layouts de base
   - [x] Composants communs
-  - [ ] Sections de page
+  - [x] Sections de page
 - [x] Configuration des routes
-- [ ] Configuration du SSG/SSR
-- [ ] Service workers pour le offline
-- [ ] PWA configuration
+- [x] Configuration du SSG/SSR
+- [x] Service workers pour le offline
+- [x] PWA configuration
 
 ### Composants 🚧
 - [x] Header multilingue

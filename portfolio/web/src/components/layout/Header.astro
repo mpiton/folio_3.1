@@ -1,0 +1,18 @@
+---
+import { Image } from "astro:assets";
+import logo from "../../assets/logo.webp";
+---
+
+<header id="main-header">
+    <a href="/">
+        <Image src={logo} alt="Logo Mathieu Piton" class="logo" />
+    </a>
+    <nav>
+        <ul>
+            <li><a href="/" data-astro-prefetch>Accueil</a></li>
+            <li><a href="/about" data-astro-prefetch>À propos</a></li>
+            <li><a href="/rss" data-astro-prefetch>Flux RSS</a></li>
+            <li><a href="/contact" data-astro-prefetch>Contact</a></li>
+        </ul>
+    </nav>
+</header>

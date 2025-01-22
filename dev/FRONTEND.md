@@ -210,6 +210,7 @@ npm install @astrojs/tailwind
 npm install astro-i18next
 npm install sharp
 npm install three @types/three
+npm install @vite-pwa/astro workbox-window
 ```
 
 ### Configuration Astro
@@ -219,19 +220,96 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwind from '@astrojs/tailwind';
+import AstroPWA from '@vite-pwa/astro';
+import pwaConfig from './src/pwa';
 
 export default defineConfig({
-  site: 'https://mathieupiton.fr',
+  site: 'https://mathieu-piton.com',
+  output: 'static',
   integrations: [
     mdx(),
     sitemap(),
     tailwind(),
+    AstroPWA(pwaConfig)
   ],
   i18n: {
     defaultLocale: 'fr',
     locales: ['fr', 'en'],
   },
 });
+```
+
+### Configuration PWA
+```typescript
+// src/pwa.ts
+export default {
+  registerType: 'autoUpdate',
+  manifest: {
+    name: 'Mathieu Piton - Portfolio',
+    short_name: 'MP Portfolio',
+    description: 'Portfolio de Mathieu Piton, développeur Full Stack',
+    theme_color: '#578E7E',
+    background_color: '#F5ECD5',
+    display: 'standalone',
+    icons: [/* ... */],
+    start_url: '/',
+    scope: '/'
+  },
+  workbox: {
+    navigateFallback: process.env.NODE_ENV === 'production' ? '/404' : null,
+    globPatterns: process.env.NODE_ENV === 'production'
+      ? ['**/*.{css,js,html,svg,png,jpg,jpeg,gif,webp,woff,woff2,ttf,eot,ico}']
+      : [],
+    runtimeCaching: [
+      {
+        urlPattern: /^https:\/\/api\.mathieu-piton\.com\/.*$/,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'api-cache',
+          networkTimeoutSeconds: 5,
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 60 * 60 * 24
+          }
+        }
+      }
+    ]
+  }
+};
+```
+
+### Gestion des Assets PWA
+```javascript
+// scripts/generate-pwa-assets.js
+import { promises as fs } from 'fs';
+import sharp from 'sharp';
+import path from 'path';
+
+const ICONS_SIZES = [192, 512];
+const SOURCE_ICON = 'public/favicon.svg';
+const OUTPUT_DIR = 'public';
+
+async function generatePWAIcons() {
+  // Génération des icônes et du manifest
+}
+```
+
+### Scripts de Build
+```json
+{
+  "scripts": {
+    "generate-pwa": "node scripts/generate-pwa-assets.js",
+    "build": "npm run generate-pwa && astro build"
+  }
+}
+```
+
+### Fichiers à ignorer
+```gitignore
+# PWA
+dev-dist/
+public/manifest.webmanifest
+public/icon-*.png
 ```
 
 ## 4. Phases de Développement

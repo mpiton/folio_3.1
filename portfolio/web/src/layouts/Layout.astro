@@ -4,6 +4,9 @@ import logo from "../assets/logo.webp";
 import favicon from "../assets/favicon.png";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import type { SEOProps } from "../utils/seo";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import PWAManager from "../components/common/PWAManager.astro";
 
 interface Props {
     seo: SEOProps;
@@ -44,53 +47,12 @@ const { title, description, openGraph } = seo;
         }
     </head>
     <body>
-        <header id="main-header">
-            <a href="/">
-                <Image src={logo} alt="Logo Mathieu Piton" class="logo" />
-            </a>
-            <nav>
-                <ul>
-                    <li><a href="/" data-astro-prefetch>Accueil</a></li>
-                    <li><a href="/about" data-astro-prefetch>À propos</a></li>
-                    <li><a href="/rss" data-astro-prefetch>Flux RSS</a></li>
-                    <li><a href="/contact" data-astro-prefetch>Contact</a></li>
-                </ul>
-            </nav>
-        </header>
-
+        <Header />
         <main>
             <slot />
         </main>
-
-        <footer>
-            <div class="social-links">
-                <a
-                    href="https://github.com/mathieupiton"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <i class="fab fa-github"></i>
-                </a>
-                <a
-                    href="https://linkedin.com/in/mathieupiton"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a
-                    href="https://twitter.com/mathieupiton"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <i class="fab fa-x-twitter"></i>
-                </a>
-            </div>
-            <a href="/mentions-legales">Mentions légales</a>
-            <p>
-                &copy; {new Date().getFullYear()} Mathieu Piton - Tous droits réservés
-            </p>
-        </footer>
+        <Footer />
+        <PWAManager />
     </body>
 </html>
 
