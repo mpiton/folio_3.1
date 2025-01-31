@@ -400,12 +400,12 @@ mod tests {
                 .await
                 .expect("Failed to list collections");
             println!("Collections trouvées : {collections:?}");
-            assert!(collections.contains(&"portfolio".to_string()));
-            assert!(collections.contains(&"contacts".to_string()));
+            assert!(collections.contains(&format!("portfolio_{}", "test_db_initialization")));
+            assert!(collections.contains(&format!("contacts_{}", "test_db_initialization")));
 
             // Vérifier que les index sont créés
             let portfolio_indexes = db
-                .collection::<Document>("portfolio")
+                .collection::<Document>(&format!("portfolio_{}", "test_db_initialization"))
                 .list_indexes()
                 .await
                 .expect("Failed to list portfolio indexes")
@@ -420,7 +420,7 @@ mod tests {
             );
 
             let contacts_indexes = db
-                .collection::<Document>("contacts")
+                .collection::<Document>(&format!("contacts_{}", "test_db_initialization"))
                 .list_indexes()
                 .await
                 .expect("Failed to list contacts indexes")

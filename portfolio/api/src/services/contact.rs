@@ -66,8 +66,15 @@ impl MessageService {
         let result = collection.insert_one(doc).await?;
         println!("Document inséré avec l'ID : {:?}", result.inserted_id);
 
-        // Ne pas envoyer d'email si c'est un test ou si la clé API est "test_key"
+        // Ne pas envoyer d'email si c'est un test
+        #[cfg(not(test))]
         if !form.is_test && self.config.brevo_api_key != "test_key" {
+            // Envoyer l'email
+            self.send_email(&form).await?;
+        }
+
+        #[cfg(test)]
+        if !form.is_test {
             // Envoyer l'email
             self.send_email(&form).await?;
         }
