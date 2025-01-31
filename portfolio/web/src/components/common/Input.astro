@@ -1,7 +1,7 @@
 ---
 interface Props {
     label: string;
-    type?: astroHTML.JSX.HTMLInputTypeAttribute;
+    type?: astroHTML.JSX.HTMLInputTypeAttribute | "textarea";
     name: string;
     placeholder?: string;
     required?: boolean;
@@ -22,6 +22,8 @@ const {
     "data-testid": testId,
     error,
 } = Astro.props;
+
+const isTextarea = type === "textarea";
 ---
 
 <div class:list={["input-wrapper", className]}>
@@ -45,16 +47,34 @@ const {
                 <i class="input-icon fas fa-heading" aria-hidden="true" />
             )
         }
-        <input
-            type={type}
-            id={name}
-            name={name}
-            placeholder={placeholder}
-            required={required}
-            value={value}
-            data-testid={testId}
-            class:list={{ error: !!error }}
-        />
+        {
+            isTextarea && (
+                <i class="textarea-icon fas fa-comment-alt" aria-hidden="true" />
+            )
+        }
+        {
+            isTextarea ? (
+                <textarea
+                    id={name}
+                    name={name}
+                    placeholder={placeholder}
+                    required={required}
+                    data-testid={testId}
+                    class:list={["textarea", { error: !!error }]}
+                >{value}</textarea>
+            ) : (
+                <input
+                    type={type}
+                    id={name}
+                    name={name}
+                    placeholder={placeholder}
+                    required={required}
+                    value={value}
+                    data-testid={testId}
+                    class:list={{ error: !!error }}
+                />
+            )
+        }
     </div>
     {
         error && (
@@ -94,146 +114,46 @@ const {
         align-items: center;
     }
 
-    .input-icon {
+    .input-icon, .textarea-icon {
         position: absolute;
         left: 1rem;
         color: #9ca3af;
         font-size: 1rem;
-        transition: color 0.2s ease;
-        pointer-events: none;
     }
 
-    input {
+    input, .textarea {
         width: 100%;
-        padding: 0.875rem 1rem;
+        padding: 0.75rem 1rem;
         padding-left: 2.75rem;
-        border: 1px solid #d1d5db;
+        border: 1px solid #e5e7eb;
         border-radius: 0.5rem;
-        background-color: var(--bg-color);
+        background-color: var(--secondary-color);
         color: var(--text-color);
-        font-family: var(--font-body);
-        font-size: 1rem;
+        font-size: 0.95rem;
         transition: all 0.2s ease;
     }
 
-    /* État par défaut avec une bordure visible */
-    input {
-        border: 1px solid #d1d5db;
+    .textarea {
+        min-height: 8rem;
+        resize: vertical;
+        padding-right: 1rem;
     }
 
-    /* État hover */
-    .input-container:hover input:not(:focus):not(.error) {
-        border-color: var(--primary-color);
-        box-shadow: 0 2px 4px rgba(87, 142, 126, 0.05);
-    }
-
-    .input-container:hover .input-icon {
-        color: var(--primary-color);
-    }
-
-    /* État focus avec outline visible */
-    input:focus {
+    input:focus, .textarea:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(87, 142, 126, 0.1);
-        padding-left: 2.75rem;
+        box-shadow: 0 0 0 2px var(--primary-color-light);
     }
 
-    input:focus + .input-icon,
-    input:not(:placeholder-shown) + .input-icon {
-        color: var(--primary-color);
-    }
-
-    input::placeholder {
-        color: #9ca3af;
-        opacity: 0.8;
-    }
-
-    /* État d'erreur */
-    input.error {
+    .error input, .error .textarea {
         border-color: var(--error-color);
-        background-color: #fef2f2;
-        padding-left: 2.75rem;
-    }
-
-    input.error:focus {
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-    }
-
-    input.error + .input-icon {
-        color: var(--error-color);
     }
 
     .error-message {
-        color: #991b1b;
-        font-size: 0.875rem;
-        margin-top: 0.375rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        background-color: #fee2e2;
-        border: 1px solid #fecaca;
-        border-radius: 0.375rem;
-        padding: 0.5rem 0.75rem;
-        animation: slideIn 0.2s ease-out;
-    }
-
-    .error-message i {
-        font-size: 1rem;
-        color: #dc2626;
-    }
-
-    .input-container.error input {
-        border-color: #dc2626;
-        background-color: #fef2f2;
-    }
-
-    .input-container.error input:focus {
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-    }
-
-    .input-container.error .input-icon {
-        color: #dc2626;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        .error-message {
-            background-color: rgb(127 29 29 / 0.1);
-            border-color: rgb(127 29 29 / 0.2);
-            color: #f87171;
-        }
-
-        .error-message i {
-            color: #f87171;
-        }
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-0.25rem);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Support de la réduction des animations */
-    @media (prefers-reduced-motion: reduce) {
-        .error-message {
-            animation: none;
-        }
-    }
-
-    @media (max-width: 768px) {
-        input {
-            padding: 0.75rem;
-            padding-left: 2.5rem;
-        }
-
-        .input-icon {
-            left: 0.875rem;
-        }
+        color: var(--error-color);
+        font-size: 0.875rem;
     }
 </style>

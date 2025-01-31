@@ -1,0 +1,101 @@
+---
+
+---
+
+<script>
+    import { registerSW } from "virtual:pwa-register";
+
+    // Fonction pour recharger la page
+    const reloadPage = () => {
+        window.location.reload();
+    };
+
+    // Enregistrement du service worker avec gestion des mises à jour
+    const updateSW = registerSW({
+        onNeedRefresh() {
+            // Afficher une notification de mise à jour disponible
+            const toast = document.createElement("div");
+            toast.className = "pwa-toast";
+            toast.innerHTML = `
+        <div class="pwa-toast-content">
+          <p>Une nouvelle version est disponible</p>
+          <button id="pwa-refresh">Mettre à jour</button>
+        </div>
+      `;
+            document.body.appendChild(toast);
+
+            // Gestionnaire de clic pour le bouton de mise à jour
+            document
+                .getElementById("pwa-refresh")
+                ?.addEventListener("click", () => {
+                    updateSW(true).then(() => {
+                        reloadPage();
+                    });
+                });
+        },
+        onOfflineReady() {
+            // Afficher une notification que l'app est prête pour le mode hors-ligne
+            const toast = document.createElement("div");
+            toast.className = "pwa-toast";
+            toast.innerHTML = `
+        <div class="pwa-toast-content">
+          <p>Application prête pour le mode hors-ligne</p>
+        </div>
+      `;
+            document.body.appendChild(toast);
+
+            // Supprimer la notification après 3 secondes
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        },
+    });
+</script>
+
+<style>
+    /* Styles pour les notifications PWA */
+    .pwa-toast {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        padding: 12px;
+        background: var(--primary-color, #578e7e);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .pwa-toast-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .pwa-toast button {
+        background: white;
+        color: var(--primary-color, #578e7e);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+
+    .pwa-toast button:hover {
+        background: #f0f0f0;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>

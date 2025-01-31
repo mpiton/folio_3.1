@@ -1,9 +1,9 @@
 ---
 import RssCard from "../common/RssCard.astro";
+import Toast from "../common/Toast.astro";
 
 interface RssItem {
     title: string;
-    description: string;
     link: string;
     pubDate: string;
     imageUrl: string;
@@ -33,17 +33,24 @@ const itemsWithDateObjects = items.map((item) => ({
             class="block mx-auto px-8 py-4 text-lg font-semibold bg-primary hover:bg-primary-dark text-accent rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             id="loadMore"
             type="button"
+            data-testid="load-more"
             aria-label="Charger plus d'articles"
         >
             Charger plus d'articles
         </button>
+        <Toast
+            id="rss-error"
+            type="error"
+            title="Erreur"
+            message="Une erreur est survenue lors du chargement des articles"
+            showCloseButton={true}
+        />
     </div>
 </section>
 
 <script>
     interface RssItem {
         title: string;
-        description: string;
         link?: string;
         url?: string;
         pubDate?: string;
@@ -70,7 +77,7 @@ const itemsWithDateObjects = items.map((item) => ({
 
     function createArticleHtml(item: RssItem): string {
         return `
-            <article class="bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <article class="rss-article bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div class="relative h-48 overflow-hidden">
                     <img
                         src="${item.image_url || item.imageUrl || "https://placehold.co/600x400"}"
@@ -86,7 +93,6 @@ const itemsWithDateObjects = items.map((item) => ({
                     <p class="text-sm text-text-light mb-4">
                         ${formatArticleDate(item)}
                     </p>
-                    <p class="text-base text-text mb-6 line-clamp-3">${item.description}</p>
                     <a
                         href="${item.url || item.link || "#"}"
                         target="_blank"
@@ -124,24 +130,40 @@ const itemsWithDateObjects = items.map((item) => ({
             if (!Array.isArray(newItems) || newItems.length === 0) {
                 loadMoreBtn.textContent = "Plus d'articles disponibles";
                 loadMoreBtn.disabled = true;
+                loadMoreBtn.classList.add("hidden");
                 return;
             }
 
-            // Ajouter les nouveaux articles
+            // Créer un fragment pour ajouter tous les articles d'un coup
+            const fragment = document.createDocumentFragment();
             for (const item of newItems) {
-                articlesContainer.insertAdjacentHTML(
-                    "beforeend",
-                    createArticleHtml(item)
-                );
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = createArticleHtml(item);
+                fragment.appendChild(tempDiv.firstElementChild!);
             }
+
+            // Ajouter le fragment au conteneur
+            articlesContainer.appendChild(fragment);
 
             currentPage++;
             loadMoreBtn.textContent = "Charger plus d'articles";
             loadMoreBtn.disabled = false;
         } catch (error) {
             console.error("Erreur:", error);
-            loadMoreBtn.textContent = "Erreur lors du chargement";
-            loadMoreBtn.disabled = true;
+            loadMoreBtn.textContent = "Charger plus d'articles";
+            loadMoreBtn.disabled = false;
+
+            // Afficher le toast d'erreur
+            const errorToast = document.getElementById("rss-error");
+            if (errorToast) {
+                const clonedToast = errorToast.cloneNode(true) as HTMLElement;
+                clonedToast.classList.add("toast--cloned");
+                document.body.appendChild(clonedToast);
+                if (window.ToastManager) {
+                    const toastManager = new window.ToastManager(clonedToast);
+                    toastManager.show();
+                }
+            }
         } finally {
             isLoading = false;
         }

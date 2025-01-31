@@ -1,11 +1,17 @@
 # build output
 dist/
+.output/
 
 # generated types
 .astro/
 
 # dependencies
 node_modules/
+
+# PWA
+dev-dist/
+public/manifest.webmanifest
+public/icon-*.png
 
 # logs
 npm-debug.log*
@@ -26,3 +32,4 @@ pnpm-debug.log*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+*.log

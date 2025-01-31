@@ -3,7 +3,10 @@ import { test, expect } from '@playwright/test';
 test.describe('Components page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/components');
-    await page.waitForLoadState('networkidle');
+    await Promise.all([
+      page.waitForLoadState('networkidle', { timeout: 60_000 }),
+      page.waitForLoadState('domcontentloaded', { timeout: 60_000 })
+    ]);
   });
 
   test('should display all required sections', async ({ page }) => {
@@ -30,20 +33,20 @@ test.describe('Components page', () => {
 
   test.describe('Button tests', () => {
     test('should display different button styles', async ({ page }) => {
-      const buttonVariants = ['Primary', 'Secondary', 'Outline', 'Ghost'];
-      for (const variant of buttonVariants) {
-        const button = page.getByRole('button', { name: variant });
-        await expect(button).toBeVisible();
+      const buttonTypes = ['Primary', 'Secondary', 'Outline', 'Ghost'];
+      for (const type of buttonTypes) {
+        const button = page.getByRole('button', { name: new RegExp(type, 'i') });
+        await expect(button).toBeVisible({ timeout: 15_000 });
+        const classes = await button.getAttribute('class');
+        expect(classes).toContain(`button--${type.toLowerCase()}`);
       }
     });
 
     test('should handle button states', async ({ page }) => {
-      // Test du bouton désactivé
       const disabledButton = page.getByRole('button', { name: 'Désactivé' });
       await expect(disabledButton).toBeVisible();
       await expect(disabledButton).toBeDisabled();
 
-      // Test des tailles de boutons
       const buttonSizes = [
         { name: 'Small', class: 'sm' },
         { name: 'Medium', class: 'md' },
@@ -58,113 +61,113 @@ test.describe('Components page', () => {
 
   test.describe('Card tests', () => {
     test('should display different card styles', async ({ page }) => {
-      // Vérifier les cartes dans la section des boutons
-      const buttonCards = page.locator('section', { hasText: 'Boutons' }).locator('.card');
-      await expect(buttonCards).toHaveCount(3);
-
-      // Vérifier que chaque carte a un titre
-      const firstCard = buttonCards.first();
-      await expect(firstCard.locator('h3')).toBeVisible();
+      const cardTypes = ['default', 'elevated', 'bordered'];
+      for (const type of cardTypes) {
+        const card = page.locator(`[data-testid="card-${type}"]`);
+        await expect(card).toBeVisible({ timeout: 15_000 });
+        await expect(card).toHaveClass(new RegExp(`card--${type}`));
+      }
     });
   });
 
   test.describe('Toast tests', () => {
     test.beforeEach(async ({ page }) => {
-      // Attendre que la page soit complètement stable
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(2000);
+      await page.goto('/components');
+      await Promise.all([
+        page.waitForLoadState('networkidle', { timeout: 60_000 }),
+        page.waitForLoadState('domcontentloaded', { timeout: 60_000 })
+      ]);
+      await page.waitForSelector('[data-testid="showSuccessToast"]', { state: 'visible', timeout: 15000 });
     });
 
     test('should show and hide toast', async ({ page }) => {
-      const showToastBtn = page.locator('[data-testid="showSuccessToast"]');
+      const showToastBtn = page.getByTestId('showSuccessToast');
+      await expect(showToastBtn).toBeVisible();
       await showToastBtn.click();
 
-      // Attendre que le toast soit créé et visible avec un timeout plus long
-      const toast = page.locator('.toast--success.toast--cloned').last();
-      await expect(toast).toBeVisible({ timeout: 30000 });
-      await expect(toast).toHaveClass(/toast--visible/, { timeout: 30000 });
+      const toast = page.locator('.toast--success.toast--cloned');
+      await expect(toast).toBeAttached({ timeout: 5000 });
+      await expect(toast).toHaveClass(/toast--visible/, { timeout: 5000 });
 
-      // Attendre que le toast disparaisse avec un timeout plus long
-      await expect(toast).not.toBeVisible({ timeout: 35000 });
+      // Vérifier que le toast disparaît après un certain temps
+      await expect(toast).not.toBeVisible({ timeout: 10_000 });
     });
 
     test('should show different toast types', async ({ page }) => {
       const toastTypes = ['Success', 'Error', 'Warning', 'Info'];
 
       for (const type of toastTypes) {
-        const button = page.locator(`[data-testid="show${type}Toast"]`);
+        const button = page.getByTestId(`show${type}Toast`);
+        await expect(button).toBeVisible();
         await button.click();
 
-        // Attendre que le toast soit créé et visible avec un timeout plus long
-        await page.waitForSelector(`.toast--${type.toLowerCase()}.toast--cloned.toast--visible`, {
-          state: 'visible',
-          timeout: 30000
-        });
+        const toast = page.locator(`.toast--${type.toLowerCase()}.toast--cloned`);
+        await expect(toast).toBeAttached({ timeout: 5000 });
+        await expect(toast).toHaveClass(/toast--visible/, { timeout: 5000 });
+        await expect(toast).toHaveClass(new RegExp(`toast--${type.toLowerCase()}`));
 
-        const toast = page.locator(`.toast--${type.toLowerCase()}.toast--cloned.toast--visible`).last();
-        await expect(toast).toBeVisible({ timeout: 30000 });
-
-        // Attendre que le toast disparaisse avec un timeout plus long
-        await expect(toast).not.toBeVisible({ timeout: 35000 });
-
-        // Attendre plus longtemps entre chaque toast
-        await page.waitForTimeout(3000);
+        // Attendre que le toast disparaisse avant de passer au suivant
+        await expect(toast).not.toBeVisible({ timeout: 10_000 });
+        await page.waitForTimeout(1000);
       }
     });
 
     test('should show multiple toasts simultaneously', async ({ page }) => {
       const toastTypes = ['Success', 'Error', 'Warning', 'Info'];
-
-      // Attendre que la page soit complètement chargée
-      await page.waitForLoadState('domcontentloaded');
-      await page.waitForLoadState('networkidle');
-
-      // Cliquer sur tous les boutons et vérifier chaque toast immédiatement
+      
+      // Cliquer sur tous les boutons rapidement
       for (const type of toastTypes) {
-        const button = page.getByTestId(`show${type}Toast`);
-        await button.click();
+        await page.getByTestId(`show${type}Toast`).click();
+      }
 
-        // Attendre que le toast soit créé et devienne visible
-        const toast = page.locator(`.toast--${type.toLowerCase()}.toast--cloned`).first();
-        await expect(toast).toBeVisible({ timeout: 15000 });
-        await expect(toast).toHaveClass(new RegExp(`toast--${type.toLowerCase()}.*toast--visible`), { timeout: 15000 });
+      // Attendre que tous les toasts soient visibles
+      for (const type of toastTypes) {
+        const toast = page.locator(`.toast--${type.toLowerCase()}.toast--cloned`);
+        await expect(toast).toBeAttached({ timeout: 15_000 });
+        await expect(toast).toHaveClass(/toast--visible/, { timeout: 15_000 });
       }
     });
   });
 
   test.describe('Modal tests', () => {
     test('should open and close modal', async ({ page }) => {
-      const openModalBtn = page.getByRole('button', { name: 'Small Modal' });
+      // Ouvrir la modale
+      const openModalBtn = page.getByTestId('openSmallModal');
+      await expect(openModalBtn).toBeVisible();
       await openModalBtn.click();
 
       // Attendre que la modale soit visible
       const modal = page.locator('#smallModal');
-      await expect(modal).toBeVisible({ timeout: 10000 });
-      await expect(modal).toHaveAttribute('open', '');
+      await expect(modal).toBeVisible({ timeout: 5000 });
 
-      const closeModalBtn = modal.locator('[data-close-modal]');
-      await closeModalBtn.click();
+      // Vérifier le contenu de la modale
+      const modalTitle = modal.getByRole('heading');
+      await expect(modalTitle).toBeVisible();
 
-      // Attendre que la modale soit fermée
-      await expect(modal).not.toBeVisible({ timeout: 10000 });
-      await expect(modal).not.toHaveAttribute('open', '');
+      // Fermer la modale
+      const closeButton = modal.getByRole('button', { name: /fermer/i });
+      await expect(closeButton).toBeVisible();
+      await closeButton.click();
+
+      // Vérifier que la modale est fermée
+      await expect(modal).not.toBeVisible({ timeout: 5000 });
     });
 
     test('should close modal with overlay click', async ({ page }) => {
+      // Ouvrir la modale
       const openModalBtn = page.getByTestId('openSmallModal');
+      await expect(openModalBtn).toBeVisible();
       await openModalBtn.click();
 
+      // Attendre que la modale soit visible
       const modal = page.locator('#smallModal');
-      await expect(modal).toHaveAttribute('open', '');
+      await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Attendre que la modale soit complètement ouverte
-      await page.waitForTimeout(1000);
-
-      // Cliquer en dehors de la modale (dans le coin supérieur gauche)
+      // Cliquer à l'extérieur de la modale (en haut à gauche)
       await page.mouse.click(10, 10);
 
-      // Attendre que la modale soit fermée
-      await expect(modal).not.toHaveAttribute('open', '', { timeout: 10000 });
+      // Vérifier que la modale est fermée
+      await expect(modal).not.toBeVisible({ timeout: 5000 });
     });
   });
 });

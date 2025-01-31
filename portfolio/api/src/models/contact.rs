@@ -40,10 +40,13 @@ pub struct Request {
         message = "Le message contient du contenu non autorisé"
     ))]
     pub message: String,
+
+    #[serde(default)]
+    pub is_test: bool,
 }
 
 lazy_static::lazy_static! {
-    static ref NAME_RE: Regex = Regex::new(r"^[a-zA-ZÀ-ÿ\s\-']+$").unwrap();
+    static ref NAME_RE: Regex = Regex::new(r"^[\p{L}\s\-']+$").unwrap();
     static ref SAFE_TEXT_REGEX: Regex = Regex::new(r"^[\p{L}\p{N}\s.,!?@()'\[\]\-_&+=%°:;]+$").unwrap();
 }
 
@@ -102,6 +105,7 @@ mod tests {
             email: "john@example.com".to_string(),
             subject: "Test Subject".to_string(),
             message: "This is a valid message with good content.".to_string(),
+            is_test: false,
         };
         assert!(request.validate().is_ok());
     }
@@ -113,6 +117,7 @@ mod tests {
             email: "john@example.com".to_string(),
             subject: "Test Subject".to_string(),
             message: "Valid message".to_string(),
+            is_test: false,
         };
         assert!(request.validate().is_err());
     }
@@ -124,6 +129,7 @@ mod tests {
             email: "not-an-email".to_string(),
             subject: "Test Subject".to_string(),
             message: "Valid message".to_string(),
+            is_test: false,
         };
         assert!(request.validate().is_err());
     }
@@ -135,6 +141,7 @@ mod tests {
             email: "john@example.com".to_string(),
             subject: "Test <script>alert('xss')</script>".to_string(),
             message: "Valid message".to_string(),
+            is_test: false,
         };
         assert!(request.validate().is_err());
     }
@@ -146,6 +153,7 @@ mod tests {
             email: "john@example.com".to_string(),
             subject: "Test Subject".to_string(),
             message: "Message with <script>alert('xss')</script>".to_string(),
+            is_test: false,
         };
         assert!(request.validate().is_err());
     }
@@ -158,6 +166,7 @@ mod tests {
             subject: "Test Subject".to_string(),
             message: "http://spam1.com http://spam2.com http://spam3.com http://spam4.com"
                 .to_string(),
+            is_test: false,
         };
         assert!(request.validate().is_err());
     }
@@ -169,6 +178,7 @@ mod tests {
             email: "john@example.com".to_string(),
             subject: "Test Subject".to_string(),
             message: "a".repeat(51),
+            is_test: false,
         };
         assert!(request.validate().is_err());
     }

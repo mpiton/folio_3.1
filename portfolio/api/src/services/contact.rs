@@ -66,8 +66,18 @@ impl MessageService {
         let result = collection.insert_one(doc).await?;
         println!("Document inséré avec l'ID : {:?}", result.inserted_id);
 
-        // Envoyer l'email
-        self.send_email(&form).await?;
+        // Ne pas envoyer d'email si c'est un test
+        #[cfg(not(test))]
+        if !form.is_test && self.config.brevo_api_key != "test_key" {
+            // Envoyer l'email
+            self.send_email(&form).await?;
+        }
+
+        #[cfg(test)]
+        if !form.is_test {
+            // Envoyer l'email
+            self.send_email(&form).await?;
+        }
 
         Ok(())
     }
@@ -113,6 +123,7 @@ impl MessageService {
                     .get_str("message")
                     .map_err(|e| anyhow::anyhow!(e))?
                     .to_string(),
+                is_test: doc.get_bool("is_test").unwrap_or(false),
             });
         }
         Ok(contacts)
@@ -260,6 +271,7 @@ mod tests {
             email: String::from("test@example.com"),
             subject: String::from("Test Subject"),
             message: String::from("This is a test message"),
+            is_test: false,
         };
 
         // Soumettre le formulaire
@@ -299,6 +311,7 @@ mod tests {
             email: "test@example.com".to_string(),
             subject: "Test Subject".to_string(),
             message: "This is a test message".to_string(),
+            is_test: false,
         };
 
         assert!(form.validate().is_ok());
