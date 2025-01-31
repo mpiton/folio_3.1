@@ -264,7 +264,7 @@ mod tests {
             email: String::from("test@example.com"),
             subject: String::from("Test Subject"),
             message: String::from("This is a test message"),
-            is_test: true,
+            is_test: false,
         };
 
         // Soumettre le formulaire

@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use std::env;
-use std::path::PathBuf;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
@@ -16,10 +15,6 @@ pub struct Config {
     pub rss_source_url: String,
     pub rss_source_db: String,
     pub rss_source_collection: String,
-}
-
-fn env_or_default(key: &str, default: &str) -> String {
-    env::var(key).unwrap_or_else(|_| default.to_string())
 }
 
 impl Config {
@@ -46,9 +41,9 @@ impl Config {
     pub fn new() -> Self {
         // Charger les variables d'environnement depuis le fichier .env approprié
         if env::var("RUST_ENV").map(|v| v == "test").unwrap_or(false) {
-            let mut env_path =
-                PathBuf::from(env::current_dir().expect("Failed to get current directory"));
-            env_path.push(".env.test");
+            let env_path = env::current_dir()
+                .expect("Failed to get current directory")
+                .join(".env.test");
             dotenvy::from_path(env_path).expect("Failed to load .env.test file");
         } else {
             dotenvy::dotenv().ok();
