@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import RssIntro from "../components/sections/RssIntro.astro";
 import RssFeeds from "../components/sections/RssFeeds.astro";
 import { defaultSEO } from "../utils/seo";
+import { ToastManager, defaultMessages } from "../scripts/ToastManager";
 
 const seoData = {
     ...defaultSEO,
@@ -12,47 +13,47 @@ const seoData = {
 };
 
 // Données par défaut pour les tests
-const defaultItems = Array(9).fill({
-    title: "Test Article",
-    url: "https://example.com",
-    pub_date: new Date().toISOString(),
-    description: "Test Description",
-    image_url: "https://placehold.co/600x400",
-});
+const defaultItems = Array.from({ length: 9 }, (_, index) => ({
+    title: `Test Article ${index + 1}`,
+    link: `https://test.com/${index + 1}`,
+    pubDate: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString(),
+    imageUrl: `https://placehold.co/600x400/grey/white/png?text=Test+Article+${index + 1}`,
+}));
 
 // Récupération des articles depuis l'API
 const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
 let items = [];
 
-// En mode test, utiliser directement les données par défaut
-const isTestMode = import.meta.env.MODE === "test";
-
-if (isTestMode) {
-    items = defaultItems;
-} else {
-    try {
-        const response = await fetch(`${API_URL}/api/rss?page=1&limit=9`);
-        if (response.ok) {
-            items = await response.json();
-        } else {
-            items = defaultItems;
-        }
-    } catch (error) {
-        console.error("Erreur:", error);
+try {
+    console.log(`Tentative de récupération des flux RSS depuis ${API_URL}/api/rss`);
+    const response = await fetch(`${API_URL}/api/rss?page=1&limit=9`);
+    console.log('Statut de la réponse:', response.status);
+    
+    if (response.ok) {
+        const data = await response.json();
+        console.log('Données reçues:', data);
+        // Gérer à la fois le format de l'API réelle (array) et des tests (object avec articles)
+        items = Array.isArray(data) ? data : (data.articles || []);
+        console.log('Nombre d\'articles chargés:', items.length);
+    } else {
+        console.error('Erreur API:', await response.text());
         items = defaultItems;
     }
+} catch (error) {
+    console.error("Erreur lors du chargement des flux RSS:", error);
+    items = defaultItems;
 }
 
 // Transformation des données pour correspondre à l'interface RssItem
 const rssItems = items.map((item: any) => ({
     title: item.title || "Article sans titre",
-    link: item.url || "#",
-    description: item.description || "Pas de description disponible",
-    pubDate: new Date(item.pub_date || Date.now()),
+    pubDate: new Date(item.pubDate || item.pub_date || Date.now()),
+    link: item.link || item.url || "#",
     imageUrl:
-        item.image_url ||
+        item.imageUrl || item.image_url ||
         `https://placehold.co/600x400/grey/white/png?text=${encodeURIComponent(item.title || "Article")}`,
 }));
+
 ---
 
 <Layout seo={seoData}>
@@ -63,4 +64,124 @@ const rssItems = items.map((item: any) => ({
         />
         <RssFeeds items={rssItems} />
     </main>
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container"></div>
 </Layout>
+
+<script>
+    import { ToastManager, type ToastOptions } from "../scripts/ToastManager";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialiser le gestionnaire de toast
+        ToastManager.getInstance();
+
+        // Fonction utilitaire pour afficher un toast
+        const showToast = (type: ToastOptions['type'], title: string, message: string) => {
+            const event = new CustomEvent<ToastOptions>('showToast', {
+                detail: {
+                    type,
+                    title,
+                    message,
+                    duration: 5000
+                }
+            });
+            document.dispatchEvent(event);
+        };
+
+        // Gérer les événements de succès/erreur pour les opérations RSS
+        // Par exemple, pour l'ajout d'un flux RSS
+        const addFeedForm = document.querySelector('form');
+        if (addFeedForm) {
+            addFeedForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    // Votre logique d'ajout de flux RSS ici
+                    showToast('success', 'Flux RSS ajouté', 'Le flux RSS a été ajouté avec succès.');
+                } catch (error) {
+                    showToast('error', 'Erreur', 'Impossible d\'ajouter le flux RSS.');
+                }
+            });
+        }
+
+        // Pour la suppression d'un flux RSS
+        document.querySelectorAll('[data-delete-feed]').forEach(button => {
+            button.addEventListener('click', async () => {
+                try {
+                    // Votre logique de suppression ici
+                    showToast('success', 'Flux RSS supprimé', 'Le flux RSS a été supprimé avec succès.');
+                } catch (error) {
+                    showToast('error', 'Erreur', 'Impossible de supprimer le flux RSS.');
+                }
+            });
+        });
+    });
+</script>
+
+<style is:global>
+    .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+        pointer-events: none;
+    }
+
+    .toast {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        width: 300px;
+        margin-top: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-out;
+        pointer-events: auto;
+    }
+
+    .toast--visible {
+        transform: translateX(0);
+    }
+
+    .toast[data-type="success"] { border-left: 4px solid #10B981; }
+    .toast[data-type="error"] { border-left: 4px solid #EF4444; }
+    .toast[data-type="warning"] { border-left: 4px solid #F59E0B; }
+    .toast[data-type="info"] { border-left: 4px solid #3B82F6; }
+
+    .toast-icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .toast-content {
+        flex-grow: 1;
+    }
+
+    .toast-title {
+        margin: 0 0 4px;
+        font-weight: 600;
+    }
+
+    .toast-message {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .toast-close {
+        padding: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        opacity: 0.5;
+    }
+
+    .toast-close:hover {
+        opacity: 1;
+    }
+</style>

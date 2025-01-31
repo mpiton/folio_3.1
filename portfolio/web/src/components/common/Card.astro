@@ -1,82 +1,88 @@
 ---
 interface Props {
-  variant?: 'default' | 'elevated' | 'bordered';
-  padding?: 'sm' | 'md' | 'lg';
-  class?: string;
-  interactive?: boolean;
+    variant?: "default" | "elevated" | "bordered";
+    padding?: "sm" | "md" | "lg";
+    class?: string;
+    interactive?: boolean;
+    "data-testid"?: string;
+    [key: string]: any; // Pour permettre d'autres attributs HTML
 }
 
 const {
-  variant = 'default',
-  padding = 'md',
-  class: className = '',
-  interactive = false,
+    variant = "default",
+    padding = "md",
+    class: className = "",
+    interactive = false,
+    "data-testid": dataTestId,
+    ...rest
 } = Astro.props;
 ---
 
 <div
-  class:list={[
-    'card',
-    `card--${variant}`,
-    `card--padding-${padding}`,
-    { 'card--interactive': interactive },
-    className
-  ]}
+    class:list={[
+        "card",
+        `card--${variant}`,
+        `card--padding-${padding}`,
+        { "card--interactive": interactive },
+        className,
+    ]}
+    data-testid={dataTestId}
+    {...rest}
 >
-  <slot />
+    <slot />
 </div>
 
 <style>
-  .card {
-    background-color: var(--secondary-color);
-    border-radius: 1rem;
-    width: 100%;
-    transition: all 0.3s ease;
-    color: var(--text-color);
-  }
-
-  /* Variants */
-  .card--default {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  }
-
-  .card--elevated {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  }
-
-  .card--bordered {
-    border: 2px solid var(--primary-color);
-  }
-
-  /* Padding */
-  .card--padding-sm {
-    padding: 1rem;
-  }
-
-  .card--padding-md {
-    padding: 1.5rem;
-  }
-
-  .card--padding-lg {
-    padding: 2rem;
-  }
-
-  /* Interactive state */
-  .card--interactive {
-    cursor: pointer;
-  }
-
-  .card--interactive:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    border-color: var(--primary-color);
-    background-color: var(--accent-color);
-  }
-
-  /* Media queries */
-  @media (max-width: 768px) {
-    .card--padding-lg {
-      padding: 1.5rem;
+    .card {
+        background-color: var(--secondary-color);
+        border-radius: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+        color: var(--text-color);
     }
-  }
+
+    /* Variants */
+    .card--default {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .card--elevated {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card--bordered {
+        border: 2px solid var(--primary-color);
+    }
+
+    /* Padding */
+    .card--padding-sm {
+        padding: 1rem;
+    }
+
+    .card--padding-md {
+        padding: 1.5rem;
+    }
+
+    .card--padding-lg {
+        padding: 2rem;
+    }
+
+    /* Interactive state */
+    .card--interactive {
+        cursor: pointer;
+    }
+
+    .card--interactive:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
+        background-color: var(--accent-color);
+    }
+
+    /* Media queries */
+    @media (max-width: 768px) {
+        .card--padding-lg {
+            padding: 1.5rem;
+        }
+    }
 </style>

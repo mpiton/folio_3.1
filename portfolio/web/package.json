@@ -8,8 +8,11 @@
         "build": "npm run generate-pwa && astro build",
         "preview": "astro preview",
         "astro": "astro",
-        "test:e2e": "cross-env MODE=test PUBLIC_API_URL=http://localhost:8080 playwright test --retries=2 --workers=1",
+        "test:e2e": "cross-env MODE=test PUBLIC_API_URL=http://localhost:8080 playwright test",
+        "test:e2e:ci": "cross-env MODE=test PUBLIC_API_URL=http://localhost:8080 playwright test --retries=2 --workers=1",
         "test:e2e:ui": "cross-env MODE=test PUBLIC_API_URL=http://localhost:8080 playwright test --ui",
+        "test:e2e:debug": "cross-env MODE=test PUBLIC_API_URL=http://localhost:8080 playwright test --debug",
+        "test:e2e:single": "cross-env MODE=test PUBLIC_API_URL=http://localhost:8080 playwright test --project=chromium",
         "generate-pwa": "node scripts/generate-pwa-assets.js"
     },
     "dependencies": {

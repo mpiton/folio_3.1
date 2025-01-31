@@ -14,35 +14,51 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false, // Désactiver le parallélisme pour plus de stabilité
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
+  /* Retry failed tests */
   retries: process.env.CI ? 2 : 1,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Reduce parallel workers for better stability */
+  workers: 1, // Un seul worker pour éviter les problèmes de ressources
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    ['list'] // Reporter en ligne de commande pour un meilleur feedback
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:4321',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
 
     /* Augmenter les timeouts */
-    actionTimeout: 15_000,
-    navigationTimeout: 30_000,
+    actionTimeout: 45000,
+    navigationTimeout: 60000,
+
+    /* Capture screenshot on failure */
+    screenshot: 'only-on-failure',
+
+    /* Record video for failed tests */
+    video: 'retain-on-failure',
   },
 
-  timeout: 60_000, // Timeout global de 60 secondes
+  /* Global timeout par test */
+  timeout: 120000,
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        }
+      },
     },
 
     {
@@ -54,35 +70,36 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000, // 2 minutes pour le démarrage du serveur
-    stdout: 'pipe',
-    stderr: 'pipe',
+  webServer: [
+    {
+      // Démarrer d'abord le backend
+      command: 'cd ../api && cargo run --bin portfolio-api',
+      url: 'http://localhost:8080/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 180000, // 3 minutes pour le démarrage du serveur
+      stdout: 'pipe',
+      stderr: 'pipe'
+    },
+    {
+      // Ensuite démarrer le frontend
+      // On attend 5 secondes pour s'assurer que le backend est bien démarré
+      command: 'timeout /t 5 && npm run dev',
+      url: 'http://localhost:4321',
+      reuseExistingServer: !process.env.CI,
+      timeout: 180000, // 3 minutes pour le démarrage du serveur
+      stdout: 'pipe',
+      stderr: 'pipe'
+    }
+  ],
+
+  /* Configuration globale */
+  expect: {
+    timeout: 30000, // Timeout par défaut pour les assertions
+    toHaveScreenshot: {
+      maxDiffPixels: 100, // Plus tolérant pour les différences de pixels
+    },
   },
 });

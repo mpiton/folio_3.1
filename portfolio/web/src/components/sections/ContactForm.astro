@@ -1,7 +1,6 @@
 ---
 import Button from "../common/Button.astro";
 import Input from "../common/Input.astro";
-import Toast from "../common/Toast.astro";
 
 interface Props {
     class?: string;
@@ -11,19 +10,6 @@ const { class: className = "" } = Astro.props;
 ---
 
 <section class:list={["contact-form", className]}>
-    <Toast
-        type="success"
-        title="Message envoyé !"
-        message="Votre message a bien été envoyé. Je vous répondrai dans les plus brefs délais."
-        id="contact-success"
-    />
-    <Toast
-        type="error"
-        title="Erreur"
-        message="Une erreur est survenue lors de l'envoi du message. Veuillez réessayer."
-        id="contact-error"
-    />
-
     <form id="contact-form" class="form" novalidate>
         <div class="form-group">
             <Input
@@ -56,20 +42,14 @@ const { class: className = "" } = Astro.props;
             />
         </div>
         <div class="form-group">
-            <label for="message">
-                Message
-                <span class="required">*</span>
-            </label>
-            <div class="textarea-container">
-                <textarea
-                    id="message"
-                    name="message"
-                    placeholder="Votre message"
-                    required
-                    data-testid="contact-message"></textarea>
-                <i class="textarea-icon fas fa-comment-alt" aria-hidden="true"
-                ></i>
-            </div>
+            <Input
+                type="textarea"
+                name="message"
+                label="Message"
+                placeholder="Votre message"
+                required
+                data-testid="contact-message"
+            />
         </div>
         <div class="form-submit">
             <Button
@@ -86,11 +66,12 @@ const { class: className = "" } = Astro.props;
 </section>
 
 <script>
+    import { ToastManager } from "../../scripts/ToastManager";
+
     class ContactForm {
         private form: HTMLFormElement;
-        private successToast: HTMLElement | null;
-        private errorToast: HTMLElement | null;
         private apiUrl: string;
+        private toastManager: ToastManager;
 
         constructor() {
             const form = document.getElementById("contact-form");
@@ -98,10 +79,8 @@ const { class: className = "" } = Astro.props;
                 throw new Error("Form element not found");
             }
             this.form = form;
-            this.successToast = document.getElementById("contact-success");
-            this.errorToast = document.getElementById("contact-error");
-            this.apiUrl =
-                import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
+            this.apiUrl = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
+            this.toastManager = ToastManager.getInstance();
             this.initialize();
         }
 
@@ -220,10 +199,10 @@ const { class: className = "" } = Astro.props;
             const wrapper =
                 field.closest(".input-wrapper") || field.closest(".form-group");
 
-            // Supprimer l'ancien message d'erreur s'il existe
-            const oldError = wrapper?.querySelector(".error-message");
-            if (oldError) {
-                oldError.remove();
+            // Supprimer le message d'erreur
+            const errorMessage = wrapper?.querySelector(".error-message");
+            if (errorMessage) {
+                errorMessage.remove();
             }
 
             // Créer le nouveau message d'erreur avec les classes Tailwind
@@ -248,11 +227,14 @@ const { class: className = "" } = Astro.props;
 
             const wrapper =
                 field.closest(".input-wrapper") || field.closest(".form-group");
-            const errorDiv = wrapper?.querySelector(".error-message");
-            if (errorDiv) {
-                errorDiv.remove();
+
+            // Supprimer le message d'erreur
+            const errorMessage = wrapper?.querySelector(".error-message");
+            if (errorMessage) {
+                errorMessage.remove();
             }
 
+            // Supprimer les classes d'erreur
             field.classList.remove("error");
             const container =
                 field.closest(".input-container") ||
@@ -260,8 +242,9 @@ const { class: className = "" } = Astro.props;
             container?.classList.remove("error");
         }
 
-        isValidEmail(email: string) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        isValidEmail(email: string): boolean {
+            const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return EMAIL_REGEX.test(email);
         }
 
         escapeHtml(unsafe: string): string {
@@ -273,23 +256,21 @@ const { class: className = "" } = Astro.props;
                 .replace(/'/g, "&#039;");
         }
 
-        async handleSubmit(event: Event) {
+        private async handleSubmit(event: Event) {
             event.preventDefault();
-
+            
             if (!this.validateForm()) {
+                this.toastManager.show({
+                    type: 'error',
+                    title: 'Erreur',
+                    message: 'Veuillez remplir tous les champs requis correctement',
+                    duration: 5000
+                });
                 return;
             }
 
             const formData = new FormData(this.form);
-            const rawData = Object.fromEntries(formData.entries());
-
-            // Échapper les données avant l'envoi
-            const data = {
-                name: this.escapeHtml(rawData.name as string),
-                email: this.escapeHtml(rawData.email as string),
-                subject: this.escapeHtml(rawData.subject as string),
-                message: this.escapeHtml(rawData.message as string),
-            };
+            const data = Object.fromEntries(formData.entries());
 
             try {
                 const response = await fetch(`${this.apiUrl}/api/contact`, {
@@ -300,270 +281,86 @@ const { class: className = "" } = Astro.props;
                     body: JSON.stringify(data),
                 });
 
-                const responseData = await response.text();
-
                 if (!response.ok) {
-                    // Essayer de parser l'erreur comme JSON
-                    try {
-                        const errorData = JSON.parse(responseData);
-                        if (
-                            errorData.message &&
-                            errorData.message.includes("Validation error")
-                        ) {
-                            // Extraire le message d'erreur spécifique
-                            const errorMatch = errorData.message.match(
-                                /Validation error: (.+)/
-                            );
-                            if (errorMatch) {
-                                const [field, message] =
-                                    errorMatch[1].split(": ");
-                                const fieldElement = this.form.querySelector(
-                                    `[name="${field}"]`
-                                ) as HTMLElement;
-                                if (fieldElement) {
-                                    this.showError(fieldElement, message);
-                                    return;
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        // Si ce n'est pas du JSON, utiliser le message d'erreur brut
-                        console.error("Error parsing response:", e);
-                    }
-                    // Si on ne peut pas traiter l'erreur spécifiquement, montrer l'erreur générique
-                    if (this.errorToast) {
-                        this.showToast(this.errorToast);
-                    }
-                    return;
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
+                this.toastManager.show({
+                    type: 'success',
+                    title: 'Succès',
+                    message: 'Message envoyé avec succès',
+                    duration: 5000
+                });
                 this.form.reset();
-                if (this.successToast) {
-                    this.showToast(this.successToast);
-                }
             } catch (error) {
-                console.error("Error submitting form:", error);
-                if (this.errorToast) {
-                    this.showToast(this.errorToast);
-                }
-            }
-        }
-
-        showToast(toast: HTMLElement) {
-            if (!(toast instanceof HTMLElement)) return;
-
-            const clonedToast = toast.cloneNode(true);
-            if (!(clonedToast instanceof HTMLElement)) return;
-
-            clonedToast.classList.add("toast--cloned");
-            document.body.appendChild(clonedToast);
-
-            // Utiliser le ToastManager global
-            if (window.ToastManager) {
-                const toastManager = new window.ToastManager(clonedToast);
-                toastManager.show();
+                console.error("Error:", error);
+                this.toastManager.show({
+                    type: 'error',
+                    title: 'Erreur',
+                    message: 'Une erreur est survenue lors de l\'envoi du message',
+                    duration: 5000
+                });
             }
         }
     }
 
-    // Initialize the form when the DOM is loaded
-    document.addEventListener("DOMContentLoaded", () => {
-        new ContactForm();
-    });
+    // Initialiser le formulaire
+    new ContactForm();
 </script>
 
 <style>
     .contact-form {
-        width: 100%;
+        @apply w-full max-w-2xl mx-auto;
     }
 
     .form {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        width: 100%;
+        @apply space-y-6;
     }
 
     .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+        @apply space-y-2;
     }
 
-    label {
-        font-weight: 600;
-        color: var(--text-color);
-        font-size: 0.95rem;
-        font-family: var(--font-heading);
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
+    .form-group label {
+        @apply block text-sm font-medium text-gray-700 dark:text-gray-200;
     }
 
-    label .required {
-        color: var(--error-color);
+    .form-group .required {
+        @apply text-red-500 ml-0.5;
     }
 
     .textarea-container {
-        position: relative;
-        display: flex;
-        align-items: flex-start;
+        @apply relative;
     }
 
-    .textarea-icon {
-        position: absolute;
-        left: 1rem;
-        top: 0.875rem;
-        color: #9ca3af;
-        font-size: 1rem;
-        transition: all 0.2s ease-in-out;
-        pointer-events: none;
+    .textarea-container textarea {
+        @apply block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-secondary dark:border-gray-600 dark:focus:ring-green-500 dark:focus:border-green-500 dark:text-white resize-none h-32;
     }
 
-    textarea {
-        width: 100%;
-        min-height: 150px;
-        padding: 0.875rem 1rem;
-        padding-left: 2.75rem;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 0.5rem;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        font-family: var(--font-body);
-        font-size: 1rem;
-        resize: vertical;
-        transition: all 0.2s ease-in-out;
-    }
-
-    textarea::placeholder {
-        color: #9ca3af;
-        opacity: 0.7;
-        transition: opacity 0.2s ease;
-    }
-
-    textarea:hover::placeholder {
-        opacity: 0.9;
-    }
-
-    /* États du textarea */
-    .textarea-container:hover textarea:not(:focus):not(.error) {
-        border-color: var(--primary-color);
-        box-shadow: 0 2px 4px rgba(87, 142, 126, 0.05);
-    }
-
-    .textarea-container:hover .textarea-icon {
-        color: var(--primary-color);
-        transform: translateY(-1px);
-    }
-
-    textarea:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(87, 142, 126, 0.15);
-        background-color: #fafafa;
-    }
-
-    textarea:focus::placeholder {
-        opacity: 0.5;
-    }
-
-    /* Styles d'erreur pour le textarea */
-    .textarea-container.error textarea {
-        border-color: #dc2626;
-        background-color: #fef2f2;
-        border-width: 1.5px;
-    }
-
-    .textarea-container.error .textarea-icon {
-        color: #dc2626;
-    }
-
-    .textarea-container.error textarea:focus {
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
-    }
-
-    /* Mode sombre */
-    @media (prefers-color-scheme: dark) {
-        textarea {
-            border-color: #374151;
-            background-color: rgba(17, 24, 39, 0.3);
-        }
-
-        textarea:focus {
-            background-color: rgba(17, 24, 39, 0.5);
-        }
-
-        textarea::placeholder {
-            color: #6b7280;
-        }
-
-        .textarea-icon {
-            color: #6b7280;
-        }
-
-        .textarea-container.error textarea {
-            background-color: rgba(220, 38, 38, 0.1);
-        }
-    }
-
-    /* Mobile */
-    @media (max-width: 768px) {
-        textarea {
-            padding: 0.75rem;
-            padding-left: 2.5rem;
-        }
-
-        .textarea-icon {
-            left: 0.875rem;
-        }
+    .textarea-container .textarea-icon {
+        @apply absolute right-3 top-3 text-gray-400 dark:text-gray-500;
     }
 
     .form-submit {
-        margin-top: 1.5rem;
-        display: flex;
-        justify-content: flex-end;
+        @apply flex justify-end;
     }
 
-    /* Styles des messages d'erreur */
-    .error-message {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.375rem;
-        padding: 0.625rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #dc2626;
-        background-color: #fef2f2;
-        border-left: 4px solid #dc2626;
-        border-radius: 0 0.375rem 0.375rem 0;
-        animation: slideIn 0.2s ease-out;
+    /* Toast animations */
+    .toast--cloned {
+        @apply fixed bottom-4 right-4 opacity-0 transform translate-y-2 transition-all duration-300 ease-out z-50;
     }
 
-    .error-message i {
-        color: #dc2626;
+    .toast--visible {
+        @apply opacity-100 translate-y-0;
     }
 
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-0.25rem);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    /* Error states */
+    .input-container.error input,
+    .textarea-container.error textarea {
+        @apply border-red-500 focus:ring-red-500 focus:border-red-500;
     }
 
-    /* Mode sombre pour les messages d'erreur */
-    @media (prefers-color-scheme: dark) {
-        .error-message {
-            color: #fca5a5;
-            background-color: rgba(220, 38, 38, 0.1);
-        }
-
-        .error-message i {
-            color: #fca5a5;
-        }
+    .message-label {
+        @apply font-semibold text-text text-[0.95rem] font-heading flex items-center gap-1 transition-colors duration-200;
     }
 </style>
