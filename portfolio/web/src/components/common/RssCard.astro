@@ -1,13 +1,13 @@
 ---
 interface Props {
     title: string;
-    description: string;
+    description?: string;
     link: string;
     pubDate: Date;
     imageUrl: string;
 }
 
-const { title, description, link, pubDate, imageUrl } = Astro.props;
+const { title, link, pubDate, imageUrl } = Astro.props;
 ---
 
 <article
@@ -36,7 +36,6 @@ const { title, description, link, pubDate, imageUrl } = Astro.props;
                 })
             }
         </p>
-        <p class="text-base text-text mb-6 line-clamp-3">{description}</p>
         <a
             href={link}
             target="_blank"

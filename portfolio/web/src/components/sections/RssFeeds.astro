@@ -2,15 +2,13 @@
 import RssCard from "../common/RssCard.astro";
 import Toast from "../common/Toast.astro";
 
-interface RssItem {
-    title: string;
-    link: string;
-    pubDate: string;
-    imageUrl: string;
-}
-
 interface Props {
-    items: RssItem[];
+    items: {
+        title: string;
+        link: string;
+        pubDate: string;
+        imageUrl: string;
+    }[];
 }
 
 const { items } = Astro.props;
@@ -38,17 +36,22 @@ const itemsWithDateObjects = items.map((item) => ({
         >
             Charger plus d'articles
         </button>
-        <Toast
-            id="rss-error"
-            type="error"
-            title="Erreur"
-            message="Une erreur est survenue lors du chargement des articles"
-            showCloseButton={true}
-        />
+        <!-- Toast caché par défaut -->
+        <div class="hidden">
+            <Toast
+                id="rss-error"
+                type="error"
+                title="Erreur"
+                message="Une erreur est survenue lors du chargement des articles"
+                showCloseButton={true}
+            />
+        </div>
     </div>
 </section>
 
 <script>
+    import { ToastManager, type ToastOptions } from "../../scripts/ToastManager";
+
     interface RssItem {
         title: string;
         link?: string;
@@ -65,6 +68,19 @@ const itemsWithDateObjects = items.map((item) => ({
         "loadMore"
     ) as HTMLButtonElement | null;
     const articlesContainer = document.querySelector(".articles-grid");
+
+    // Fonction utilitaire pour afficher un toast
+    const showToast = (type: ToastOptions['type'], title: string, message: string) => {
+        const event = new CustomEvent<ToastOptions>('showToast', {
+            detail: {
+                type,
+                title,
+                message,
+                duration: 5000
+            }
+        });
+        document.dispatchEvent(event);
+    };
 
     function formatArticleDate(item: RssItem): string {
         const date = new Date(item.pub_date || item.pubDate || Date.now());
@@ -125,7 +141,7 @@ const itemsWithDateObjects = items.map((item) => ({
                 throw new Error(`Erreur HTTP: ${response.status}`);
             }
 
-            const newItems = (await response.json()) as RssItem[];
+            const newItems = await response.json() as RssItem[];
 
             if (!Array.isArray(newItems) || newItems.length === 0) {
                 loadMoreBtn.textContent = "Plus d'articles disponibles";
@@ -149,27 +165,22 @@ const itemsWithDateObjects = items.map((item) => ({
             loadMoreBtn.textContent = "Charger plus d'articles";
             loadMoreBtn.disabled = false;
         } catch (error) {
-            console.error("Erreur:", error);
+            console.error("Erreur lors du chargement des articles:", error);
+            showToast('error', 'Erreur', 'Une erreur est survenue lors du chargement des articles');
             loadMoreBtn.textContent = "Charger plus d'articles";
             loadMoreBtn.disabled = false;
-
-            // Afficher le toast d'erreur
-            const errorToast = document.getElementById("rss-error");
-            if (errorToast) {
-                const clonedToast = errorToast.cloneNode(true) as HTMLElement;
-                clonedToast.classList.add("toast--cloned");
-                document.body.appendChild(clonedToast);
-                if (window.ToastManager) {
-                    const toastManager = new window.ToastManager(clonedToast);
-                    toastManager.show();
-                }
-            }
         } finally {
             isLoading = false;
         }
     }
 
+    // Ajouter l'écouteur d'événement pour le chargement
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener("click", loadMoreArticles);
     }
+
+    // Initialiser le gestionnaire de toast
+    document.addEventListener('DOMContentLoaded', () => {
+        ToastManager.getInstance();
+    });
 </script>
