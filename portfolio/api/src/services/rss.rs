@@ -149,8 +149,9 @@ impl FeedService {
         let mut feeds_cursor = feeds_collection.find(doc! {}).await?;
 
         let target_collection = self.db.collection::<Document>("portfolio");
-        // Suppression des anciens articles
-        target_collection.delete_many(doc! {}).await?;
+
+        // Collection pour stocker tous les articles
+        let mut all_articles = Vec::new();
 
         // Pour chaque feed
         while let Some(feed_doc) = feeds_cursor.try_next().await? {
@@ -160,7 +161,7 @@ impl FeedService {
             // Récupération et parsing du flux RSS
             match self.fetch_rss(feed_link).await {
                 Ok(channel) => {
-                    for item in channel.items().iter().take(10) {
+                    for item in channel.items().iter() {
                         let title = item.title().unwrap_or_default();
                         let link = item.link().unwrap_or_default();
                         let description = item.description().unwrap_or_default();
@@ -177,23 +178,16 @@ impl FeedService {
                             )
                         });
 
-                        let new_doc = doc! {
-                            "title": title,
-                            "url": link,
-                            "pub_date": pub_date.to_rfc3339(),
-                            "description": description,
-                            "image_url": image_url,
-                        };
-
-                        if let Err(e) = target_collection.insert_one(new_doc).await {
-                            tracing::error!(
-                                "Erreur lors de l'insertion de l'article '{}' : {}",
-                                title,
-                                e
-                            );
-                            continue;
-                        }
-                        tracing::info!("Article ajouté : {}", title);
+                        all_articles.push((
+                            pub_date,
+                            doc! {
+                                "title": title,
+                                "url": link,
+                                "pub_date": pub_date.to_rfc3339(),
+                                "description": description,
+                                "image_url": image_url,
+                            },
+                        ));
                     }
                 }
                 Err(e) => {
@@ -204,6 +198,23 @@ impl FeedService {
                     );
                     continue;
                 }
+            }
+        }
+
+        // Trier tous les articles par date décroissante
+        all_articles.sort_by(|a, b| b.0.cmp(&a.0));
+
+        // Supprimer les anciens articles
+        target_collection.delete_many(doc! {}).await?;
+
+        // Insérer les articles triés
+        if !all_articles.is_empty() {
+            let articles_to_insert: Vec<Document> =
+                all_articles.into_iter().map(|(_, doc)| doc).collect();
+
+            match target_collection.insert_many(articles_to_insert).await {
+                Ok(_) => tracing::info!("Articles insérés avec succès"),
+                Err(e) => tracing::error!("Erreur lors de l'insertion des articles : {}", e),
             }
         }
 
