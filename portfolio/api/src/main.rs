@@ -1,3 +1,11 @@
+//! Portfolio API Server
+//!
+//! Provides backend services for:
+//! - RSS feed aggregation
+//! - Contact form processing
+//! - Database management
+//! - Email queue system
+
 use axum::http::HeaderValue;
 use axum::{
     http::{HeaderName, Method},
@@ -17,6 +25,19 @@ use std::{net::SocketAddr, time::Duration};
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+/// Adds security headers to HTTP responses for enhanced protection
+///
+/// # Security Headers
+/// - `X-Frame-Options: DENY` - Prevents clickjacking attacks
+/// - `X-Content-Type-Options: nosniff` - Disables MIME type sniffing
+/// - `X-XSS-Protection: 1; mode=block` - Enables XSS filtering
+/// - `Content-Security-Policy` - Restricts resources to trusted sources
+///
+/// # Arguments
+/// * `response` - Original Axum response to modify
+///
+/// # Returns
+/// Modified response with security headers
 async fn add_security_headers(mut response: axum::response::Response) -> axum::response::Response {
     let headers = response.headers_mut();
     headers.insert("X-Frame-Options", HeaderValue::from_static("DENY"));

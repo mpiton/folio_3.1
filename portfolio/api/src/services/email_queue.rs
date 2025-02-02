@@ -8,10 +8,21 @@ use tokio::sync::{
 
 static EMAIL_QUEUE: OnceCell<Arc<EmailQueue>> = OnceCell::new();
 
+/// Thread-safe email queue for asynchronous message processing
+///
+/// # Features
+/// - Buffered channel with 100 message capacity
+/// - Background processor thread
+/// - Test utilities for isolated testing
+///
+///   Email message structure for queue items
 #[derive(Debug, Clone)]
 pub struct EmailMessage {
+    /// Recipient email address
     pub to: String,
+    /// Email subject line
     pub subject: String,
+    /// HTML email body content
     pub body: String,
 }
 
@@ -20,10 +31,10 @@ struct EmailQueue {
     receiver: Mutex<Option<Receiver<EmailMessage>>>,
 }
 
-/// Initialise la file d'attente des emails.
+/// Initializes email queue
 ///
-/// Cette fonction est thread-safe et ne peut être appelée qu'une seule fois.
-/// Les appels suivants n'auront aucun effet.
+/// Thread-safe - can only be called once
+/// Subsequent calls have no effect.
 pub fn init_queue() {
     EMAIL_QUEUE.get_or_init(|| {
         let (sender, receiver) = mpsc::channel(100);
@@ -34,24 +45,29 @@ pub fn init_queue() {
     });
 }
 
-/// Ajoute un email à la file d'attente pour envoi.
+/// Enqueues email for background processing
 ///
 /// # Errors
-///
-/// Cette fonction retourne une erreur si :
-/// - La file d'attente n'est pas initialisée
-/// - La file d'attente est pleine
-/// - Le canal de communication est fermé
+/// Returns error if:
+/// - Queue not initialized
+/// - Channel is closed
 pub async fn enqueue_email(message: EmailMessage) -> Result<()> {
     let queue = EMAIL_QUEUE
         .get()
-        .ok_or_else(|| anyhow::anyhow!("La file d'attente n'est pas initialisée"))?;
+        .ok_or_else(|| anyhow::anyhow!("Queue not initialized"))?;
     queue.sender.send(message).await?;
     Ok(())
 }
 
-/// Démarre le processeur d'emails en arrière-plan.
-/// Cette fonction est thread-safe et peut être appelée plusieurs fois.
+/// Starts background email processing task
+///
+/// # Behavior
+/// - Claims exclusive access to queue receiver
+/// - Processes messages until channel closes
+/// - Runs indefinitely in tokio task
+///
+/// # Safety
+/// Should only be called once during application startup
 pub async fn start_email_processor() {
     let Some(queue) = EMAIL_QUEUE.get() else {
         return;
@@ -64,10 +80,10 @@ pub async fn start_email_processor() {
     }
 }
 
-/// Traite un email de la file d'attente.
+/// Processes email from queue
 fn process_email(message: &EmailMessage) {
     println!(
-        "Email envoyé à {} avec le sujet: {}",
+        "Email sent to {} with subject: {}",
         message.to, message.subject
     );
 }
@@ -78,21 +94,21 @@ mod tests {
 
     #[tokio::test]
     async fn test_email_queue() {
-        // Initialiser la file d'attente
+        // Initialize queue
         init_queue();
 
-        // Créer un message de test
+        // Create test message
         let message = EmailMessage {
             to: "test@example.com".to_string(),
             subject: "Test Subject".to_string(),
             body: "<p>Test content</p>".to_string(),
         };
 
-        // Envoyer le message
+        // Send message
         let result = enqueue_email(message).await;
         assert!(result.is_ok());
 
-        // Récupérer le message directement depuis la queue
+        // Retrieve message directly from queue
         if let Some(queue) = EMAIL_QUEUE.get() {
             if let Some(mut receiver) = queue.receiver.lock().await.take() {
                 if let Some(received_message) = receiver.recv().await {

@@ -8,9 +8,9 @@ static TEMPLATES: Lazy<Handlebars<'static>> = Lazy::new(|| {
     reg.register_template_string(
         "contact",
         r"
-        <h2>Nouveau message de contact</h2>
-        <p><strong>De:</strong> {{name}} ({{email}})</p>
-        <p><strong>Sujet:</strong> {{subject}}</p>
+        <h2>New contact message</h2>
+        <p><strong>From:</strong> {{name}} ({{email}})</p>
+        <p><strong>Subject:</strong> {{subject}}</p>
         <hr>
         <p><strong>Message:</strong></p>
         <p>{{message}}</p>
@@ -20,14 +20,14 @@ static TEMPLATES: Lazy<Handlebars<'static>> = Lazy::new(|| {
     reg
 });
 
-/// Génère le contenu HTML d'un email à partir du template de contact.
+/// Generates HTML email content from contact template.
 ///
 /// # Errors
 ///
-/// Cette fonction retourne une erreur si :
-/// - Le template n'est pas trouvé
-/// - Le rendu du template échoue
-/// - Les données fournies sont invalides pour le template
+/// Returns error if:
+/// - Template not found
+/// - Template rendering fails
+/// - Invalid template data
 pub fn render_contact_template(
     name: &str,
     email: &str,
