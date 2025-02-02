@@ -10,12 +10,22 @@ use serde::{Deserialize, Serialize};
 use urlencoding;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+/// RSS feed metadata container for source tracking
 pub struct Feed {
+    /// Canonical URL of the RSS feed source
     pub link: String,
+    /// Initial creation timestamp in UTC
     pub created_at: DateTime<Utc>,
+    /// Last update timestamp in UTC
     pub updated_at: DateTime<Utc>,
 }
 
+/// RSS feed processing service with MongoDB integration
+///
+/// # Features
+/// - Feed parsing with image extraction
+/// - Paginated feed retrieval
+/// - Automatic content expiration via TTL indexes
 pub struct FeedService {
     db: Database,
     config: Config,
@@ -35,16 +45,16 @@ impl FeedService {
         }
     }
 
-    /// Extrait l'URL de l'image d'un article RSS
+    /// Extracts the image URL from an RSS article item
     fn extract_image_url(item: &Item) -> Option<String> {
-        // 1. Vérifier les enclosures
+        // 1. Check enclosures
         if let Some(enclosure) = item.enclosure() {
             if enclosure.mime_type.starts_with("image/") {
                 return Some(enclosure.url.clone());
             }
         }
 
-        // 2. Vérifier les extensions (media:content, media:thumbnail)
+        // 2. Check media extensions (media:content, media:thumbnail)
         if let Some(ext) = item.extensions.get("media") {
             if let Some(contents) = ext.get("content") {
                 if let Some(content) = contents.first() {
@@ -62,7 +72,7 @@ impl FeedService {
             }
         }
 
-        // 3. Chercher dans la description HTML
+        // 3. Search HTML description
         if let Some(description) = item.description() {
             let fragment = Html::parse_fragment(description);
             if let Ok(selector) = Selector::parse("img") {
@@ -77,7 +87,14 @@ impl FeedService {
         None
     }
 
-    /// Récupère tous les flux RSS de la base de données.
+    /// Retrieves paginated RSS feed items from database
+    ///
+    /// # Arguments
+    /// * `page` - Pagination page number (1-based)
+    /// * `limit` - Items per page
+    ///
+    /// # Returns
+    /// Vector of `RssItem` structures sorted by publication date
     pub async fn get_feeds(&self, page: u32, limit: u32) -> Vec<RssItem> {
         let collection = self.db.collection::<Document>("portfolio");
         let skip = (page - 1) * limit;
@@ -116,7 +133,7 @@ impl FeedService {
         }
     }
 
-    /// Récupère et parse un flux RSS
+    /// Fetches and parses an RSS feed
     async fn fetch_rss(&self, url: &str) -> Result<Channel> {
         let content = self
             .client
@@ -131,34 +148,47 @@ impl FeedService {
         Ok(channel)
     }
 
-    /// Stocke les éléments du flux RSS dans la base de données.
+    /// Synchronizes RSS feeds from external sources to local database
     ///
-    /// # Errors
+    /// # Workflow
+    /// 1. Connects to configured RSS source database
+    /// 2. Processes each feed URL sequentially
+    /// 3. Performs multi-stage parsing:
+    ///    - Channel metadata extraction
+    ///    - Item content parsing
+    ///    - Image URL detection
+    /// 4. Stores normalized data with TTL indexes
     ///
-    /// Cette fonction retourne une erreur si :
-    /// - La requête à la base de données échoue
-    /// - L'insertion ou la mise à jour des documents échoue
+    /// # Error Handling
+    /// Returns error if:
+    /// - Source database connection fails
+    /// - RSS feed parsing fails permanently (invalid XML)
+    /// - Bulk write operation fails
+    ///
+    /// # Notes
+    /// - Failed individual feeds are logged but don't abort the process
+    /// - Uses 90-day TTL for automatic data cleanup
     pub async fn store_items(&self) -> Result<()> {
-        // Connexion à la base de données source
+        // Connect to the source database
         let source_client = mongodb::Client::with_uri_str(&self.config.rss_source_url)
             .await?
             .database(&self.config.rss_source_db);
 
-        // Récupération des feeds
+        // Retrieve feeds
         let feeds_collection = source_client.collection::<Document>("feeds");
         let mut feeds_cursor = feeds_collection.find(doc! {}).await?;
 
         let target_collection = self.db.collection::<Document>("portfolio");
 
-        // Collection pour stocker tous les articles
+        // Collection to store all articles
         let mut all_articles = Vec::new();
 
-        // Pour chaque feed
+        // Process each feed
         while let Some(feed_doc) = feeds_cursor.try_next().await? {
             let feed_link = feed_doc.get_str("link").unwrap_or_default();
-            tracing::info!("Traitement du feed : {}", feed_link);
+            tracing::info!("Processing feed: {}", feed_link);
 
-            // Récupération et parsing du flux RSS
+            // Fetch and parse the RSS feed
             match self.fetch_rss(feed_link).await {
                 Ok(channel) => {
                     for item in channel.items().iter() {
@@ -191,30 +221,26 @@ impl FeedService {
                     }
                 }
                 Err(e) => {
-                    tracing::error!(
-                        "Erreur lors de la récupération du feed {} : {}",
-                        feed_link,
-                        e
-                    );
+                    tracing::error!("Error fetching feed {}: {}", feed_link, e);
                     continue;
                 }
             }
         }
 
-        // Trier tous les articles par date décroissante
+        // Sort articles by date in descending order
         all_articles.sort_by(|a, b| b.0.cmp(&a.0));
 
-        // Supprimer les anciens articles
+        // Remove old articles
         target_collection.delete_many(doc! {}).await?;
 
-        // Insérer les articles triés
+        // Insert sorted articles
         if !all_articles.is_empty() {
             let articles_to_insert: Vec<Document> =
                 all_articles.into_iter().map(|(_, doc)| doc).collect();
 
             match target_collection.insert_many(articles_to_insert).await {
-                Ok(_) => tracing::info!("Articles insérés avec succès"),
-                Err(e) => tracing::error!("Erreur lors de l'insertion des articles : {}", e),
+                Ok(_) => tracing::info!("Articles inserted successfully"),
+                Err(e) => tracing::error!("Error inserting articles: {}", e),
             }
         }
 

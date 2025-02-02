@@ -1,17 +1,28 @@
 use serde::Deserialize;
 use std::env;
 
+/// Central application configuration loaded from environment variables
+///
+/// # Environment Variables
+/// - `MONGO_URL`: MongoDB connection string (required)
+/// - `PORT`: Server port (default: 8080)
+/// - `BREVO_API_KEY`: Email service API key (required)
+/// - `FRONTEND_URL`: CORS allowed origin (required)
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
+    /// MongoDB connection URL with authentication source
     pub mongo_url: String,
-    pub host: String,
+    /// Server listening port
     pub port: u16,
-    pub rss_cache_duration: u64,
+    /// Email service API key for Brevo/SendGrid
     pub brevo_api_key: String,
+    /// Allowed frontend origin for CORS
+    pub frontend_url: String,
+    pub host: String,
+    pub rss_cache_duration: u64,
     pub recipient_email: String,
     pub sender_name: String,
     pub sender_email: String,
-    pub frontend_url: String,
     pub rss_source_url: String,
     pub rss_source_db: String,
     pub rss_source_collection: String,
@@ -86,11 +97,12 @@ impl Config {
         }
     }
 
-    /// Crée une configuration de test avec des valeurs par défaut.
+    /// Creates isolated test configuration
     ///
-    /// # Panics
-    ///
-    /// Cette fonction panique si la variable d'environnement `MONGO_URL` n'est pas définie.
+    /// # Test Environment
+    /// - Loads `.env.test` file explicitly
+    /// - Uses separate database credentials
+    /// - Sets shorter cache durations for faster tests
     #[cfg(test)]
     #[must_use]
     pub fn test_config() -> Self {
