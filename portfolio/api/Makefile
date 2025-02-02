@@ -27,6 +27,12 @@ build:
 run-api:
 	cargo run --bin portfolio-api
 
+sync-rss:
+	cargo run --bin sync_rss
+
+run-format:
+	cargo fmt
+
 check:
 	cargo check && cargo clippy
 
