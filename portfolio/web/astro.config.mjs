@@ -80,7 +80,7 @@ export default defineConfig({
         scope: '/'
       },
       workbox: {
-        navigateFallback: '/404',
+        navigateFallback: '/index.html',
         globPatterns: ['**/*.{css,js,html,svg,png,jpg,jpeg,gif,webp,woff,woff2,ttf,eot,ico}']
       },
       devOptions: {
