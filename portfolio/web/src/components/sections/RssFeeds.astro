@@ -11,10 +11,10 @@ interface Props {
     }[];
 }
 
-const { items } = Astro.props;
+const { items: initialItems } = Astro.props;
 
-// Convertir les dates des items
-const itemsWithDateObjects = items.map((item) => ({
+// Convertir les dates des items initiaux
+const itemsWithDateObjects = initialItems.map((item) => ({
     ...item,
     pubDate: new Date(item.pubDate),
 }));
@@ -24,6 +24,7 @@ const itemsWithDateObjects = items.map((item) => ({
     <div class="max-w-7xl mx-auto">
         <div
             class="articles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
+            id="articles-container"
         >
             {itemsWithDateObjects.map((item) => <RssCard {...item} />)}
         </div>
@@ -50,53 +51,38 @@ const itemsWithDateObjects = items.map((item) => ({
 </section>
 
 <script>
-    import { ToastManager, type ToastOptions } from "../../scripts/ToastManager";
-
-    interface RssItem {
-        title: string;
-        link?: string;
-        url?: string;
-        pubDate?: string;
-        pub_date?: string;
-        imageUrl?: string;
-        image_url?: string;
-    }
-
+    const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
+    const articlesContainer = document.getElementById('articles-container');
     let currentPage = 1;
-    let isLoading = false;
-    const loadMoreBtn = document.getElementById(
-        "loadMore"
-    ) as HTMLButtonElement | null;
-    const articlesContainer = document.querySelector(".articles-grid");
+    const ITEMS_PER_PAGE = 9;
 
-    // Fonction utilitaire pour afficher un toast
-    const showToast = (type: ToastOptions['type'], title: string, message: string) => {
-        const event = new CustomEvent<ToastOptions>('showToast', {
-            detail: {
-                type,
-                title,
-                message,
-                duration: 5000
-            }
-        });
-        document.dispatchEvent(event);
-    };
-
-    function formatArticleDate(item: RssItem): string {
-        const date = new Date(item.pub_date || item.pubDate || Date.now());
-        return date.toLocaleDateString("fr-FR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
+    async function loadArticles(page: number) {
+        try {
+            const response = await fetch(`${API_URL}/api/rss?page=${page}&limit=${ITEMS_PER_PAGE}`);
+            if (!response.ok) throw new Error('Erreur lors du chargement des articles');
+            
+            const items = await response.json();
+            return items.map((item: any) => ({
+                title: item.title || "Article sans titre",
+                pubDate: new Date(item.pubDate || item.pub_date || Date.now()),
+                link: item.link || item.url || "#",
+                imageUrl: item.image_url || `https://placehold.co/600x400/grey/white/png?text=${encodeURIComponent(item.title || "Article sans titre")}`,
+            }))
+            .sort((a: any, b: any) => b.pubDate.getTime() - a.pubDate.getTime());
+        } catch (error) {
+            console.error('Erreur:', error);
+            const toast = document.getElementById('rss-error') as HTMLElement;
+            if (toast) toast.classList.remove('hidden');
+            return [];
+        }
     }
 
-    function createArticleHtml(item: RssItem): string {
+    function createArticleCard(item: any) {
         return `
             <article class="rss-article bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div class="relative h-48 overflow-hidden">
                     <img
-                        src="${item.image_url || item.imageUrl || "https://placehold.co/600x400"}"
+                        src="${item.imageUrl}"
                         alt="${item.title}"
                         loading="lazy"
                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
@@ -107,10 +93,14 @@ const itemsWithDateObjects = items.map((item) => ({
                         ${item.title}
                     </h3>
                     <p class="text-sm text-text-light mb-4">
-                        ${formatArticleDate(item)}
+                        ${item.pubDate.toLocaleDateString("fr-FR", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                        })}
                     </p>
                     <a
-                        href="${item.url || item.link || "#"}"
+                        href="${item.link}"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="inline-block text-primary font-semibold hover:text-primary-dark transition-colors duration-300"
@@ -123,64 +113,25 @@ const itemsWithDateObjects = items.map((item) => ({
         `;
     }
 
-    async function loadMoreArticles() {
-        if (!articlesContainer || !loadMoreBtn || isLoading) return;
-
-        try {
-            isLoading = true;
-            loadMoreBtn.disabled = true;
-            loadMoreBtn.textContent = "Chargement...";
-
-            const API_URL =
-                import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
-            const response = await fetch(
-                `${API_URL}/api/rss?page=${currentPage + 1}&limit=9`
-            );
-
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
+    document.getElementById('loadMore')?.addEventListener('click', async () => {
+        currentPage++;
+        const newArticles = await loadArticles(currentPage);
+        if (newArticles.length > 0) {
+            const articlesHTML = newArticles.map(createArticleCard).join('');
+            if (articlesContainer) {
+                articlesContainer.insertAdjacentHTML('beforeend', articlesHTML);
             }
-
-            const newItems = await response.json() as RssItem[];
-
-            if (!Array.isArray(newItems) || newItems.length === 0) {
-                loadMoreBtn.textContent = "Plus d'articles disponibles";
-                loadMoreBtn.disabled = true;
-                loadMoreBtn.classList.add("hidden");
-                return;
-            }
-
-            // Créer un fragment pour ajouter tous les articles d'un coup
-            const fragment = document.createDocumentFragment();
-            for (const item of newItems) {
-                const tempDiv = document.createElement("div");
-                tempDiv.innerHTML = createArticleHtml(item);
-                fragment.appendChild(tempDiv.firstElementChild!);
-            }
-
-            // Ajouter le fragment au conteneur
-            articlesContainer.appendChild(fragment);
-
-            currentPage++;
-            loadMoreBtn.textContent = "Charger plus d'articles";
-            loadMoreBtn.disabled = false;
-        } catch (error) {
-            console.error("Erreur lors du chargement des articles:", error);
-            showToast('error', 'Erreur', 'Une erreur est survenue lors du chargement des articles');
-            loadMoreBtn.textContent = "Charger plus d'articles";
-            loadMoreBtn.disabled = false;
-        } finally {
-            isLoading = false;
         }
-    }
+    });
 
-    // Ajouter l'écouteur d'événement pour le chargement
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener("click", loadMoreArticles);
-    }
-
-    // Initialiser le gestionnaire de toast
-    document.addEventListener('DOMContentLoaded', () => {
-        ToastManager.getInstance();
+    // Charger les articles frais au chargement de la page
+    document.addEventListener('DOMContentLoaded', async () => {
+        const freshArticles = await loadArticles(1);
+        if (freshArticles.length > 0) {
+            const articlesHTML = freshArticles.map(createArticleCard).join('');
+            if (articlesContainer) {
+                articlesContainer.innerHTML = articlesHTML;
+            }
+        }
     });
 </script>
