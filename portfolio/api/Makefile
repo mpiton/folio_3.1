@@ -2,19 +2,19 @@
 
 # Docker commands
 up:
-	docker-compose up -d
+	docker compose up -d
 
 down:
-	docker-compose down
+	docker compose down
 
 restart:
-	docker-compose restart
+	docker compose restart
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 clean:
-	docker-compose down -v
+	docker compose down -v
 	docker system prune -f
 
 # Development commands
@@ -41,7 +41,7 @@ fmt:
 
 # Database commands
 init-db:
-	docker-compose up -d mongodb
+	docker compose up -d mongodb
 	@echo "Waiting for MongoDB to start..."
 	@sleep 5
 	@echo "MongoDB is ready!"
@@ -50,12 +50,12 @@ init-db:
 backup:
 	@mkdir -p backup
 	@echo "Creating database backup..."
-	docker-compose exec mongodb mongodump --uri="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/${MONGO_DB}?authSource=admin" --out=/data/db/backup/
+	docker compose exec mongodb mongodump --uri="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/${MONGO_DB}?authSource=admin" --out=/data/db/backup/
 	@echo "Backup completed!"
 
 restore:
 	@echo "Restoring database from backup..."
-	docker-compose exec mongodb mongorestore --uri="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/${MONGO_DB}?authSource=admin" /data/db/backup/
+	docker compose exec mongodb mongorestore --uri="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:27017/${MONGO_DB}?authSource=admin" /data/db/backup/
 	@echo "Restore completed!"
 
 # Help command
