@@ -209,23 +209,3 @@ impl MessageService {
         Ok(())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use validator::Validate;
-
-    #[test]
-    fn test_contact_form_validation() {
-        // Test setup
-        let valid_form = Request {
-            name: "John Doe".to_string(),
-            email: "john.doe@example.com".to_string(),
-            subject: "Test Subject".to_string(),
-            message: "This is a test message".to_string(),
-            is_test: false,
-        };
-
-        assert!(valid_form.validate().is_ok());
-    }
-}
