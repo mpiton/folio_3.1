@@ -125,7 +125,3 @@ async fn init_collections(db: &Database) -> Result<()> {
     println!("Collection initialization completed successfully");
     Ok(())
 }
-
-
-
-
