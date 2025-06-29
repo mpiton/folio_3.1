@@ -86,7 +86,7 @@ async fn main() {
     let cors = CorsLayer::new()
         .allow_origin([
             frontend_url.parse().unwrap(),
-            format!("{}/", frontend_url).parse().unwrap(),
+            format!("{frontend_url}/").parse().unwrap(),
         ])
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
         .allow_headers([

@@ -1,5 +1,44 @@
 # Liste des Tâches - Portfolio v3.1
 
+> 💡 Cette liste de tâches a été entièrement synchronisée avec l'état actuel du projet. Les tâches précédemment cochées mais non implémentées ont été décochées et réorganisées.
+
+## ✅ Tâches Accomplies (Après Refactorisation)
+
+-   **[x] Environnement de dev stabilisé** : Correction des dépendances système (Rust, OpenSSL, Node).
+-   **[x] Dépendances mises à jour** : `Cargo.toml` et `package.json` sont à jour.
+-   **[x] Code mort supprimé** : Nettoyage des dépendances et du code inutilisés côté backend et frontend.
+-   **[x] CI Backend fonctionnelle** : `cargo fmt`, `cargo clippy` et `cargo test` (tests unitaires) passent avec succès.
+-   **[x] Build Frontend fonctionnel** : `npm run build` s'exécute sans erreur (hors connexion API).
+-   **[x] Documentation projet mise à jour** : `PROJET.md`, `FRONTEND.md` et `CDC.md` reflètent maintenant l'état réel du projet.
+
+## 🚧 Prochaines Étapes (Priorités)
+
+###  Backend (API Rust)
+
+-   [ ] **Automatiser les backups** : Créer un job (ex: cron) pour exécuter le binaire `backup_db` périodiquement.
+-   [ ] **Implémenter une protection anti-spam basique** : Ajouter un rate-limiting plus strict sur l'endpoint du formulaire de contact.
+-   [ ] **Mettre en place une file d'attente pour les emails** : Utiliser le service `email_queue` pour rendre l'envoi non bloquant.
+-   [ ] **Générer la documentation API** : Mettre en place `OpenAPI/Swagger` pour documenter les routes.
+
+### Frontend (Astro)
+
+-   [ ] **Activer le mode PWA** : Finaliser la configuration du Service Worker et du manifest.
+-   [ ] **Améliorer l'accessibilité** : Effectuer un audit `a11y` et corriger les problèmes.
+-   [ ] **Optimiser les images** : S'assurer que toutes les images sont compressées et utilisent des formats modernes.
+-   [ ] **Supprimer les composants de démo inutilisés** : Nettoyer les composants qui ne sont utilisés que dans la page de test `components.astro` si celle-ci n'est pas conservée.
+
+### Infrastructure & Déploiement
+
+-   [ ] **Finaliser la CI/CD** : Mettre en place l'étape de déploiement automatique dans le workflow GitHub Actions.
+-   [ ] **Configurer le monitoring** : Mettre en place un service de logging et d'alerting pour l'application en production.
+
+## 💡 Améliorations Futures (Non Prioritaire)
+
+-   [ ] **Internationalisation (i18n)** : Ajouter le support multilingue (FR/EN) comme envisagé initialement.
+-   [ ] **Tests d'intégration Backend** : Ré-évaluer la mise en place de tests d'intégration avec un environnement Docker stable et dédié.
+-   [ ] **Tests unitaires Frontend** : Intégrer `Vitest` pour tester la logique des composants complexes.
+-   [ ] **Protection anti-spam avancée** : Mettre en place des solutions comme un honeypot ou une analyse de contenu.
+
 ## 🚀 Phase 1 : Configuration Initiale ✅
 - [x] Structure du projet Rust avec Cargo
 - [x] Configuration GitHub Actions (CI/CD)

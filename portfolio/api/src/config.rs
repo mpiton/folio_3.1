@@ -108,9 +108,13 @@ impl Config {
     pub fn test_config() -> Self {
         // Charger les variables d'environnement depuis le fichier .env.test
         dotenvy::from_filename(".env.test").ok();
-        let base_mongo_url = env::var("MONGO_URL").expect("MONGO_URL must be set");
+        let mut base_mongo_url = env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = env::var("MONGO_DB").expect("MONGO_DB must be set");
-        let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+
+        if !base_mongo_url.ends_with('/') {
+            base_mongo_url.push('/');
+        }
+        let mongo_url = format!("{base_mongo_url}?authSource={mongo_db}");
 
         Self {
             mongo_url,
