@@ -17,7 +17,7 @@ mod tests {
         dotenvy::from_filename(".env.test").ok();
         let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
-        let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+        let mongo_url = format!("{base_mongo_url}?authSource={mongo_db}");
 
         BackupConfig {
             mongo_uri: mongo_url,
@@ -34,7 +34,7 @@ mod tests {
 
         let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
-        let expected_mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+        let expected_mongo_url = format!("{base_mongo_url}?authSource={mongo_db}");
 
         std::env::set_var("BACKUP_DIR", "/tmp/test");
         std::env::set_var("DATABASE_NAME", "test_db");
@@ -111,7 +111,7 @@ mod tests {
             Ok(_) => println!("Test réussi : vérification de l'espace disque OK"),
             Err(e) => {
                 println!("Test : Configuration de backup chargée");
-                panic!("Test échoué : {}", e);
+                panic!("Test échoué : {e}");
             }
         }
     }
@@ -147,7 +147,7 @@ impl BackupConfig {
         dotenvy::dotenv().ok();
         let base_mongo_url = std::env::var("MONGO_URL").expect("MONGO_URL must be set");
         let mongo_db = std::env::var("MONGO_DB").expect("MONGO_DB must be set");
-        let mongo_url = format!("{}?authSource={}", base_mongo_url, mongo_db);
+        let mongo_url = format!("{base_mongo_url}?authSource={mongo_db}");
 
         Self {
             mongo_uri: mongo_url,
