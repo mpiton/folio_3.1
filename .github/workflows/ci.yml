@@ -37,7 +37,7 @@ jobs:
 
     services:
       mongodb:
-        image: mongo:7.0@sha256:d504ca91d9c89a3c08c0de32d3032b7f5ac4c26ba0b49d8b6e2ce1c8d7f6cfc8
+        image: mongo:7.0
         env:
           MONGO_INITDB_ROOT_USERNAME: ${{ env.MONGO_INITDB_ROOT_USERNAME }}
           MONGO_INITDB_ROOT_PASSWORD: ${{ env.MONGO_INITDB_ROOT_PASSWORD }}
