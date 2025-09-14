@@ -40,6 +40,10 @@ node_modules/
 # vscode
 .vscode/
 
+# claude
+.claude/
+CLAUDE.md
+
 
 
 # End of https://www.toptal.com/developers/gitignore/api/rust,rust-analyzer,dotenv
