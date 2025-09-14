@@ -21,7 +21,8 @@ export default defineConfig({
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: true,
+          // Keep important logs visible in prod
+          pure_funcs: ['console.debug', 'console.info', 'console.trace'],
           drop_debugger: true
         }
       },
@@ -84,7 +85,8 @@ export default defineConfig({
         globPatterns: ['**/*.{css,js,html,svg,png,jpg,jpeg,gif,webp,woff,woff2,ttf,eot,ico}']
       },
       devOptions: {
-        enabled: false
+        // Enable with `PWA_DEV=true npm run dev` when you need to test SW in dev
+        enabled: process.env.PWA_DEV === 'true'
       }
     })
   ]
