@@ -30,16 +30,14 @@ anyhow = "1.0.99"
 chrono = { version = "0.4.42", features = ["serde"] }
 
 # HTTP client
-reqwest = { version = "0.12.23", features = ["json"] }
+reqwest = { version = "0.12.23", default-features = false, features = ["json", "rustls-tls"] }
 url = "2.5.7"
 rss = "2.0.11"
 regex = "1.11.2"
-lazy_static = "1.5.0"
 handlebars = "6.3.2"
 axum = { version = "0.8.1", features = ["macros", "tower-log"] }
 tower-http = { version = "0.6.2", features = ["cors", "limit", "trace"] }
 validator = { version = "0.20.0", features = ["derive"] }
-validator_derive = "0.20.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 tower = { version = "0.5.2", features = ["util", "limit"] }
