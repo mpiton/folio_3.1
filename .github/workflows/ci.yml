@@ -37,7 +37,7 @@ jobs:
 
     services:
       mongodb:
-        image: mongo:7.0
+        image: mongo:7.0@sha256:d504ca91d9c89a3c08c0de32d3032b7f5ac4c26ba0b49d8b6e2ce1c8d7f6cfc8
         env:
           MONGO_INITDB_ROOT_USERNAME: ${{ env.MONGO_INITDB_ROOT_USERNAME }}
           MONGO_INITDB_ROOT_PASSWORD: ${{ env.MONGO_INITDB_ROOT_PASSWORD }}
@@ -51,12 +51,11 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
     - name: Set up Rust
       uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203
       with:
-        toolchain: 1.89.0
         components: rustfmt, clippy
 
     - name: Cache dependencies
@@ -91,12 +90,11 @@ jobs:
   security-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203
         with:
-          toolchain: 1.89.0
           components: rustfmt, clippy
 
       - name: Install cargo-audit
