@@ -3,33 +3,32 @@ use axum::{
     http::{Request, Response, StatusCode},
 };
 use futures_util::future::BoxFuture;
+use once_cell::sync::Lazy;
 use serde_json::Value;
 use std::collections::HashSet;
 use tower::Service;
 
-lazy_static::lazy_static! {
-    static ref MONGO_OPERATORS: HashSet<&'static str> = {
-        let mut set = HashSet::new();
-        set.insert("$where");
-        set.insert("$ne");
-        set.insert("$gt");
-        set.insert("$lt");
-        set.insert("$gte");
-        set.insert("$lte");
-        set.insert("$regex");
-        set.insert("$in");
-        set.insert("$nin");
-        set.insert("$all");
-        set.insert("$or");
-        set.insert("$and");
-        set.insert("$exists");
-        set.insert("$type");
-        set.insert("$mod");
-        set.insert("$text");
-        set.insert("$search");
-        set
-    };
-}
+static MONGO_OPERATORS: Lazy<HashSet<&'static str>> = Lazy::new(|| {
+    let mut set = HashSet::new();
+    set.insert("$where");
+    set.insert("$ne");
+    set.insert("$gt");
+    set.insert("$lt");
+    set.insert("$gte");
+    set.insert("$lte");
+    set.insert("$regex");
+    set.insert("$in");
+    set.insert("$nin");
+    set.insert("$all");
+    set.insert("$or");
+    set.insert("$and");
+    set.insert("$exists");
+    set.insert("$type");
+    set.insert("$mod");
+    set.insert("$text");
+    set.insert("$search");
+    set
+});
 
 #[derive(Clone)]
 pub struct MongoSanitizer;

@@ -4,12 +4,7 @@ use anyhow::Result;
 use futures_util::TryStreamExt;
 use mongodb::bson::{doc, Document};
 use mongodb::Database;
-use tokio::sync::Mutex;
 use validator::Validate;
-
-lazy_static::lazy_static! {
-    static ref TEST_MUTEX: Mutex<()> = Mutex::new(());
-}
 
 pub struct MessageService {
     db: Database,

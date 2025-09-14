@@ -4,9 +4,14 @@ use chrono::{DateTime, Utc};
 use futures_util::TryStreamExt;
 use mongodb::bson::{doc, Document};
 use mongodb::Database;
+use once_cell::sync::Lazy;
+use regex::Regex;
 use rss::{Channel, Item};
 use serde::{Deserialize, Serialize};
 use urlencoding;
+
+static IMG_SRC_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r#"(?i)<img[^>]+src=["'](https?://[^"']+)["']"#).unwrap());
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 /// RSS feed metadata container for source tracking
@@ -73,12 +78,9 @@ impl FeedService {
 
         // 3. Search HTML description using regex
         if let Some(description) = item.description() {
-            // Simple regex to extract img src attributes
-            if let Ok(re) = regex::Regex::new(r#"<img[^>]+src=["']([^"']+)["']"#) {
-                if let Some(cap) = re.captures(description) {
-                    if let Some(src) = cap.get(1) {
-                        return Some(src.as_str().to_string());
-                    }
+            if let Some(cap) = IMG_SRC_RE.captures(description) {
+                if let Some(src) = cap.get(1) {
+                    return Some(src.as_str().to_string());
                 }
             }
         }

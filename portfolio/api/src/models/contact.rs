@@ -1,3 +1,4 @@
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
@@ -45,10 +46,9 @@ pub struct Request {
     pub is_test: bool,
 }
 
-lazy_static::lazy_static! {
-    static ref NAME_RE: Regex = Regex::new(r"^[\p{L}\s\-']+$").unwrap();
-    static ref SAFE_TEXT_REGEX: Regex = Regex::new(r"^[\p{L}\p{N}\s.,!?@()'\[\]\-_&+=%°:;]+$").unwrap();
-}
+static NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[\p{L}\s\-']+$").unwrap());
+static SAFE_TEXT_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^[\p{L}\p{N}\s.,!?@()'\[\]\-_&+=%°:;]+$").unwrap());
 
 fn validate_name(name: &str) -> Result<(), validator::ValidationError> {
     if NAME_RE.is_match(name) {
