@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:7.0-rc
+    image: mongo:7.0
     container_name: portfolio_mongodb
     restart: unless-stopped
     environment:
