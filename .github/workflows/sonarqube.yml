@@ -38,16 +38,27 @@ jobs:
       - name: Convert shallow clone to full clone for SonarQube
         run: |
           # Ensure we have full git history for SonarQube analysis
-          if git rev-parse --is-shallow-repository | grep -q true; then
-            echo "Shallow repository detected, fetching full history..."
-            git fetch --unshallow --all --tags
-          else
-            echo "Repository is already a full clone"
+          # GitHub Actions fetch-depth: 0 should work, but let's be explicit
+          echo "Initial repository state:"
+          git rev-parse --is-shallow-repository || echo "Git check failed"
+
+          # Remove shallow clone marker if it exists
+          if [ -f .git/shallow ]; then
+            echo "Found .git/shallow file, removing it..."
+            rm .git/shallow
           fi
-          # Verify repository state
-          echo "Repository info:"
-          git rev-parse --is-shallow-repository
-          git rev-parse --git-dir
+
+          # Fetch full history with all tags
+          echo "Fetching full git history..."
+          git fetch --unshallow --all --tags 2>/dev/null || {
+            echo "git fetch --unshallow failed, trying alternative approach..."
+            git fetch --all --tags --prune --unshallow 2>/dev/null || true
+          }
+
+          # Final verification
+          echo "Final repository state:"
+          git rev-parse --is-shallow-repository || echo "Git check failed"
+          [ ! -f .git/shallow ] && echo ".git/shallow removed successfully" || echo "Warning: .git/shallow still exists"
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203
@@ -120,16 +131,27 @@ jobs:
       - name: Convert shallow clone to full clone for SonarQube
         run: |
           # Ensure we have full git history for SonarQube analysis
-          if git rev-parse --is-shallow-repository | grep -q true; then
-            echo "Shallow repository detected, fetching full history..."
-            git fetch --unshallow --all --tags
-          else
-            echo "Repository is already a full clone"
+          # GitHub Actions fetch-depth: 0 should work, but let's be explicit
+          echo "Initial repository state:"
+          git rev-parse --is-shallow-repository || echo "Git check failed"
+
+          # Remove shallow clone marker if it exists
+          if [ -f .git/shallow ]; then
+            echo "Found .git/shallow file, removing it..."
+            rm .git/shallow
           fi
-          # Verify repository state
-          echo "Repository info:"
-          git rev-parse --is-shallow-repository
-          git rev-parse --git-dir
+
+          # Fetch full history with all tags
+          echo "Fetching full git history..."
+          git fetch --unshallow --all --tags 2>/dev/null || {
+            echo "git fetch --unshallow failed, trying alternative approach..."
+            git fetch --all --tags --prune --unshallow 2>/dev/null || true
+          }
+
+          # Final verification
+          echo "Final repository state:"
+          git rev-parse --is-shallow-repository || echo "Git check failed"
+          [ ! -f .git/shallow ] && echo ".git/shallow removed successfully" || echo "Warning: .git/shallow still exists"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
