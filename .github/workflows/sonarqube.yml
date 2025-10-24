@@ -38,7 +38,12 @@ jobs:
       - name: Build and generate clippy report
         run: |
           cd portfolio/api
-          cargo clippy --all-targets --all-features --message-format json > target/clippy-report.json || true
+          # Generate clippy report with proper error handling
+          cargo clippy --all-targets --all-features --message-format json 2>&1 | tee target/clippy-report.json || true
+          # Validate report is not empty, create valid empty JSON array if needed
+          if [ ! -s target/clippy-report.json ]; then
+            echo "[]" > target/clippy-report.json
+          fi
           cargo build --verbose
 
       - name: Run tests with coverage
@@ -58,14 +63,8 @@ jobs:
         run: |
           cd portfolio/api
           ${{ runner.temp }}/sonar/sonar-scanner-6.1.0.4477-linux/bin/sonar-scanner \
-            -Dsonar.projectKey=folio-api \
-            -Dsonar.projectName=Folio API Backend \
-            -Dsonar.sources=src \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_LOGIN: ${{ secrets.SONAR_TOKEN }}
 
   sonarqube-frontend:
     name: SonarQube Frontend (Astro/TypeScript)
@@ -110,15 +109,8 @@ jobs:
         run: |
           cd portfolio/web
           ${{ runner.temp }}/sonar/sonar-scanner-6.1.0.4477-linux/bin/sonar-scanner \
-            -Dsonar.projectKey=folio-web \
-            -Dsonar.projectName=Folio Web Frontend \
-            -Dsonar.sources=src \
-            -Dsonar.language=ts \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_LOGIN: ${{ secrets.SONAR_TOKEN }}
 
   sonarqube-report:
     name: Create SonarQube Report
