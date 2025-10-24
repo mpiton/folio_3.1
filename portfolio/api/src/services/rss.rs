@@ -49,43 +49,55 @@ impl FeedService {
         }
     }
 
+    /// Extracts image URL from RSS item enclosure
+    fn extract_from_enclosure(item: &Item) -> Option<String> {
+        item.enclosure()
+            .filter(|enclosure| enclosure.mime_type.starts_with("image/"))
+            .map(|enclosure| enclosure.url.clone())
+    }
+
+    /// Extracts image URL from RSS item media extension (content)
+    fn extract_from_media_content(item: &Item) -> Option<String> {
+        item.extensions
+            .get("media")?
+            .get("content")?
+            .first()?
+            .attrs
+            .get("url")
+            .cloned()
+    }
+
+    /// Extracts image URL from RSS item media extension (thumbnail)
+    fn extract_from_media_thumbnail(item: &Item) -> Option<String> {
+        item.extensions
+            .get("media")?
+            .get("thumbnail")?
+            .first()?
+            .attrs
+            .get("url")
+            .cloned()
+    }
+
+    /// Extracts image URL from HTML description using regex
+    fn extract_from_html_description(item: &Item) -> Option<String> {
+        item.description()
+            .and_then(|description| IMG_SRC_RE.captures(description))
+            .and_then(|cap| cap.get(1))
+            .map(|src| src.as_str().to_string())
+    }
+
     /// Extracts the image URL from an RSS article item
+    ///
+    /// Tries multiple sources in order:
+    /// 1. RSS enclosure (image type)
+    /// 2. Media extension content
+    /// 3. Media extension thumbnail
+    /// 4. HTML description (regex search)
     fn extract_image_url(item: &Item) -> Option<String> {
-        // 1. Check enclosures
-        if let Some(enclosure) = item.enclosure() {
-            if enclosure.mime_type.starts_with("image/") {
-                return Some(enclosure.url.clone());
-            }
-        }
-
-        // 2. Check media extensions (media:content, media:thumbnail)
-        if let Some(ext) = item.extensions.get("media") {
-            if let Some(contents) = ext.get("content") {
-                if let Some(content) = contents.first() {
-                    if let Some(url) = content.attrs.get("url") {
-                        return Some(url.clone());
-                    }
-                }
-            }
-            if let Some(thumbnails) = ext.get("thumbnail") {
-                if let Some(thumbnail) = thumbnails.first() {
-                    if let Some(url) = thumbnail.attrs.get("url") {
-                        return Some(url.clone());
-                    }
-                }
-            }
-        }
-
-        // 3. Search HTML description using regex
-        if let Some(description) = item.description() {
-            if let Some(cap) = IMG_SRC_RE.captures(description) {
-                if let Some(src) = cap.get(1) {
-                    return Some(src.as_str().to_string());
-                }
-            }
-        }
-
-        None
+        Self::extract_from_enclosure(item)
+            .or_else(|| Self::extract_from_media_content(item))
+            .or_else(|| Self::extract_from_media_thumbnail(item))
+            .or_else(|| Self::extract_from_html_description(item))
     }
 
     /// Retrieves paginated RSS feed items from database
