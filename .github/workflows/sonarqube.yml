@@ -16,6 +16,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Validate SonarQube secrets are configured
+        run: |
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ] || [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
+            echo "❌ ERROR: SonarQube secrets not configured!"
+            echo "Please set the following secrets in GitHub repository settings:"
+            echo "  - SONAR_TOKEN: Your SonarQube authentication token"
+            echo "  - SONAR_HOST_URL: Your SonarQube server URL (e.g., https://sonarqube.example.com)"
+            echo ""
+            echo "Additional notes:"
+            echo "  - Ensure the projects 'folio-api' and 'folio-web' exist on your SonarQube server"
+            echo "  - Or ensure your token has permission to create new projects"
+            exit 1
+          fi
+          echo "✅ SonarQube secrets are configured"
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0  # Full history for SonarQube
@@ -50,6 +65,8 @@ jobs:
         run: |
           cd portfolio/api
           cargo test --verbose -- --test-threads=1
+        env:
+          MONGO_URL: mongodb://localhost:27017/test
 
       - name: Run SonarQube analysis for backend
         uses: sonarsource/sonarqube-scan-action@master
@@ -65,6 +82,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Validate SonarQube secrets are configured
+        run: |
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ] || [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
+            echo "❌ ERROR: SonarQube secrets not configured!"
+            echo "Please set the following secrets in GitHub repository settings:"
+            echo "  - SONAR_TOKEN: Your SonarQube authentication token"
+            echo "  - SONAR_HOST_URL: Your SonarQube server URL (e.g., https://sonarqube.example.com)"
+            echo ""
+            echo "Additional notes:"
+            echo "  - Ensure the projects 'folio-api' and 'folio-web' exist on your SonarQube server"
+            echo "  - Or ensure your token has permission to create new projects"
+            exit 1
+          fi
+          echo "✅ SonarQube secrets are configured"
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0  # Full history for SonarQube
