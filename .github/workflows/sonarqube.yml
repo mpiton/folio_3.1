@@ -35,30 +35,30 @@ jobs:
         with:
           fetch-depth: 0  # Full history for SonarQube
 
-      - name: Convert shallow clone to full clone for SonarQube
+      - name: Ensure full git history for SonarQube
         run: |
-          # Ensure we have full git history for SonarQube analysis
-          # GitHub Actions fetch-depth: 0 should work, but let's be explicit
-          echo "Initial repository state:"
-          git rev-parse --is-shallow-repository || echo "Git check failed"
+          # SonarQube requires complete git history for blame information
+          # GitHub Actions PR events create merge commits with limited history
 
-          # Remove shallow clone marker if it exists
-          if [ -f .git/shallow ]; then
-            echo "Found .git/shallow file, removing it..."
-            rm .git/shallow
+          echo "Preparing repository for SonarQube analysis..."
+
+          # Remove .git/shallow marker if it exists
+          [ -f .git/shallow ] && rm .git/shallow && echo "Removed .git/shallow marker"
+
+          # Fetch full history from all remotes
+          git fetch origin --unshallow --all --tags --force 2>/dev/null || true
+
+          # For PR events, ensure we have both base and head branch history
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "PR event detected, fetching PR-specific history..."
+            git fetch origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}" || true
+            git fetch origin "+refs/pull/${{ github.event.pull_request.number }}/merge:" || true
           fi
 
-          # Fetch full history with all tags
-          echo "Fetching full git history..."
-          git fetch --unshallow --all --tags 2>/dev/null || {
-            echo "git fetch --unshallow failed, trying alternative approach..."
-            git fetch --all --tags --prune --unshallow 2>/dev/null || true
-          }
-
-          # Final verification
-          echo "Final repository state:"
-          git rev-parse --is-shallow-repository || echo "Git check failed"
-          [ ! -f .git/shallow ] && echo ".git/shallow removed successfully" || echo "Warning: .git/shallow still exists"
+          # Verify final state
+          echo "Repository ready for analysis:"
+          git log --oneline -5
+          echo "Shallow repository check: $(git rev-parse --is-shallow-repository)"
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203
@@ -128,30 +128,30 @@ jobs:
         with:
           fetch-depth: 0  # Full history for SonarQube
 
-      - name: Convert shallow clone to full clone for SonarQube
+      - name: Ensure full git history for SonarQube
         run: |
-          # Ensure we have full git history for SonarQube analysis
-          # GitHub Actions fetch-depth: 0 should work, but let's be explicit
-          echo "Initial repository state:"
-          git rev-parse --is-shallow-repository || echo "Git check failed"
+          # SonarQube requires complete git history for blame information
+          # GitHub Actions PR events create merge commits with limited history
 
-          # Remove shallow clone marker if it exists
-          if [ -f .git/shallow ]; then
-            echo "Found .git/shallow file, removing it..."
-            rm .git/shallow
+          echo "Preparing repository for SonarQube analysis..."
+
+          # Remove .git/shallow marker if it exists
+          [ -f .git/shallow ] && rm .git/shallow && echo "Removed .git/shallow marker"
+
+          # Fetch full history from all remotes
+          git fetch origin --unshallow --all --tags --force 2>/dev/null || true
+
+          # For PR events, ensure we have both base and head branch history
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "PR event detected, fetching PR-specific history..."
+            git fetch origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}" || true
+            git fetch origin "+refs/pull/${{ github.event.pull_request.number }}/merge:" || true
           fi
 
-          # Fetch full history with all tags
-          echo "Fetching full git history..."
-          git fetch --unshallow --all --tags 2>/dev/null || {
-            echo "git fetch --unshallow failed, trying alternative approach..."
-            git fetch --all --tags --prune --unshallow 2>/dev/null || true
-          }
-
-          # Final verification
-          echo "Final repository state:"
-          git rev-parse --is-shallow-repository || echo "Git check failed"
-          [ ! -f .git/shallow ] && echo ".git/shallow removed successfully" || echo "Warning: .git/shallow still exists"
+          # Verify final state
+          echo "Repository ready for analysis:"
+          git log --oneline -5
+          echo "Shallow repository check: $(git rev-parse --is-shallow-repository)"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
