@@ -193,28 +193,43 @@ fn create_backup(config: &BackupConfig) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn should_remove_backup(
+    metadata: &std::fs::Metadata,
+    now: chrono::DateTime<Utc>,
+    retention_duration: chrono::Duration,
+) -> Result<bool, Box<dyn Error>> {
+    let modified = metadata.modified()?;
+    let modified = chrono::DateTime::<Utc>::from(modified);
+    Ok(now - modified > retention_duration)
+}
+
 fn cleanup_old_backups(config: &BackupConfig) {
     let backup_dir = Path::new(&config.backup_dir);
     let retention_duration = chrono::Duration::days(i64::from(config.retention_days));
     let now = Utc::now();
 
-    if let Ok(entries) = std::fs::read_dir(backup_dir) {
-        for entry in entries.flatten() {
-            if let Ok(metadata) = entry.metadata() {
-                if let Ok(modified) = metadata.modified() {
-                    let modified = chrono::DateTime::<Utc>::from(modified);
-                    if now - modified > retention_duration {
-                        if let Err(e) = std::fs::remove_file(entry.path()) {
-                            error!(
-                                "Erreur lors de la suppression du backup {}: {e}",
-                                entry.path().display()
-                            );
-                        } else {
-                            info!("Backup supprimé: {}", entry.path().display());
-                        }
-                    }
+    let Ok(entries) = std::fs::read_dir(backup_dir) else {
+        return;
+    };
+
+    for entry in entries.flatten() {
+        let Ok(metadata) = entry.metadata() else {
+            continue;
+        };
+
+        match should_remove_backup(&metadata, now, retention_duration) {
+            Ok(true) => {
+                if let Err(e) = std::fs::remove_file(entry.path()) {
+                    error!(
+                        "Erreur lors de la suppression du backup {}: {e}",
+                        entry.path().display()
+                    );
+                } else {
+                    info!("Backup supprimé: {}", entry.path().display());
                 }
             }
+            Ok(false) => {}
+            Err(_) => continue,
         }
     }
 }
