@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 
 export class FirefliesAnimation {
-  private scene: THREE.Scene;
+  private readonly scene: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
   private particles!: THREE.Points;
-  private particlesCount: number = 200;
+  private readonly particlesCount: number = 200;
   private positions!: Float32Array;
-  private canvas: HTMLCanvasElement;
-  private clock: THREE.Clock;
+  private readonly canvas: HTMLCanvasElement;
+  private readonly clock: THREE.Clock;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;

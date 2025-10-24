@@ -1,137 +1,110 @@
 ---
 import RssCard from "../common/RssCard.astro";
-import Toast from "../common/Toast.astro";
 
-interface Props {
-    items: {
-        title: string;
-        link: string;
-        pubDate: string;
-        imageUrl: string;
-    }[];
+const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
+
+async function getRssItems() {
+    try {
+        const response = await fetch(`${API_URL}/api/rss?page=1&limit=9`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch RSS items');
+        }
+        const data = await response.json();
+        return Array.isArray(data) ? data : (data.articles || []);
+    } catch (error) {
+        console.error("Erreur lors du chargement des flux RSS:", error);
+        return [];
+    }
 }
 
-const { items: initialItems } = Astro.props;
+const items = await getRssItems();
 
-// Convertir les dates des items initiaux
-const itemsWithDateObjects = initialItems.map((item) => ({
-    ...item,
-    pubDate: new Date(item.pubDate),
+const rssItems = items.map((item: any) => ({
+    title: item.title || "Article sans titre",
+    pubDate: new Date(item.pubDate || item.pub_date || Date.now()),
+    link: item.link || item.url || "#",
+    imageUrl: item.imageUrl || item.image_url || `https://placehold.co/600x400/grey/white/png?text=${encodeURIComponent(item.title || "Article")}`,
 }));
 ---
 
 <section class="px-4 py-8 md:py-12">
     <div class="max-w-7xl mx-auto">
-        <div
-            class="articles-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
-            id="articles-container"
-        >
-            {itemsWithDateObjects.map((item) => <RssCard {...item} />)}
+        <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {rssItems.map((item) => <RssCard {...item} />)}
         </div>
-        <button
-            class="block mx-auto px-8 py-4 text-lg font-semibold bg-primary hover:bg-primary-dark text-accent rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-            id="loadMore"
-            type="button"
-            data-testid="load-more"
-            aria-label="Charger plus d'articles"
-        >
-            Charger plus d'articles
-        </button>
-        <!-- Toast caché par défaut -->
-        <div class="hidden">
-            <Toast
-                id="rss-error"
-                type="error"
-                title="Erreur"
-                message="Une erreur est survenue lors du chargement des articles"
-                showCloseButton={true}
-            />
+        <div class="text-center">
+            <button
+                id="loadMore"
+                class="bg-primary text-accent font-semibold px-8 py-4 rounded-lg hover:bg-primary-dark transition-colors duration-300"
+                type="button"
+            >
+                Charger plus d'articles
+            </button>
         </div>
     </div>
 </section>
 
 <script>
     const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
-    const articlesContainer = document.getElementById('articles-container');
-    let currentPage = 1;
     const ITEMS_PER_PAGE = 9;
+    let currentPage = 1;
 
-    async function loadArticles(page: number) {
+    const container = document.getElementById('articles-container');
+    const loadMoreBtn = document.getElementById('loadMore');
+
+    async function loadArticles(page) {
         try {
-            const response = await fetch(`${API_URL}/api/rss?page=${page}&limit=${ITEMS_PER_PAGE}`);
-            if (!response.ok) throw new Error('Erreur lors du chargement des articles');
-            
-            const items = await response.json();
-            return items.map((item: any) => ({
+            const res = await fetch(`${API_URL}/api/rss?page=${page}&limit=${ITEMS_PER_PAGE}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            const items = Array.isArray(data) ? data : (data.articles || []);
+            return items.map((item) => ({
                 title: item.title || "Article sans titre",
                 pubDate: new Date(item.pubDate || item.pub_date || Date.now()),
                 link: item.link || item.url || "#",
-                imageUrl: item.image_url || `https://placehold.co/600x400/grey/white/png?text=${encodeURIComponent(item.title || "Article sans titre")}`,
-            }))
-            .sort((a: any, b: any) => b.pubDate.getTime() - a.pubDate.getTime());
-        } catch (error) {
-            console.error('Erreur:', error);
-            const toast = document.getElementById('rss-error') as HTMLElement;
-            if (toast) toast.classList.remove('hidden');
+                imageUrl: item.image_url || item.imageUrl || `https://placehold.co/600x400/grey/white/png?text=${encodeURIComponent(item.title || "Article")}`,
+            }));
+        } catch (e) {
+            console.error('Erreur chargement RSS:', e);
             return [];
         }
     }
 
-    function createArticleCard(item: any) {
-        return `
-            <article class="rss-article bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div class="relative h-48 overflow-hidden">
-                    <img
-                        src="${item.imageUrl}"
-                        alt="${item.title}"
-                        loading="lazy"
-                        class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                </div>
-                <div class="p-6">
-                    <h3 class="text-xl font-heading font-semibold text-text mb-2 line-clamp-2">
-                        ${item.title}
-                    </h3>
-                    <p class="text-sm text-text-light mb-4">
-                        ${item.pubDate.toLocaleDateString("fr-FR", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                        })}
-                    </p>
-                    <a
-                        href="${item.link}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-block text-primary font-semibold hover:text-primary-dark transition-colors duration-300"
-                    >
-                        Lire l'article
-                        <span class="sr-only">Ouvrir ${item.title} dans un nouvel onglet</span>
-                    </a>
-                </div>
-            </article>
-        `;
+    function formatDate(d) {
+        try {
+            return d.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+        } catch { return ''; }
     }
 
-    document.getElementById('loadMore')?.addEventListener('click', async () => {
-        currentPage++;
-        const newArticles = await loadArticles(currentPage);
-        if (newArticles.length > 0) {
-            const articlesHTML = newArticles.map(createArticleCard).join('');
-            if (articlesContainer) {
-                articlesContainer.insertAdjacentHTML('beforeend', articlesHTML);
-            }
-        }
-    });
+    function createCardHTML(item) {
+        return `
+<article class="bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+  <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="block">
+    <div class="relative h-48 overflow-hidden">
+      <img src="${item.imageUrl}" alt="${item.title?.replace(/"/g,'&quot;')}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+    </div>
+    <div class="p-6">
+      <h3 class="text-xl font-heading font-semibold text-text-main mb-2 line-clamp-2" title="${item.title?.replace(/"/g,'&quot;')}">${item.title}</h3>
+      <p class="text-sm text-gray-600 mb-4">${formatDate(item.pubDate)}</p>
+      <span class="inline-block text-primary font-semibold group-hover:text-primary-dark transition-colors duration-300">Lire l'article<span class="sr-only">, ${item.title}</span></span>
+    </div>
+  </a>
+</article>`;
+    }
 
-    // Charger les articles frais au chargement de la page
-    document.addEventListener('DOMContentLoaded', async () => {
-        const freshArticles = await loadArticles(1);
-        if (freshArticles.length > 0) {
-            const articlesHTML = freshArticles.map(createArticleCard).join('');
-            if (articlesContainer) {
-                articlesContainer.innerHTML = articlesHTML;
-            }
+    loadMoreBtn?.addEventListener('click', async () => {
+        loadMoreBtn.setAttribute('disabled', 'true');
+        loadMoreBtn.textContent = 'Chargement…';
+        const nextPage = currentPage + 1;
+        const newItems = await loadArticles(nextPage);
+        if (newItems.length === 0) {
+            loadMoreBtn.textContent = 'Aucun autre article';
+            return;
         }
+        const html = newItems.map(createCardHTML).join('');
+        container?.insertAdjacentHTML('beforeend', html);
+        currentPage = nextPage;
+        loadMoreBtn.removeAttribute('disabled');
+        loadMoreBtn.textContent = "Charger plus d'articles";
     });
 </script>

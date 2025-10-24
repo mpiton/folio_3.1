@@ -1,7 +1,6 @@
 ---
 interface Props {
     title: string;
-    description?: string;
     link: string;
     pubDate: Date;
     imageUrl: string;
@@ -10,40 +9,31 @@ interface Props {
 const { title, link, pubDate, imageUrl } = Astro.props;
 ---
 
-<article
-    class="rss-article bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
->
-    <div class="relative h-48 overflow-hidden">
-        <img
-            src={imageUrl}
-            alt={title}
-            loading="lazy"
-            class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-        />
-    </div>
-    <div class="p-6">
-        <h3
-            class="text-xl font-heading font-semibold text-text mb-2 line-clamp-2"
-        >
-            {title}
-        </h3>
-        <p class="text-sm text-text-light mb-4">
-            {
-                pubDate.toLocaleDateString("fr-FR", {
+<article class="bg-secondary rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+    <a href={link} target="_blank" rel="noopener noreferrer" class="block">
+        <div class="relative h-48 overflow-hidden">
+            <img
+                src={imageUrl}
+                alt={title}
+                loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+        </div>
+        <div class="p-6">
+            <h3 class="text-xl font-heading font-semibold text-text-main mb-2 line-clamp-2" title={title}>
+                {title}
+            </h3>
+            <p class="text-sm text-gray-600 mb-4">
+                {pubDate.toLocaleDateString("fr-FR", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
-                })
-            }
-        </p>
-        <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-block text-primary font-semibold hover:text-primary-dark transition-colors duration-300"
-        >
-            Lire l'article
-            <span class="sr-only">Ouvrir {title} dans un nouvel onglet</span>
-        </a>
-    </div>
+                })}
+            </p>
+            <span class="inline-block text-primary font-semibold group-hover:text-primary-dark transition-colors duration-300">
+                Lire l'article
+                <span class="sr-only">, {title}</span>
+            </span>
+        </div>
+    </a>
 </article>
