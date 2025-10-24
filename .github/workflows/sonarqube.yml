@@ -66,7 +66,9 @@ jobs:
           cd portfolio/api
           cargo test --verbose -- --test-threads=1
         env:
-          MONGO_URL: mongodb://localhost:27017/test
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
 
       - name: Run SonarQube analysis for backend
         uses: sonarsource/sonarqube-scan-action@master
