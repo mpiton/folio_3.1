@@ -18,7 +18,6 @@ const seoData = {
             <Image
                 src={profilePic}
                 alt="Mathieu Piton"
-                class="rounded-full mx-auto"
             />
             <h1>À propos de moi</h1>
             <p>
@@ -319,9 +318,12 @@ const seoData = {
     }
 
     .about-intro img {
+        display: block;
         width: 200px;
         height: 200px;
         border-radius: 50%;
+        margin-left: auto;
+        margin-right: auto;
         margin-bottom: 2rem;
         border: 10px solid var(--secondary-color);
         box-shadow: 0 0 10px rgba(87, 142, 126, 0.2);

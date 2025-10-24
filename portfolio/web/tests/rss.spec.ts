@@ -63,7 +63,7 @@ test.describe('RSS Page', () => {
             if (url.includes('page=1')) {
                 // Première page : retourner des articles normaux
                 await route.fulfill({
-                    json: Array(9).fill({
+                    json: new Array(9).fill({
                         title: 'Test Article',
                         url: 'https://example.com',
                         pub_date: new Date().toISOString(),

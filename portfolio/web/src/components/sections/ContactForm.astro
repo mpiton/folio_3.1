@@ -310,57 +310,106 @@ const { class: className = "" } = Astro.props;
 
 <style>
     .contact-form {
-        @apply w-full max-w-2xl mx-auto;
+        width: 100%;
+        max-width: 42rem;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .form {
-        @apply space-y-6;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
     .form-group {
-        @apply space-y-2;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
     .form-group label {
-        @apply block text-sm font-medium text-gray-700 dark:text-gray-200;
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
     }
 
     .form-group .required {
-        @apply text-red-500 ml-0.5;
+        color: #ef4444;
+        margin-left: 0.125rem;
     }
 
     .textarea-container {
-        @apply relative;
+        position: relative;
     }
 
     .textarea-container textarea {
-        @apply block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-secondary dark:border-gray-600 dark:focus:ring-green-500 dark:focus:border-green-500 dark:text-white resize-none h-32;
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #d1d5db;
+        background-color: var(--secondary-color);
+        resize: none;
+        height: 8rem;
+    }
+
+    .textarea-container textarea:focus {
+        outline: none;
+        ring: 2px;
+        ring-color: #10b981;
+        border-color: #10b981;
     }
 
     .textarea-container .textarea-icon {
-        @apply absolute right-3 top-3 text-gray-400 dark:text-gray-500;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.75rem;
+        color: #9ca3af;
     }
 
     .form-submit {
-        @apply flex justify-end;
+        display: flex;
+        justify-content: flex-end;
     }
 
     /* Toast animations */
     .toast--cloned {
-        @apply fixed bottom-4 right-4 opacity-0 transform translate-y-2 transition-all duration-300 ease-out z-50;
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        opacity: 0;
+        transform: translateY(0.5rem);
+        transition: all 0.3s ease-out;
+        z-index: 50;
     }
 
     .toast--visible {
-        @apply opacity-100 translate-y-0;
+        opacity: 1;
+        transform: translateY(0);
     }
 
     /* Error states */
     .input-container.error input,
     .textarea-container.error textarea {
-        @apply border-red-500 focus:ring-red-500 focus:border-red-500;
+        border-color: #ef4444;
+    }
+
+    .input-container.error input:focus,
+    .textarea-container.error textarea:focus {
+        ring-color: #ef4444;
+        border-color: #ef4444;
     }
 
     .message-label {
-        @apply font-semibold text-text text-[0.95rem] font-heading flex items-center gap-1 transition-colors duration-200;
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 0.95rem;
+        font-family: var(--font-heading);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: color 0.2s;
     }
 </style>

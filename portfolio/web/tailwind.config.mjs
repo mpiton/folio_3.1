@@ -4,25 +4,18 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				'primary': {
-					DEFAULT: '#578E7E',
-					dark: '#355E57'
-				},
-				'secondary': '#F5ECD5',
-				'accent': '#FFFAEC',
-				'text': {
-					DEFAULT: '#3D3D3D',
-					light: '#666666'
-				},
-				'bg': {
-					DEFAULT: '#FFFFFF',
-					dark: '#13151A'
-				}
+				primary: '#578E7E',
+				'primary-dark': '#355E57',
+				secondary: '#F5ECD5',
+				accent: '#FFFAEC',
+				'text-main': '#3D3D3D',
+				'text-light': '#666666',
 			},
 			fontFamily: {
-				'heading': ['Poppins', 'sans-serif'],
-				'body': ['Open Sans', 'sans-serif']
+				heading: ['Poppins', 'sans-serif'],
+				body: ['"Open Sans"', 'sans-serif'],
 			}
 		},
 	},
+	plugins: [],
 }

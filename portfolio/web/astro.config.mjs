@@ -1,9 +1,9 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import AstroPWA from '@vite-pwa/astro';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,6 +16,8 @@ export default defineConfig({
     format: 'file'
   },
   vite: {
+    // @ts-expect-error - Incompatibilité de types connue entre @tailwindcss/vite et Astro
+    plugins: [tailwindcss()],
     build: {
       cssMinify: true,
       minify: 'terser',
@@ -39,7 +41,6 @@ export default defineConfig({
     }
   },
   integrations: [
-    tailwind(),
     mdx(),
     sitemap({
       i18n: {

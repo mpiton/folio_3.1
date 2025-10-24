@@ -56,14 +56,35 @@ const {
 <script>
   import { FirefliesAnimation } from '../../scripts/fireflies';
 
-  const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement;
-  if (canvas) {
-    const fireflies = new FirefliesAnimation(canvas);
+  const isWebGLAvailable = () => {
+    try {
+      const testCanvas = document.createElement('canvas');
+      const hasContext = !!(
+        window.WebGLRenderingContext &&
+        (testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl'))
+      );
+      return hasContext;
+    } catch {
+      return false;
+    }
+  };
 
-    // Cleanup on page unload
-    window.addEventListener('unload', () => {
-      fireflies.destroy();
-    });
+  const canvas = document.getElementById('hero-canvas') as HTMLCanvasElement | null;
+  if (canvas && isWebGLAvailable()) {
+    try {
+      const fireflies = new FirefliesAnimation(canvas);
+
+      // Cleanup on page unload
+      window.addEventListener('unload', () => {
+        fireflies.destroy();
+      });
+    } catch (err) {
+      console.warn('WebGL init failed, disabling fireflies:', err);
+      canvas.style.display = 'none';
+    }
+  } else if (canvas) {
+    // Hide canvas if WebGL is unavailable to avoid empty overlay and errors
+    canvas.style.display = 'none';
   }
 </script>
 
