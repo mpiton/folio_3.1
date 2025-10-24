@@ -37,9 +37,17 @@ jobs:
 
       - name: Convert shallow clone to full clone for SonarQube
         run: |
+          # Ensure we have full git history for SonarQube analysis
           if git rev-parse --is-shallow-repository | grep -q true; then
-            git fetch --unshallow
+            echo "Shallow repository detected, fetching full history..."
+            git fetch --unshallow --all --tags
+          else
+            echo "Repository is already a full clone"
           fi
+          # Verify repository state
+          echo "Repository info:"
+          git rev-parse --is-shallow-repository
+          git rev-parse --git-dir
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203
@@ -111,9 +119,17 @@ jobs:
 
       - name: Convert shallow clone to full clone for SonarQube
         run: |
+          # Ensure we have full git history for SonarQube analysis
           if git rev-parse --is-shallow-repository | grep -q true; then
-            git fetch --unshallow
+            echo "Shallow repository detected, fetching full history..."
+            git fetch --unshallow --all --tags
+          else
+            echo "Repository is already a full clone"
           fi
+          # Verify repository state
+          echo "Repository info:"
+          git rev-parse --is-shallow-repository
+          git rev-parse --git-dir
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
