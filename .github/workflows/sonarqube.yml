@@ -12,10 +12,6 @@ permissions:
 
 jobs:
   sonarqube-backend:
-    # Temporarily disabled due to HTTP 403 Forbidden on sonar-scanner download
-    # from binaries.sonarsource.com (likely GitHub Actions IP rate limiting)
-    # TODO: Migrate to official sonarsource/sonarqube-scan-action or SonarCloud
-    if: false
     name: SonarQube Backend (Rust/Axum)
     runs-on: ubuntu-latest
 
@@ -55,26 +51,16 @@ jobs:
           cd portfolio/api
           cargo test --verbose -- --test-threads=1
 
-      - name: Download sonar-scanner
-        run: |
-          mkdir -p ${{ runner.temp }}/sonar
-          cd ${{ runner.temp }}/sonar
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.1.0.4477-linux.zip
-          unzip -q sonar-scanner-cli-6.1.0.4477-linux.zip
-          rm sonar-scanner-cli-6.1.0.4477-linux.zip
-
       - name: Run SonarQube analysis for backend
-        run: |
-          cd portfolio/api
-          ${{ runner.temp }}/sonar/sonar-scanner-6.1.0.4477-linux/bin/sonar-scanner \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectBaseDir=portfolio/api
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   sonarqube-frontend:
-    # Temporarily disabled due to HTTP 403 Forbidden on sonar-scanner download
-    # from binaries.sonarsource.com (likely GitHub Actions IP rate limiting)
-    # TODO: Migrate to official sonarsource/sonarqube-scan-action or SonarCloud
-    if: false
     name: SonarQube Frontend (Astro/TypeScript)
     runs-on: ubuntu-latest
 
@@ -105,29 +91,20 @@ jobs:
           cd portfolio/web
           npm run test:e2e || true
 
-      - name: Download sonar-scanner
-        run: |
-          mkdir -p ${{ runner.temp }}/sonar
-          cd ${{ runner.temp }}/sonar
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.1.0.4477-linux.zip
-          unzip -q sonar-scanner-cli-6.1.0.4477-linux.zip
-          rm sonar-scanner-cli-6.1.0.4477-linux.zip
-
       - name: Run SonarQube analysis for frontend
-        run: |
-          cd portfolio/web
-          ${{ runner.temp }}/sonar/sonar-scanner-6.1.0.4477-linux/bin/sonar-scanner \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectBaseDir=portfolio/web
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   sonarqube-report:
-    # Temporarily disabled due to HTTP 403 Forbidden on sonar-scanner download
-    # from binaries.sonarsource.com (likely GitHub Actions IP rate limiting)
-    # TODO: Migrate to official sonarsource/sonarqube-scan-action or SonarCloud
     name: Create SonarQube Report
     runs-on: ubuntu-latest
     needs: [sonarqube-backend, sonarqube-frontend]
-    if: false
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Comment PR with SonarQube results
