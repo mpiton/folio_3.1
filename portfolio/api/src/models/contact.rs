@@ -44,6 +44,9 @@ pub struct Request {
 
     #[serde(default)]
     pub is_test: bool,
+
+    #[serde(default)]
+    pub test_name: Option<String>,
 }
 
 static NAME_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[\p{L}\s\-']+$").unwrap());

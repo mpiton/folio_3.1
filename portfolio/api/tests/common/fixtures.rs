@@ -26,6 +26,7 @@ pub fn sample_contact_request() -> ContactRequest {
         subject: Words(2..5).fake::<Vec<String>>().join(" "),
         message: Sentences(3..8).fake::<Vec<String>>().join(" "),
         is_test: false,
+        test_name: None,
     }
 }
 
@@ -52,6 +53,7 @@ pub struct ContactRequestBuilder {
     subject: String,
     message: String,
     is_test: bool,
+    test_name: Option<String>,
 }
 
 impl ContactRequestBuilder {
@@ -62,6 +64,7 @@ impl ContactRequestBuilder {
             subject: Words(2..5).fake::<Vec<String>>().join(" "),
             message: Sentences(3..8).fake::<Vec<String>>().join(" "),
             is_test: false,
+            test_name: None,
         }
     }
 
@@ -92,6 +95,12 @@ impl ContactRequestBuilder {
         self
     }
 
+    #[allow(dead_code)]
+    pub fn test_name(mut self, test_name: &str) -> Self {
+        self.test_name = Some(test_name.to_string());
+        self
+    }
+
     pub fn build(self) -> ContactRequest {
         ContactRequest {
             name: self.name,
@@ -99,6 +108,7 @@ impl ContactRequestBuilder {
             subject: self.subject,
             message: self.message,
             is_test: self.is_test,
+            test_name: self.test_name,
         }
     }
 }

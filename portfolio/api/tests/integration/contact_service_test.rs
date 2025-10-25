@@ -205,18 +205,28 @@ async fn g2_1_insert_contact_into_mongodb() -> Result<()> {
         .subject("Database Test")
         .message("This message tests MongoDB insertion successfully.")
         .is_test(true)
+        .test_name("g2_1")
         .build();
 
     // Act
     service.submit_contact(contact.clone()).await?;
 
-    // Small delay to ensure write is persisted before querying
-    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+    // Retry logic to ensure write is persisted before querying
+    let mut count = 0;
+    for attempt in 0..5 {
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_1");
+        count = collection.count_documents(doc! {}).await?;
+        if count == 1 {
+            break;
+        }
+        if attempt == 4 {
+            assert_eq!(count, 1, "One document should be inserted after retries");
+        }
+    }
 
     // Assert - Verify document was inserted
-    let collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
-    let count = collection.count_documents(doc! {}).await?;
-    assert_eq!(count, 1, "One document should be inserted");
+    let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_1");
 
     // Verify document content
     let doc = collection
@@ -235,7 +245,7 @@ async fn g2_1_insert_contact_into_mongodb() -> Result<()> {
         "Email should match"
     );
 
-    cleanup_db(&db, &["contacts_test_submit_contact"]).await?;
+    cleanup_db(&db, &["contacts_test_g2_1"]).await?;
     Ok(())
 }
 
@@ -253,23 +263,29 @@ async fn g2_2_use_test_collection_in_test_mode() -> Result<()> {
         .subject("Collection Test")
         .message("Testing collection naming in test mode.")
         .is_test(true)
+        .test_name("g2_2")
         .build();
 
     // Act
     service.submit_contact(contact).await?;
 
-    // Small delay to ensure write is persisted before querying
-    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+    // Retry logic to ensure write is persisted before querying
+    let mut test_count = 0;
+    for attempt in 0..5 {
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        let test_collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_2");
+        test_count = test_collection.count_documents(doc! {}).await?;
+        if test_count == 1 {
+            break;
+        }
+        if attempt == 4 {
+            assert_eq!(test_count, 1, "Document should be in test collection during test");
+        }
+    }
 
     // Assert - Test collection should exist, production shouldn't
-    let test_collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
-    let test_count = test_collection.count_documents(doc! {}).await?;
-    assert_eq!(
-        test_count, 1,
-        "Document should be in test collection during test"
-    );
 
-    cleanup_db(&db, &["contacts_test_submit_contact"]).await?;
+    cleanup_db(&db, &["contacts_test_g2_2"]).await?;
     Ok(())
 }
 
@@ -290,20 +306,30 @@ async fn g2_3_multiple_sequential_inserts() -> Result<()> {
             .subject("Sequential Insert Test")
             .message("This message tests sequential insertions in MongoDB.")
             .is_test(true)
+            .test_name("g2_3")
             .build();
 
         service.submit_contact(contact).await?;
     }
 
-    // Small delay to ensure all writes are persisted before querying
-    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    // Retry logic to ensure all writes are persisted before querying
+    let mut count = 0;
+    for attempt in 0..5 {
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_3");
+        count = collection.count_documents(doc! {}).await?;
+        if count == 3 {
+            break;
+        }
+        if attempt == 4 {
+            assert_eq!(count, 3, "Three documents should be inserted after retries");
+        }
+    }
 
     // Assert
-    let collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
-    let count = collection.count_documents(doc! {}).await?;
-    assert_eq!(count, 3, "Three documents should be inserted");
+    let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_3");
 
-    cleanup_db(&db, &["contacts_test_submit_contact"]).await?;
+    cleanup_db(&db, &["contacts_test_g2_3"]).await?;
     Ok(())
 }
 
@@ -332,6 +358,7 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
                 .subject("Concurrent Insert Test")
                 .message("This message tests concurrent insertions in MongoDB.")
                 .is_test(true)
+                .test_name("g2_4")
                 .build();
 
             service.submit_contact(contact).await
@@ -345,15 +372,24 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
         assert!(handle.await?.is_ok(), "Concurrent insert should succeed");
     }
 
-    // Small delay to ensure all writes are persisted before querying
-    tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
+    // Retry logic to ensure all writes are persisted before querying
+    let mut count = 0;
+    for attempt in 0..5 {
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+        let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_4");
+        count = collection.count_documents(doc! {}).await?;
+        if count == 5 {
+            break;
+        }
+        if attempt == 4 {
+            assert_eq!(count, 5, "Five documents should be inserted concurrently after retries");
+        }
+    }
 
     // Assert - Verify all documents were inserted
-    let collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
-    let count = collection.count_documents(doc! {}).await?;
-    assert_eq!(count, 5, "Five documents should be inserted concurrently");
+    let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_4");
 
-    cleanup_db(&db, &["contacts_test_submit_contact"]).await?;
+    cleanup_db(&db, &["contacts_test_g2_4"]).await?;
     Ok(())
 }
 
