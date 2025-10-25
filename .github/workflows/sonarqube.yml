@@ -118,16 +118,26 @@ jobs:
           fi
           cargo build --verbose
 
+      - name: Install cargo-tarpaulin
+        run: cargo install cargo-tarpaulin
+
       - name: Run tests with coverage
         run: |
           cd portfolio/api
-          cargo test --verbose -- --test-threads=1
+          # Run tests with coverage using tarpaulin
+          # Generates LCOV report for SonarQube
+          cargo tarpaulin --out Lcov --output-dir target/coverage --timeout 300 --exclude-files tests/* --exclude-files benches/* -- --test-threads=1
+
+          # Ensure coverage directory exists for SonarQube
+          mkdir -p target/coverage
 
       - name: Run SonarQube analysis for backend
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args: >
             -Dsonar.projectBaseDir=portfolio/api
+            -Dsonar.coverageReportPaths=target/coverage/lcov.info
+            -Dsonar.coverage.exclusions=tests/**,benches/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -198,16 +208,23 @@ jobs:
           cd portfolio/web
           npm run build
 
-      - name: Run tests and generate coverage
+      - name: Run unit tests with coverage
         run: |
           cd portfolio/web
-          npm run test:e2e || true
+          npm run test:coverage
+
+      - name: Run E2E tests
+        run: |
+          cd portfolio/web
+          npm run test:e2e:ci || true
 
       - name: Run SonarQube analysis for frontend
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args: >
             -Dsonar.projectBaseDir=portfolio/web
+            -Dsonar.coverageReportPaths=coverage/lcov.info
+            -Dsonar.coverage.exclusions=**/*.spec.ts,**/*.test.ts,**/node_modules/**,**/.astro/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
