@@ -12,15 +12,28 @@ use wiremock::MockServer;
 /// MongoDB container configuration for integration testing
 ///
 /// Connects to a MongoDB instance (assumes MongoDB is running locally or via container)
-/// For testing, this uses the standard MongoDB connection string
+/// For testing, this uses environment variables if available, otherwise falls back to default
 #[allow(dead_code)]
 pub async fn setup_mongodb() -> Result<(MongoClient, Database)> {
-    // Try to connect to MongoDB on standard port
-    // In CI/test environments, MongoDB should be running in a container or service
-    let connection_string = "mongodb://127.0.0.1:27017";
+    // Build connection string from environment variables or use defaults
+    let mongo_user = std::env::var("MONGO_INITDB_ROOT_USERNAME").unwrap_or_default();
+    let mongo_password = std::env::var("MONGO_INITDB_ROOT_PASSWORD").unwrap_or_default();
+    let mongo_host = std::env::var("MONGO_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let mongo_port = std::env::var("MONGO_PORT").unwrap_or_else(|_| "27017".to_string());
+    let mongo_db = std::env::var("MONGO_DB").unwrap_or_else(|_| "portfolio_test".to_string());
+
+    // Construct connection string with credentials if provided
+    let connection_string = if !mongo_user.is_empty() && !mongo_password.is_empty() {
+        format!(
+            "mongodb://{}:{}@{}:{}/{}?authSource=admin",
+            mongo_user, mongo_password, mongo_host, mongo_port, mongo_db
+        )
+    } else {
+        format!("mongodb://{}:{}", mongo_host, mongo_port)
+    };
 
     // Create client with timeout for connection attempts
-    let mut client_options = mongodb::options::ClientOptions::parse(connection_string).await?;
+    let mut client_options = mongodb::options::ClientOptions::parse(&connection_string).await?;
     client_options.connect_timeout = Some(std::time::Duration::from_secs(5));
     let client = MongoClient::with_options(client_options)?;
 
@@ -31,7 +44,7 @@ pub async fn setup_mongodb() -> Result<(MongoClient, Database)> {
         .run_command(doc! { "ping": 1 })
         .await?;
 
-    let db = client.database("portfolio_test");
+    let db = client.database(&mongo_db);
 
     Ok((client, db))
 }
