@@ -239,8 +239,24 @@ const { class: className = '' } = Astro.props;
         return;
       }
 
+      // Disable submit button during submission
+      const submitButton = this.form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+
       const formData = new FormData(this.form);
       const data = Object.fromEntries(formData.entries());
+
+      // Trim whitespace from all form fields
+      const trimmedData: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof value === 'string') {
+          trimmedData[key] = value.trim();
+        } else {
+          trimmedData[key] = value;
+        }
+      }
 
       try {
         const response = await fetch(`${this.apiUrl}/api/contact`, {
@@ -248,7 +264,7 @@ const { class: className = '' } = Astro.props;
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(trimmedData),
         });
 
         if (!response.ok) {
@@ -270,6 +286,11 @@ const { class: className = '' } = Astro.props;
           message: "Une erreur est survenue lors de l'envoi du message",
           duration: 5000,
         });
+      } finally {
+        // Re-enable submit button
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
       }
     }
   }
