@@ -136,7 +136,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectBaseDir=portfolio/api
-            -Dsonar.coverageReportPaths=target/coverage/lcov.info
+            -Dsonar.rust.lcov.reportPaths=target/coverage/lcov.info
             -Dsonar.coverage.exclusions=tests/**,benches/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -223,7 +223,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectBaseDir=portfolio/web
-            -Dsonar.coverageReportPaths=coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.coverage.exclusions=**/*.spec.ts,**/*.test.ts,**/node_modules/**,**/.astro/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
