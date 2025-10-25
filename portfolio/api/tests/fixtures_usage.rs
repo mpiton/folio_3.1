@@ -19,6 +19,7 @@ mod fixtures_tests {
                 subject: "Test Subject".to_string(),
                 message: "This is a valid test message for the contact form".to_string(),
                 is_test: false,
+                test_name: None,
             };
 
             assert_eq!(contact.name, "Test User");
@@ -35,6 +36,7 @@ mod fixtures_tests {
                 subject: "Valid Subject".to_string(),
                 message: "This is a valid message for testing purposes".to_string(),
                 is_test: false,
+                test_name: None,
             };
 
             assert!(valid_contact.validate().is_ok());
@@ -50,6 +52,7 @@ mod fixtures_tests {
                 subject: "Valid Subject".to_string(),
                 message: "This is a valid message for testing purposes".to_string(),
                 is_test: false,
+                test_name: None,
             };
 
             assert!(invalid_contact.validate().is_err());
