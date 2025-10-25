@@ -54,47 +54,53 @@ function generatePageNumbers(current: number, total: number, maxVisible: number)
 const pages = generatePageNumbers(currentPage, totalPages, maxVisiblePages);
 ---
 
-<nav
-  class:list={['pagination', className]}
-  role="navigation"
-  aria-label="Navigation des pages"
->
+<nav class:list={['pagination', className]} role="navigation" aria-label="Navigation des pages">
   <div class="pagination-container">
     <a
       href={currentPage > 1 ? `${baseUrl}/${currentPage - 1}` : '#'}
-      class:list={[
-        'pagination-button',
-        { 'pagination-button--disabled': currentPage === 1 },
-      ]}
+      class:list={['pagination-button', { 'pagination-button--disabled': currentPage === 1 }]}
       aria-label="Page précédente"
       aria-disabled={currentPage === 1}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pagination-icon">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="pagination-icon"
+      >
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
       <span>Précédent</span>
     </a>
 
     <ul class="pagination-list">
-      {pages.map((page) => (
-        <li class="pagination-item">
-          {typeof page === 'number' ? (
-            <a
-              href={page === currentPage ? '#' : `${baseUrl}/${page}`}
-              class:list={[
-                'pagination-link',
-                { 'pagination-link--active': page === currentPage },
-              ]}
-              aria-label={`Page ${page}`}
-              aria-current={page === currentPage ? 'page' : undefined}
-            >
-              {page}
-            </a>
-          ) : (
-            <span class="pagination-ellipsis" aria-hidden="true">...</span>
-          )}
-        </li>
-      ))}
+      {
+        pages.map(page => (
+          <li class="pagination-item">
+            {typeof page === 'number' ? (
+              <a
+                href={page === currentPage ? '#' : `${baseUrl}/${page}`}
+                class:list={[
+                  'pagination-link',
+                  { 'pagination-link--active': page === currentPage },
+                ]}
+                aria-label={`Page ${page}`}
+                aria-current={page === currentPage ? 'page' : undefined}
+              >
+                {page}
+              </a>
+            ) : (
+              <span class="pagination-ellipsis" aria-hidden="true">
+                ...
+              </span>
+            )}
+          </li>
+        ))
+      }
     </ul>
 
     <a
@@ -107,7 +113,16 @@ const pages = generatePageNumbers(currentPage, totalPages, maxVisiblePages);
       aria-disabled={currentPage === totalPages}
     >
       <span>Suivant</span>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pagination-icon">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="pagination-icon"
+      >
         <polyline points="9 18 15 12 9 6"></polyline>
       </svg>
     </a>

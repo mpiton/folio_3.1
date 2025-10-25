@@ -1,24 +1,23 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import RssIntro from "../components/sections/RssIntro.astro";
-import RssFeeds from "../components/sections/RssFeeds.astro";
-import { defaultSEO } from "../utils/seo";
+import Layout from '../layouts/Layout.astro';
+import RssIntro from '../components/sections/RssIntro.astro';
+import RssFeeds from '../components/sections/RssFeeds.astro';
+import { defaultSEO } from '../utils/seo';
 
 const seoData = {
-    ...defaultSEO,
-    title: "Flux RSS - Mathieu Piton",
-    description:
-        "Découvrez les articles les plus intéressants que j'ai sélectionnés pour vous dans mes flux RSS. Des sujets variés allant du développement web aux dernières tendances technologiques.",
+  ...defaultSEO,
+  title: 'Flux RSS - Mathieu Piton',
+  description:
+    "Découvrez les articles les plus intéressants que j'ai sélectionnés pour vous dans mes flux RSS. Des sujets variés allant du développement web aux dernières tendances technologiques.",
 };
-
 ---
 
 <Layout seo={seoData}>
-    <main class="bg-accent pt-24 pb-16">
-        <RssIntro
-            title="Mes flux RSS favoris"
-            description="Découvrez les articles les plus intéressants que j'ai sélectionnés pour vous dans mes flux RSS. Des sujets variés allant du développement web aux dernières tendances technologiques."
-        />
-        <RssFeeds />
-    </main>
+  <main class="bg-accent pt-24 pb-16">
+    <RssIntro
+      title="Mes flux RSS favoris"
+      description="Découvrez les articles les plus intéressants que j'ai sélectionnés pour vous dans mes flux RSS. Des sujets variés allant du développement web aux dernières tendances technologiques."
+    />
+    <RssFeeds />
+  </main>
 </Layout>

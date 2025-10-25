@@ -7,10 +7,10 @@ interface Props {
 }
 
 const {
-  title = "Mathieu Piton",
-  description = "Développeur web passionné et créatif",
-  ctaText = "Découvrir mon univers",
-  ctaLink = "/about"
+  title = 'Mathieu Piton',
+  description = 'Développeur web passionné et créatif',
+  ctaText = 'Découvrir mon univers',
+  ctaLink = '/about',
 } = Astro.props;
 ---
 
@@ -226,31 +226,112 @@ const {
   }
 
   /* Positions des roseaux gauches */
-  .reeds-left .reed:nth-child(1) { left: 10px; height: 95%; animation: sway 8s ease-in-out infinite; }
-  .reeds-left .reed:nth-child(2) { left: 40px; height: 85%; animation: sway 7s ease-in-out infinite -1s; }
-  .reeds-left .reed:nth-child(3) { left: 70px; height: 90%; animation: sway 9s ease-in-out infinite -3s; }
-  .reeds-left .reed:nth-child(4) { left: 100px; height: 80%; animation: sway 8.5s ease-in-out infinite -2.5s; }
-  .reeds-left .reed:nth-child(5) { left: 130px; height: 88%; animation: sway 8.2s ease-in-out infinite -1.5s; }
-  .reeds-left .reed:nth-child(6) { left: 160px; height: 92%; animation: sway 7.8s ease-in-out infinite -2s; }
-  .reeds-left .reed:nth-child(7) { left: 190px; height: 86%; animation: sway 8.6s ease-in-out infinite -2.8s; }
-  .reeds-left .reed:nth-child(8) { left: 220px; height: 82%; animation: sway 7.4s ease-in-out infinite -3.2s; }
-  .reeds-left .reed:nth-child(9) { left: 250px; height: 94%; animation: sway 8.8s ease-in-out infinite -1.7s; }
-  .reeds-left .reed:nth-child(10) { left: 280px; height: 89%; animation: sway 7.6s ease-in-out infinite -2.3s; }
+  .reeds-left .reed:nth-child(1) {
+    left: 10px;
+    height: 95%;
+    animation: sway 8s ease-in-out infinite;
+  }
+  .reeds-left .reed:nth-child(2) {
+    left: 40px;
+    height: 85%;
+    animation: sway 7s ease-in-out infinite -1s;
+  }
+  .reeds-left .reed:nth-child(3) {
+    left: 70px;
+    height: 90%;
+    animation: sway 9s ease-in-out infinite -3s;
+  }
+  .reeds-left .reed:nth-child(4) {
+    left: 100px;
+    height: 80%;
+    animation: sway 8.5s ease-in-out infinite -2.5s;
+  }
+  .reeds-left .reed:nth-child(5) {
+    left: 130px;
+    height: 88%;
+    animation: sway 8.2s ease-in-out infinite -1.5s;
+  }
+  .reeds-left .reed:nth-child(6) {
+    left: 160px;
+    height: 92%;
+    animation: sway 7.8s ease-in-out infinite -2s;
+  }
+  .reeds-left .reed:nth-child(7) {
+    left: 190px;
+    height: 86%;
+    animation: sway 8.6s ease-in-out infinite -2.8s;
+  }
+  .reeds-left .reed:nth-child(8) {
+    left: 220px;
+    height: 82%;
+    animation: sway 7.4s ease-in-out infinite -3.2s;
+  }
+  .reeds-left .reed:nth-child(9) {
+    left: 250px;
+    height: 94%;
+    animation: sway 8.8s ease-in-out infinite -1.7s;
+  }
+  .reeds-left .reed:nth-child(10) {
+    left: 280px;
+    height: 89%;
+    animation: sway 7.6s ease-in-out infinite -2.3s;
+  }
 
   /* Positions des roseaux droits */
-  .reeds-right .reed:nth-child(1) { right: 10px; height: 92%; animation: sway 8.3s ease-in-out infinite -3s; }
-  .reeds-right .reed:nth-child(2) { right: 40px; height: 98%; animation: sway 7.5s ease-in-out infinite -4s; }
-  .reeds-right .reed:nth-child(3) { right: 70px; height: 88%; animation: sway 8.7s ease-in-out infinite -2.5s; }
-  .reeds-right .reed:nth-child(4) { right: 100px; height: 85%; animation: sway 9.2s ease-in-out infinite -1.5s; }
-  .reeds-right .reed:nth-child(5) { right: 130px; height: 90%; animation: sway 8.4s ease-in-out infinite -3.5s; }
-  .reeds-right .reed:nth-child(6) { right: 160px; height: 86%; animation: sway 7.9s ease-in-out infinite -2.8s; }
-  .reeds-right .reed:nth-child(7) { right: 190px; height: 94%; animation: sway 8.8s ease-in-out infinite -1.8s; }
-  .reeds-right .reed:nth-child(8) { right: 220px; height: 87%; animation: sway 7.6s ease-in-out infinite -3.7s; }
-  .reeds-right .reed:nth-child(9) { right: 250px; height: 91%; animation: sway 8.2s ease-in-out infinite -2.1s; }
-  .reeds-right .reed:nth-child(10) { right: 280px; height: 89%; animation: sway 7.8s ease-in-out infinite -3.3s; }
+  .reeds-right .reed:nth-child(1) {
+    right: 10px;
+    height: 92%;
+    animation: sway 8.3s ease-in-out infinite -3s;
+  }
+  .reeds-right .reed:nth-child(2) {
+    right: 40px;
+    height: 98%;
+    animation: sway 7.5s ease-in-out infinite -4s;
+  }
+  .reeds-right .reed:nth-child(3) {
+    right: 70px;
+    height: 88%;
+    animation: sway 8.7s ease-in-out infinite -2.5s;
+  }
+  .reeds-right .reed:nth-child(4) {
+    right: 100px;
+    height: 85%;
+    animation: sway 9.2s ease-in-out infinite -1.5s;
+  }
+  .reeds-right .reed:nth-child(5) {
+    right: 130px;
+    height: 90%;
+    animation: sway 8.4s ease-in-out infinite -3.5s;
+  }
+  .reeds-right .reed:nth-child(6) {
+    right: 160px;
+    height: 86%;
+    animation: sway 7.9s ease-in-out infinite -2.8s;
+  }
+  .reeds-right .reed:nth-child(7) {
+    right: 190px;
+    height: 94%;
+    animation: sway 8.8s ease-in-out infinite -1.8s;
+  }
+  .reeds-right .reed:nth-child(8) {
+    right: 220px;
+    height: 87%;
+    animation: sway 7.6s ease-in-out infinite -3.7s;
+  }
+  .reeds-right .reed:nth-child(9) {
+    right: 250px;
+    height: 91%;
+    animation: sway 8.2s ease-in-out infinite -2.1s;
+  }
+  .reeds-right .reed:nth-child(10) {
+    right: 280px;
+    height: 89%;
+    animation: sway 7.8s ease-in-out infinite -3.3s;
+  }
 
   @keyframes sway {
-    0%, 100% {
+    0%,
+    100% {
       transform: rotate(-3deg) scaleY(1.005);
       filter: brightness(1);
     }
@@ -267,10 +348,7 @@ const {
     transform: translateX(-50%);
     width: 600px;
     height: 200px;
-    background: linear-gradient(to bottom,
-      rgba(122, 196, 170, 0.2),
-      rgba(87, 142, 126, 0.4)
-    );
+    background: linear-gradient(to bottom, rgba(122, 196, 170, 0.2), rgba(87, 142, 126, 0.4));
     border-radius: 50% 50% 0 0;
     filter: blur(5px);
     z-index: 0;

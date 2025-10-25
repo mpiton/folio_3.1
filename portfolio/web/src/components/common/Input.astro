@@ -1,159 +1,153 @@
 ---
 interface Props {
-    label: string;
-    type?: astroHTML.JSX.HTMLInputTypeAttribute | "textarea";
-    name: string;
-    placeholder?: string;
-    required?: boolean;
-    class?: string;
-    value?: string;
-    "data-testid"?: string;
-    error?: string;
+  label: string;
+  type?: astroHTML.JSX.HTMLInputTypeAttribute | 'textarea';
+  name: string;
+  placeholder?: string;
+  required?: boolean;
+  class?: string;
+  value?: string;
+  'data-testid'?: string;
+  error?: string;
 }
 
 const {
-    label,
-    type = "text",
-    name,
-    placeholder,
-    required = false,
-    class: className = "",
-    value = "",
-    "data-testid": testId,
-    error,
+  label,
+  type = 'text',
+  name,
+  placeholder,
+  required = false,
+  class: className = '',
+  value = '',
+  'data-testid': testId,
+  error,
 } = Astro.props;
 
-const isTextarea = type === "textarea";
+const isTextarea = type === 'textarea';
 ---
 
-<div class:list={["input-wrapper", className]}>
-    <label for={name}>
-        {label}
-        {required && <span class="required">*</span>}
-    </label>
-    <div class:list={["input-container", { error: !!error }]}>
-        {
-            type === "email" && (
-                <i class="input-icon fas fa-envelope" aria-hidden="true" />
-            )
-        }
-        {
-            type === "text" && name === "name" && (
-                <i class="input-icon fas fa-user" aria-hidden="true" />
-            )
-        }
-        {
-            type === "text" && name === "subject" && (
-                <i class="input-icon fas fa-heading" aria-hidden="true" />
-            )
-        }
-        {
-            isTextarea && (
-                <i class="textarea-icon fas fa-comment-alt" aria-hidden="true" />
-            )
-        }
-        {
-            isTextarea ? (
-                <textarea
-                    id={name}
-                    name={name}
-                    placeholder={placeholder}
-                    required={required}
-                    data-testid={testId}
-                    class:list={["textarea", { error: !!error }]}
-                >{value}</textarea>
-            ) : (
-                <input
-                    type={type}
-                    id={name}
-                    name={name}
-                    placeholder={placeholder}
-                    required={required}
-                    value={value}
-                    data-testid={testId}
-                    class:list={{ error: !!error }}
-                />
-            )
-        }
-    </div>
+<div class:list={['input-wrapper', className]}>
+  <label for={name}>
+    {label}
+    {required && <span class="required">*</span>}
+  </label>
+  <div class:list={['input-container', { error: !!error }]}>
+    {type === 'email' && <i class="input-icon fas fa-envelope" aria-hidden="true" />}
+    {type === 'text' && name === 'name' && <i class="input-icon fas fa-user" aria-hidden="true" />}
     {
-        error && (
-            <div class="error-message">
-                <i class="fas fa-exclamation-circle" aria-hidden="true" />
-                {error}
-            </div>
-        )
+      type === 'text' && name === 'subject' && (
+        <i class="input-icon fas fa-heading" aria-hidden="true" />
+      )
     }
+    {isTextarea && <i class="textarea-icon fas fa-comment-alt" aria-hidden="true" />}
+    {
+      isTextarea ? (
+        <textarea
+          id={name}
+          name={name}
+          placeholder={placeholder}
+          required={required}
+          data-testid={testId}
+          class:list={['textarea', { error: !!error }]}
+        >
+          {value}
+        </textarea>
+      ) : (
+        <input
+          type={type}
+          id={name}
+          name={name}
+          placeholder={placeholder}
+          required={required}
+          value={value}
+          data-testid={testId}
+          class:list={{ error: !!error }}
+        />
+      )
+    }
+  </div>
+  {
+    error && (
+      <div class="error-message">
+        <i class="fas fa-exclamation-circle" aria-hidden="true" />
+        {error}
+      </div>
+    )
+  }
 </div>
 
 <style>
-    .input-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
+  .input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 
-    label {
-        font-weight: 600;
-        color: var(--text-color);
-        font-size: 0.95rem;
-        font-family: var(--font-heading);
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        transition: color 0.2s ease;
-    }
+  label {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-family: var(--font-heading);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.2s ease;
+  }
 
-    .required {
-        color: var(--error-color);
-    }
+  .required {
+    color: var(--error-color);
+  }
 
-    .input-container {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
+  .input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
 
-    .input-icon, .textarea-icon {
-        position: absolute;
-        left: 1rem;
-        color: #9ca3af;
-        font-size: 1rem;
-    }
+  .input-icon,
+  .textarea-icon {
+    position: absolute;
+    left: 1rem;
+    color: #9ca3af;
+    font-size: 1rem;
+  }
 
-    input, .textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        padding-left: 2.75rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        background-color: var(--secondary-color);
-        color: var(--text-color);
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
-    }
+  input,
+  .textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    padding-left: 2.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
 
-    .textarea {
-        min-height: 8rem;
-        resize: vertical;
-        padding-right: 1rem;
-    }
+  .textarea {
+    min-height: 8rem;
+    resize: vertical;
+    padding-right: 1rem;
+  }
 
-    input:focus, .textarea:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 2px var(--primary-color-light);
-    }
+  input:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color-light);
+  }
 
-    .error input, .error .textarea {
-        border-color: var(--error-color);
-    }
+  .error input,
+  .error .textarea {
+    border-color: var(--error-color);
+  }
 
-    .error-message {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--error-color);
-        font-size: 0.875rem;
-    }
+  .error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--error-color);
+    font-size: 0.875rem;
+  }
 </style>

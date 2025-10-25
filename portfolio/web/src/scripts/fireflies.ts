@@ -34,7 +34,7 @@ export class FirefliesAnimation {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       alpha: true,
-      antialias: true
+      antialias: true,
     });
     this.renderer.setClearColor(0x00_00_00, 0);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -46,7 +46,7 @@ export class FirefliesAnimation {
     this.positions = new Float32Array(this.particlesCount * 3);
 
     // Distribution des particules dans un volume plus naturel
-    for(let i = 0; i < this.particlesCount; i++) {
+    for (let i = 0; i < this.particlesCount; i++) {
       const i3 = i * 3;
       this.positions[i3] = (Math.random() - 0.5) * 40; // Plus large sur X
       this.positions[i3 + 1] = Math.random() * 25; // Plus haut sur Y
@@ -66,7 +66,7 @@ export class FirefliesAnimation {
       color: '#7AC4AA',
       sizeAttenuation: true,
       blending: THREE.AdditiveBlending,
-      depthWrite: false
+      depthWrite: false,
     });
 
     this.particles = new THREE.Points(geometry, material);
