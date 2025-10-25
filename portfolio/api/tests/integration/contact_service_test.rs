@@ -279,7 +279,10 @@ async fn g2_2_use_test_collection_in_test_mode() -> Result<()> {
             break;
         }
         if attempt == 4 {
-            assert_eq!(test_count, 1, "Document should be in test collection during test");
+            assert_eq!(
+                test_count, 1,
+                "Document should be in test collection during test"
+            );
         }
     }
 
@@ -382,7 +385,10 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
             break;
         }
         if attempt == 4 {
-            assert_eq!(count, 5, "Five documents should be inserted concurrently after retries");
+            assert_eq!(
+                count, 5,
+                "Five documents should be inserted concurrently after retries"
+            );
         }
     }
 
