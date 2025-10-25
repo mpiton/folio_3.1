@@ -6,7 +6,7 @@ test.describe('About Page', () => {
     await test.step('Navigate to about page', async () => {
       await page.goto('/about', {
         timeout: 30000,
-        waitUntil: 'networkidle'
+        waitUntil: 'networkidle',
       });
     });
   });
@@ -33,7 +33,7 @@ test.describe('About Page', () => {
     expect(categoryTitles).toEqual([
       'Langages',
       'Frameworks Frontend & Hybrids',
-      'Frameworks Backend'
+      'Frameworks Backend',
     ]);
 
     // Vérifier les compétences de la première catégorie (Langages)

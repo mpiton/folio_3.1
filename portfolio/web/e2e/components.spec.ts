@@ -5,7 +5,7 @@ test.describe('Components page', () => {
     await page.goto('/components');
     await Promise.all([
       page.waitForLoadState('networkidle', { timeout: 60_000 }),
-      page.waitForLoadState('domcontentloaded', { timeout: 60_000 })
+      page.waitForLoadState('domcontentloaded', { timeout: 60_000 }),
     ]);
   });
 
@@ -22,7 +22,7 @@ test.describe('Components page', () => {
       'Modales',
       'Notifications',
       'Loaders',
-      'Pagination'
+      'Pagination',
     ];
 
     for (const section of sections) {
@@ -50,7 +50,7 @@ test.describe('Components page', () => {
       const buttonSizes = [
         { name: 'Small', class: 'sm' },
         { name: 'Medium', class: 'md' },
-        { name: 'Large', class: 'lg' }
+        { name: 'Large', class: 'lg' },
       ];
       for (const size of buttonSizes) {
         const button = page.locator(`.button--${size.class}`).first();
@@ -75,9 +75,12 @@ test.describe('Components page', () => {
       await page.goto('/components');
       await Promise.all([
         page.waitForLoadState('networkidle', { timeout: 60_000 }),
-        page.waitForLoadState('domcontentloaded', { timeout: 60_000 })
+        page.waitForLoadState('domcontentloaded', { timeout: 60_000 }),
       ]);
-      await page.waitForSelector('[data-testid="showSuccessToast"]', { state: 'visible', timeout: 15000 });
+      await page.waitForSelector('[data-testid="showSuccessToast"]', {
+        state: 'visible',
+        timeout: 15000,
+      });
     });
 
     test('should show and hide toast', async ({ page }) => {
@@ -114,7 +117,7 @@ test.describe('Components page', () => {
 
     test('should show multiple toasts simultaneously', async ({ page }) => {
       const toastTypes = ['Success', 'Error', 'Warning', 'Info'];
-      
+
       // Cliquer sur tous les boutons rapidement
       for (const type of toastTypes) {
         await page.getByTestId(`show${type}Toast`).click();

@@ -24,7 +24,7 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
-    ['list'] // Reporter en ligne de commande pour un meilleur feedback
+    ['list'], // Reporter en ligne de commande pour un meilleur feedback
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -52,12 +52,12 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
         launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
-        }
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
       },
     },
 
@@ -73,27 +73,19 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      // Démarrer d'abord le backend
-      command: 'cd ../api && cargo run --bin portfolio-api',
-      url: 'http://localhost:8080/health',
-      reuseExistingServer: !process.env.CI,
-      timeout: 180000, // 3 minutes pour le démarrage du serveur
-      stdout: 'pipe',
-      stderr: 'pipe'
-    },
-    {
-      // Ensuite démarrer le frontend
-      // On attend 5 secondes pour s'assurer que le backend est bien démarré
-      command: 'timeout /t 5 && npm run dev',
-      url: 'http://localhost:4321',
-      reuseExistingServer: !process.env.CI,
-      timeout: 180000, // 3 minutes pour le démarrage du serveur
-      stdout: 'pipe',
-      stderr: 'pipe'
-    }
-  ],
+  webServer: process.env.CI
+    ? []
+    : [
+        {
+          // Démarrer le frontend seulement - Backend doit être lancé manuellement en dev
+          command: 'npm run dev',
+          url: 'http://localhost:4321',
+          reuseExistingServer: true,
+          timeout: 180000, // 3 minutes pour le démarrage du serveur
+          stdout: 'pipe',
+          stderr: 'pipe',
+        },
+      ],
 
   /* Configuration globale */
   expect: {

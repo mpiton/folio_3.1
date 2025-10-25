@@ -1,1 +1,0 @@
-# SonarQube Configuration Test

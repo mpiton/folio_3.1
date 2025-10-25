@@ -17,40 +17,37 @@ const {
 ---
 
 <div
-  class:list={[
-    'loader',
-    `loader--${variant}`,
-    `loader--${size}`,
-    className,
-  ]}
+  class:list={['loader', `loader--${variant}`, `loader--${size}`, className]}
   role="status"
   aria-label={label}
 >
-  {variant === 'spinner' && (
-    <svg class="loader-spinner" viewBox="0 0 50 50">
-      <circle
-        class="loader-circle"
-        cx="25"
-        cy="25"
-        r="20"
-        fill="none"
-        stroke={color}
-        stroke-width="5"
-      />
-    </svg>
-  )}
+  {
+    variant === 'spinner' && (
+      <svg class="loader-spinner" viewBox="0 0 50 50">
+        <circle
+          class="loader-circle"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke={color}
+          stroke-width="5"
+        />
+      </svg>
+    )
+  }
 
-  {variant === 'dots' && (
-    <div class="loader-dots">
-      <div class="dot" style={`background-color: ${color};`}></div>
-      <div class="dot" style={`background-color: ${color};`}></div>
-      <div class="dot" style={`background-color: ${color};`}></div>
-    </div>
-  )}
+  {
+    variant === 'dots' && (
+      <div class="loader-dots">
+        <div class="dot" style={`background-color: ${color};`} />
+        <div class="dot" style={`background-color: ${color};`} />
+        <div class="dot" style={`background-color: ${color};`} />
+      </div>
+    )
+  }
 
-  {variant === 'pulse' && (
-    <div class="loader-pulse" style={`background-color: ${color};`}></div>
-  )}
+  {variant === 'pulse' && <div class="loader-pulse" style={`background-color: ${color};`} />}
 
   <span class="loader-label">{label}</span>
 </div>

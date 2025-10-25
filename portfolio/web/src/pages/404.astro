@@ -6,58 +6,92 @@ const seo = {
   description: 'Page introuvable sur le portfolio de Matthieu Piton',
   openGraph: {
     type: 'website',
-    locale: 'fr_FR'
-  }
+    locale: 'fr_FR',
+  },
 };
 ---
 
 <Layout title="Page non trouvée" seo={seo}>
-  <main class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10">
+  <main
+    class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10"
+  >
     <div class="max-w-2xl text-center space-y-8 relative">
       <h1 class="sr-only">404</h1>
       <div class="animate-float">
-        <svg class="w-[32rem] h-[32rem] mx-auto" viewBox="-150 -150 700 700" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          class="w-[32rem] h-[32rem] mx-auto"
+          viewBox="-150 -150 700 700"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <!-- Fond abstrait -->
-          <path d="M50,200 Q150,0 225,200 T400,200" class="stroke-primary/20 dark:stroke-primary/30 fill-none stroke-[6px]" />
-          <path d="M50,230 Q150,30 225,230 T400,230" class="stroke-secondary/20 dark:stroke-secondary/30 fill-none stroke-[5px]" />
+          <path
+            d="M50,200 Q150,0 225,200 T400,200"
+            class="stroke-primary/20 dark:stroke-primary/30 fill-none stroke-[6px]"></path>
+          <path
+            d="M50,230 Q150,30 225,230 T400,230"
+            class="stroke-secondary/20 dark:stroke-secondary/30 fill-none stroke-[5px]"></path>
 
           <!-- Cercle principal -->
-          <circle cx="225" cy="200" r="150" class="fill-none stroke-primary/30 dark:stroke-primary/40 stroke-[5px]" />
-          
+          <circle
+            cx="225"
+            cy="200"
+            r="150"
+            class="fill-none stroke-primary/30 dark:stroke-primary/40 stroke-[5px]"></circle>
+
           <!-- Motif géométrique -->
           <g class="animate-spin-slow" transform="translate(225 200)">
-            <path d="M0,-120 L45,-80 L0,-40 L-45,-80 Z" class="fill-none stroke-secondary dark:stroke-secondary-light stroke-[5px]" />
-            <path d="M0,120 L45,80 L0,40 L-45,80 Z" class="fill-none stroke-secondary dark:stroke-secondary-light stroke-[5px]" />
+            <path
+              d="M0,-120 L45,-80 L0,-40 L-45,-80 Z"
+              class="fill-none stroke-secondary dark:stroke-secondary-light stroke-[5px]"></path>
+            <path
+              d="M0,120 L45,80 L0,40 L-45,80 Z"
+              class="fill-none stroke-secondary dark:stroke-secondary-light stroke-[5px]"></path>
           </g>
 
           <!-- 404 moderne -->
           <g transform="translate(225 200)" class="animate-float">
-            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" 
-                  class="text-[96px] font-bold fill-primary dark:fill-primary-light font-mono tracking-wider">
+            <text
+              x="0"
+              y="0"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              class="text-[96px] font-bold fill-primary dark:fill-primary-light font-mono tracking-wider"
+            >
               404
             </text>
           </g>
 
           <!-- Points décoratifs -->
           <g class="animate-pulse">
-            <circle cx="80" cy="80" r="10" class="fill-primary dark:fill-primary-light" />
-            <circle cx="370" cy="80" r="10" class="fill-secondary dark:fill-secondary-light" />
-            <circle cx="80" cy="320" r="10" class="fill-secondary dark:fill-secondary-light" />
-            <circle cx="370" cy="320" r="10" class="fill-primary dark:fill-primary-light" />
+            <circle cx="80" cy="80" r="10" class="fill-primary dark:fill-primary-light"></circle>
+            <circle cx="370" cy="80" r="10" class="fill-secondary dark:fill-secondary-light"
+            ></circle>
+            <circle cx="80" cy="320" r="10" class="fill-secondary dark:fill-secondary-light"
+            ></circle>
+            <circle cx="370" cy="320" r="10" class="fill-primary dark:fill-primary-light"></circle>
           </g>
 
           <!-- Ligne glitch -->
           <g class="animate-glitch">
-            <line x1="80" y1="200" x2="370" y2="200" 
-                  class="stroke-red-400/50 dark:stroke-red-300/50 stroke-[4px]" 
-                  stroke-dasharray="10 15" />
+            <line
+              x1="80"
+              y1="200"
+              x2="370"
+              y2="200"
+              class="stroke-red-400/50 dark:stroke-red-300/50 stroke-[4px]"
+              stroke-dasharray="10 15"></line>
           </g>
         </svg>
       </div>
-      
-      <p class="text-xl text-gray-600 dark:text-gray-300">Oups! La page que vous cherchez s'est envolée...</p>
-      
-      <a href="/" class="inline-block mt-8 px-8 py-3 bg-primary dark:bg-primary-light text-white rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors duration-300 transform hover:scale-105">
+
+      <p class="text-xl text-gray-600 dark:text-gray-300">
+        Oups! La page que vous cherchez s'est envolée...
+      </p>
+
+      <a
+        href="/"
+        class="inline-block mt-8 px-8 py-3 bg-primary dark:bg-primary-light text-white rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors duration-300 transform hover:scale-105"
+      >
         Retour à l'accueil
       </a>
     </div>
@@ -66,38 +100,73 @@ const seo = {
 
 <style is:global>
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
-  
+
   @keyframes pulse-slow {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
   }
 
   @keyframes swing {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(5deg); }
+    0%,
+    100% {
+      transform: rotate(-5deg);
+    }
+    50% {
+      transform: rotate(5deg);
+    }
   }
 
   @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 
   @keyframes spin-slow {
-    0%, 100% { transform: rotate(0deg); }
-    50% { transform: rotate(360deg); }
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(360deg);
+    }
   }
 
   @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
   }
 
   @keyframes glitch {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(10px); }
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(10px);
+    }
   }
 
   .animate-float {

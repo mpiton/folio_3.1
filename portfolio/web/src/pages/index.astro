@@ -1,21 +1,20 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Hero from "../components/sections/Hero.astro";
-import { defaultSEO } from "../utils/seo";
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/sections/Hero.astro';
+import { defaultSEO } from '../utils/seo';
 
 const seoData = {
-    ...defaultSEO,
-    title: "Mathieu Piton - Développeur Web",
-    description:
-        "Portfolio de Mathieu Piton, développeur web spécialisé en Node.js",
+  ...defaultSEO,
+  title: 'Mathieu Piton - Développeur Web',
+  description: 'Portfolio de Mathieu Piton, développeur web spécialisé en Node.js',
 };
 ---
 
 <Layout seo={seoData}>
-    <Hero
-        title="Mathieu Piton"
-        description="Développeur web passionné et créatif"
-        ctaText="Découvrir mon univers"
-        ctaLink="/about"
-    />
+  <Hero
+    title="Mathieu Piton"
+    description="Développeur web passionné et créatif"
+    ctaText="Découvrir mon univers"
+    ctaLink="/about"
+  />
 </Layout>

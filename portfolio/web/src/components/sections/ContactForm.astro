@@ -1,415 +1,406 @@
 ---
-import Button from "../common/Button.astro";
-import Input from "../common/Input.astro";
+import Button from '../common/Button.astro';
+import Input from '../common/Input.astro';
 
 interface Props {
-    class?: string;
+  class?: string;
 }
 
-const { class: className = "" } = Astro.props;
+const { class: className = '' } = Astro.props;
 ---
 
-<section class:list={["contact-form", className]}>
-    <form id="contact-form" class="form" novalidate>
-        <div class="form-group">
-            <Input
-                type="text"
-                name="name"
-                label="Nom"
-                placeholder="Votre nom"
-                required
-                data-testid="contact-name"
-            />
-        </div>
-        <div class="form-group">
-            <Input
-                type="email"
-                name="email"
-                label="Email"
-                placeholder="votre@email.com"
-                required
-                data-testid="contact-email"
-            />
-        </div>
-        <div class="form-group">
-            <Input
-                type="text"
-                name="subject"
-                label="Sujet"
-                placeholder="Sujet de votre message"
-                required
-                data-testid="contact-subject"
-            />
-        </div>
-        <div class="form-group">
-            <Input
-                type="textarea"
-                name="message"
-                label="Message"
-                placeholder="Votre message"
-                required
-                data-testid="contact-message"
-            />
-        </div>
-        <div class="form-submit">
-            <Button
-                type="submit"
-                variant="primary"
-                data-testid="contact-submit"
-                class="flex items-center gap-2"
-            >
-                <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                Envoyer
-            </Button>
-        </div>
-    </form>
+<section class:list={['contact-form', className]}>
+  <form id="contact-form" class="form" novalidate>
+    <div class="form-group">
+      <Input
+        type="text"
+        name="name"
+        label="Nom"
+        placeholder="Votre nom"
+        required
+        data-testid="contact-name"
+      />
+    </div>
+    <div class="form-group">
+      <Input
+        type="email"
+        name="email"
+        label="Email"
+        placeholder="votre@email.com"
+        required
+        data-testid="contact-email"
+      />
+    </div>
+    <div class="form-group">
+      <Input
+        type="text"
+        name="subject"
+        label="Sujet"
+        placeholder="Sujet de votre message"
+        required
+        data-testid="contact-subject"
+      />
+    </div>
+    <div class="form-group">
+      <Input
+        type="textarea"
+        name="message"
+        label="Message"
+        placeholder="Votre message"
+        required
+        data-testid="contact-message"
+      />
+    </div>
+    <div class="form-submit">
+      <Button
+        type="submit"
+        variant="primary"
+        data-testid="contact-submit"
+        class="flex items-center gap-2"
+      >
+        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+        Envoyer
+      </Button>
+    </div>
+  </form>
 </section>
 
 <script>
-    import { ToastManager } from "../../scripts/ToastManager";
+  import { ToastManager } from '../../scripts/ToastManager';
 
-    class ContactForm {
-        private form: HTMLFormElement;
-        private apiUrl: string;
-        private toastManager: ToastManager;
+  class ContactForm {
+    private form: HTMLFormElement;
+    private apiUrl: string;
+    private toastManager: ToastManager;
 
-        constructor() {
-            const form = document.getElementById("contact-form");
-            if (!(form instanceof HTMLFormElement)) {
-                throw new Error("Form element not found");
-            }
-            this.form = form;
-            this.apiUrl = import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
-            this.toastManager = ToastManager.getInstance();
-            this.initialize();
-        }
-
-        initialize() {
-            this.form.addEventListener("submit", this.handleSubmit.bind(this));
-
-            // Ajouter la validation sur le blur des champs
-            const requiredFields = this.form.querySelectorAll("[required]");
-            requiredFields.forEach((field) => {
-                if (
-                    field instanceof HTMLInputElement ||
-                    field instanceof HTMLTextAreaElement
-                ) {
-                    field.addEventListener("blur", () => {
-                        this.validateField(field);
-                    });
-                }
-            });
-        }
-
-        validateText(text: string): boolean {
-            const SAFE_TEXT_REGEX = /^[\p{L}\p{N}\s.,!?@()'\[\]\-_&+=%°:;]+$/u;
-            return SAFE_TEXT_REGEX.test(text);
-        }
-
-        validateField(field: HTMLInputElement | HTMLTextAreaElement) {
-            const value = field.value.trim();
-
-            if (!value) {
-                this.showError(field, "Ce champ est requis");
-                return false;
-            }
-
-            switch (field.name) {
-                case "name":
-                    if (value.length < 2 || value.length > 100) {
-                        this.showError(
-                            field,
-                            "Le nom doit faire entre 2 et 100 caractères"
-                        );
-                        return false;
-                    }
-                    if (!this.validateText(value)) {
-                        this.showError(
-                            field,
-                            "Le nom contient des caractères non autorisés"
-                        );
-                        return false;
-                    }
-                    break;
-                case "email":
-                    if (!this.isValidEmail(value)) {
-                        this.showError(field, "L'email n'est pas valide");
-                        return false;
-                    }
-                    break;
-                case "subject":
-                    if (value.length < 2 || value.length > 100) {
-                        this.showError(
-                            field,
-                            "Le sujet doit faire entre 2 et 100 caractères"
-                        );
-                        return false;
-                    }
-                    if (!this.validateText(value)) {
-                        this.showError(
-                            field,
-                            "Le sujet contient des caractères non autorisés"
-                        );
-                        return false;
-                    }
-                    break;
-                case "message":
-                    if (value.length < 10 || value.length > 1000) {
-                        this.showError(
-                            field,
-                            "Le message doit faire entre 10 et 1000 caractères"
-                        );
-                        return false;
-                    }
-                    if (!this.validateText(value)) {
-                        this.showError(
-                            field,
-                            "Le message contient des caractères non autorisés"
-                        );
-                        return false;
-                    }
-                    break;
-            }
-
-            this.removeError(field);
-            return true;
-        }
-
-        validateForm() {
-            const requiredFields = this.form.querySelectorAll("[required]");
-            let isValid = true;
-
-            requiredFields.forEach((field) => {
-                if (
-                    field instanceof HTMLInputElement ||
-                    field instanceof HTMLTextAreaElement
-                ) {
-                    if (!this.validateField(field)) {
-                        isValid = false;
-                    }
-                }
-            });
-
-            return isValid;
-        }
-
-        showError(field: HTMLElement, message: string) {
-            if (!(field instanceof HTMLElement)) return;
-
-            const wrapper =
-                field.closest(".input-wrapper") || field.closest(".form-group");
-
-            // Supprimer le message d'erreur
-            const errorMessage = wrapper?.querySelector(".error-message");
-            if (errorMessage) {
-                errorMessage.remove();
-            }
-
-            // Créer le nouveau message d'erreur avec les classes Tailwind
-            const errorDiv = document.createElement("div");
-            errorDiv.className =
-                "error-message flex items-center gap-2 mt-1.5 p-2.5 text-sm font-medium text-red-800 bg-red-50/80 border-l-4 border-l-red-500 rounded-r-md dark:text-red-300 dark:bg-red-900/20 dark:border-l-red-500";
-            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 dark:text-red-400" aria-hidden="true"></i>${message}`;
-
-            // Ajouter la classe error au champ et son container
-            field.classList.add("error");
-            const container =
-                field.closest(".input-container") ||
-                field.closest(".textarea-container");
-            container?.classList.add("error");
-
-            // Ajouter le message d'erreur à la fin du wrapper
-            wrapper?.appendChild(errorDiv);
-        }
-
-        removeError(field: HTMLElement) {
-            if (!(field instanceof HTMLElement)) return;
-
-            const wrapper =
-                field.closest(".input-wrapper") || field.closest(".form-group");
-
-            // Supprimer le message d'erreur
-            const errorMessage = wrapper?.querySelector(".error-message");
-            if (errorMessage) {
-                errorMessage.remove();
-            }
-
-            // Supprimer les classes d'erreur
-            field.classList.remove("error");
-            const container =
-                field.closest(".input-container") ||
-                field.closest(".textarea-container");
-            container?.classList.remove("error");
-        }
-
-        isValidEmail(email: string): boolean {
-            const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return EMAIL_REGEX.test(email);
-        }
-
-        escapeHtml(unsafe: string): string {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        private async handleSubmit(event: Event) {
-            event.preventDefault();
-            
-            if (!this.validateForm()) {
-                this.toastManager.show({
-                    type: 'error',
-                    title: 'Erreur',
-                    message: 'Veuillez remplir tous les champs requis correctement',
-                    duration: 5000
-                });
-                return;
-            }
-
-            const formData = new FormData(this.form);
-            const data = Object.fromEntries(formData.entries());
-
-            try {
-                const response = await fetch(`${this.apiUrl}/api/contact`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                this.toastManager.show({
-                    type: 'success',
-                    title: 'Succès',
-                    message: 'Message envoyé avec succès',
-                    duration: 5000
-                });
-                this.form.reset();
-            } catch (error) {
-                console.error("Error:", error);
-                this.toastManager.show({
-                    type: 'error',
-                    title: 'Erreur',
-                    message: 'Une erreur est survenue lors de l\'envoi du message',
-                    duration: 5000
-                });
-            }
-        }
+    constructor() {
+      const form = document.getElementById('contact-form');
+      if (!(form instanceof HTMLFormElement)) {
+        throw new Error('Form element not found');
+      }
+      this.form = form;
+      this.apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080';
+      this.toastManager = ToastManager.getInstance();
+      this.initialize();
     }
 
-    // Initialiser le formulaire
-    new ContactForm();
+    initialize() {
+      this.form.addEventListener('submit', this.handleSubmit.bind(this));
+
+      // Ajouter la validation sur le blur des champs
+      const requiredFields = this.form.querySelectorAll('[required]');
+      requiredFields.forEach(field => {
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+          field.addEventListener('blur', () => {
+            this.validateField(field);
+          });
+        }
+      });
+    }
+
+    validateText(text: string): boolean {
+      const SAFE_TEXT_REGEX = /^[\p{L}\p{N}\s.,!?@()'\[\]\-_&+=%°:;]+$/u;
+      return SAFE_TEXT_REGEX.test(text);
+    }
+
+    validateField(field: HTMLInputElement | HTMLTextAreaElement) {
+      const value = field.value.trim();
+
+      if (!value) {
+        this.showError(field, 'Ce champ est requis');
+        return false;
+      }
+
+      switch (field.name) {
+        case 'name':
+          if (value.length < 2 || value.length > 100) {
+            this.showError(field, 'Le nom doit faire entre 2 et 100 caractères');
+            return false;
+          }
+          if (!this.validateText(value)) {
+            this.showError(field, 'Le nom contient des caractères non autorisés');
+            return false;
+          }
+          break;
+        case 'email':
+          if (!this.isValidEmail(value)) {
+            this.showError(field, "L'email n'est pas valide");
+            return false;
+          }
+          break;
+        case 'subject':
+          if (value.length < 2 || value.length > 100) {
+            this.showError(field, 'Le sujet doit faire entre 2 et 100 caractères');
+            return false;
+          }
+          if (!this.validateText(value)) {
+            this.showError(field, 'Le sujet contient des caractères non autorisés');
+            return false;
+          }
+          break;
+        case 'message':
+          if (value.length < 10 || value.length > 1000) {
+            this.showError(field, 'Le message doit faire entre 10 et 1000 caractères');
+            return false;
+          }
+          if (!this.validateText(value)) {
+            this.showError(field, 'Le message contient des caractères non autorisés');
+            return false;
+          }
+          break;
+      }
+
+      this.removeError(field);
+      return true;
+    }
+
+    validateForm() {
+      const requiredFields = this.form.querySelectorAll('[required]');
+      let isValid = true;
+
+      requiredFields.forEach(field => {
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+          if (!this.validateField(field)) {
+            isValid = false;
+          }
+        }
+      });
+
+      return isValid;
+    }
+
+    showError(field: HTMLElement, message: string) {
+      if (!(field instanceof HTMLElement)) return;
+
+      const wrapper = field.closest('.input-wrapper') || field.closest('.form-group');
+
+      // Supprimer le message d'erreur
+      const errorMessage = wrapper?.querySelector('.error-message');
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+
+      // Créer le nouveau message d'erreur avec les classes Tailwind
+      const errorDiv = document.createElement('div');
+      errorDiv.className =
+        'error-message flex items-center gap-2 mt-1.5 p-2.5 text-sm font-medium text-red-800 bg-red-50/80 border-l-4 border-l-red-500 rounded-r-md dark:text-red-300 dark:bg-red-900/20 dark:border-l-red-500';
+      errorDiv.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 dark:text-red-400" aria-hidden="true"></i>${message}`;
+
+      // Ajouter la classe error au champ et son container
+      field.classList.add('error');
+      const container = field.closest('.input-container') || field.closest('.textarea-container');
+      container?.classList.add('error');
+
+      // Ajouter le message d'erreur à la fin du wrapper
+      wrapper?.appendChild(errorDiv);
+    }
+
+    removeError(field: HTMLElement) {
+      if (!(field instanceof HTMLElement)) return;
+
+      const wrapper = field.closest('.input-wrapper') || field.closest('.form-group');
+
+      // Supprimer le message d'erreur
+      const errorMessage = wrapper?.querySelector('.error-message');
+      if (errorMessage) {
+        errorMessage.remove();
+      }
+
+      // Supprimer les classes d'erreur
+      field.classList.remove('error');
+      const container = field.closest('.input-container') || field.closest('.textarea-container');
+      container?.classList.remove('error');
+    }
+
+    isValidEmail(email: string): boolean {
+      const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return EMAIL_REGEX.test(email);
+    }
+
+    escapeHtml(unsafe: string): string {
+      return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    private async handleSubmit(event: Event) {
+      event.preventDefault();
+
+      if (!this.validateForm()) {
+        this.toastManager.show({
+          type: 'error',
+          title: 'Erreur',
+          message: 'Veuillez remplir tous les champs requis correctement',
+          duration: 5000,
+        });
+        return;
+      }
+
+      // Disable submit button during submission
+      const submitButton = this.form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+
+      const formData = new FormData(this.form);
+      const data = Object.fromEntries(formData.entries());
+
+      // Trim whitespace from all form fields
+      const trimmedData: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(data)) {
+        if (typeof value === 'string') {
+          trimmedData[key] = value.trim();
+        } else {
+          trimmedData[key] = value;
+        }
+      }
+
+      try {
+        const response = await fetch(`${this.apiUrl}/api/contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(trimmedData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        this.toastManager.show({
+          type: 'success',
+          title: 'Succès',
+          message: 'Message envoyé avec succès',
+          duration: 5000,
+        });
+        this.form.reset();
+      } catch (error) {
+        console.error('Error:', error);
+        this.toastManager.show({
+          type: 'error',
+          title: 'Erreur',
+          message: "Une erreur est survenue lors de l'envoi du message",
+          duration: 5000,
+        });
+      } finally {
+        // Re-enable submit button
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    }
+  }
+
+  // Initialiser le formulaire
+  new ContactForm();
 </script>
 
 <style>
-    .contact-form {
-        width: 100%;
-        max-width: 42rem;
-        margin-left: auto;
-        margin-right: auto;
-    }
+  .contact-form {
+    width: 100%;
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
 
-    .form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 
-    .form-group label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #374151;
-    }
+  .form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
 
-    .form-group .required {
-        color: #ef4444;
-        margin-left: 0.125rem;
-    }
+  .form-group .required {
+    color: #ef4444;
+    margin-left: 0.125rem;
+  }
 
-    .textarea-container {
-        position: relative;
-    }
+  .textarea-container {
+    position: relative;
+  }
 
-    .textarea-container textarea {
-        display: block;
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #d1d5db;
-        background-color: var(--secondary-color);
-        resize: none;
-        height: 8rem;
-    }
+  .textarea-container textarea {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    background-color: var(--secondary-color);
+    resize: none;
+    height: 8rem;
+  }
 
-    .textarea-container textarea:focus {
-        outline: none;
-        ring: 2px;
-        ring-color: #10b981;
-        border-color: #10b981;
-    }
+  .textarea-container textarea:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #10b981;
+    border-color: #10b981;
+  }
 
-    .textarea-container .textarea-icon {
-        position: absolute;
-        right: 0.75rem;
-        top: 0.75rem;
-        color: #9ca3af;
-    }
+  .textarea-container .textarea-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+    color: #9ca3af;
+  }
 
-    .form-submit {
-        display: flex;
-        justify-content: flex-end;
-    }
+  .form-submit {
+    display: flex;
+    justify-content: flex-end;
+  }
 
-    /* Toast animations */
-    .toast--cloned {
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        opacity: 0;
-        transform: translateY(0.5rem);
-        transition: all 0.3s ease-out;
-        z-index: 50;
-    }
+  /* Toast animations */
+  .toast--cloned {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    opacity: 0;
+    transform: translateY(0.5rem);
+    transition: all 0.3s ease-out;
+    z-index: 50;
+  }
 
-    .toast--visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  .toast--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-    /* Error states */
-    .input-container.error input,
-    .textarea-container.error textarea {
-        border-color: #ef4444;
-    }
+  /* Error states */
+  .input-container.error input,
+  .textarea-container.error textarea {
+    border-color: #ef4444;
+  }
 
-    .input-container.error input:focus,
-    .textarea-container.error textarea:focus {
-        ring-color: #ef4444;
-        border-color: #ef4444;
-    }
+  .input-container.error input:focus,
+  .textarea-container.error textarea:focus {
+    ring-color: #ef4444;
+    border-color: #ef4444;
+  }
 
-    .message-label {
-        font-weight: 600;
-        color: var(--text-color);
-        font-size: 0.95rem;
-        font-family: var(--font-heading);
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        transition: color 0.2s;
-    }
+  .message-label {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-family: var(--font-heading);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.2s;
+  }
 </style>

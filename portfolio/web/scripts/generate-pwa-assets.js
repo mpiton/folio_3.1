@@ -34,8 +34,8 @@ async function generatePWAIcons() {
         src: `/icon-${size}x${size}.png`,
         sizes: `${size}x${size}`,
         type: 'image/png',
-        ...(size === 512 ? { purpose: 'any maskable' } : {})
-      }))
+        ...(size === 512 ? { purpose: 'any maskable' } : {}),
+      })),
     };
 
     await fs.writeFile(
@@ -43,7 +43,6 @@ async function generatePWAIcons() {
       JSON.stringify(manifest, null, 2)
     );
     console.log('✓ Généré manifest.webmanifest');
-
   } catch (error) {
     console.error('Erreur lors de la génération des assets PWA:', error);
     process.exit(1);
