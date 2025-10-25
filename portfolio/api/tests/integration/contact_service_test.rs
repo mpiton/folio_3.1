@@ -282,7 +282,7 @@ async fn g2_3_multiple_sequential_inserts() -> Result<()> {
     let service = MessageService::new(db.clone(), config);
 
     // Act - Insert multiple contacts
-    let names = vec!["Alice Smith", "Bob Johnson", "Carol Davis"];
+    let names = ["Alice Smith", "Bob Johnson", "Carol Davis"];
     for (i, name) in names.iter().enumerate() {
         let contact = ContactRequestBuilder::new()
             .name(name)
@@ -317,7 +317,7 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
 
     // Act - Create 5 concurrent insert tasks
     let mut handles = vec![];
-    let names = vec!["Alice", "Bob", "Carol", "David", "Emma"];
+    let names = ["Alice", "Bob", "Carol", "David", "Emma"];
 
     for (i, name) in names.iter().enumerate() {
         let db = db_arc.clone();
