@@ -31,12 +31,29 @@ mod test_helpers {
 
     /// MongoDB container configuration for integration testing
     pub async fn setup_mongodb() -> Result<(MongoClient, Database)> {
-        // Create fresh client for each test to avoid conflicts
-        // Attempt to connect to MongoDB (assumes running locally on 27017)
-        // Add serverSelectionTimeoutMS to give MongoDB time to respond
-        let connection_string =
-            "mongodb://127.0.0.1:27017/?serverSelectionTimeoutMS=10000&connectTimeoutMS=10000";
-        let client = MongoClient::with_uri_str(connection_string).await?;
+        // Build connection string from environment variables or use defaults
+        let mongo_user = std::env::var("MONGO_INITDB_ROOT_USERNAME").unwrap_or_default();
+        let mongo_password = std::env::var("MONGO_INITDB_ROOT_PASSWORD").unwrap_or_default();
+        let mongo_host = std::env::var("MONGO_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+        let mongo_port = std::env::var("MONGO_PORT").unwrap_or_else(|_| "27017".to_string());
+
+        // Construct connection string with credentials if provided
+        let connection_string = if !mongo_user.is_empty() && !mongo_password.is_empty() {
+            format!(
+                "mongodb://{}:{}@{}:{}/?authSource=admin&serverSelectionTimeoutMS=10000&connectTimeoutMS=10000",
+                mongo_user, mongo_password, mongo_host, mongo_port
+            )
+        } else {
+            format!(
+                "mongodb://{}:{}/?serverSelectionTimeoutMS=10000&connectTimeoutMS=10000",
+                mongo_host, mongo_port
+            )
+        };
+
+        // Create client with timeout for connection attempts
+        let mut client_options = mongodb::options::ClientOptions::parse(&connection_string).await?;
+        client_options.connect_timeout = Some(std::time::Duration::from_secs(5));
+        let client = MongoClient::with_options(client_options)?;
 
         // Verify connection with a simple ping
         client
@@ -46,7 +63,8 @@ mod test_helpers {
 
         // Use unique database names for test isolation
         let db_id = DB_COUNTER.fetch_add(1, Ordering::SeqCst);
-        let db_name = format!("portfolio_test_{}", db_id);
+        let mongo_db = std::env::var("MONGO_DB").unwrap_or_else(|_| "portfolio_test".to_string());
+        let db_name = format!("{}_{}", mongo_db, db_id);
 
         let db = client.database(&db_name);
 
@@ -70,8 +88,23 @@ mod test_helpers {
 
     /// Create a test configuration with minimal dependencies
     pub fn test_config() -> Config {
+        // Build connection string from environment variables or use defaults
+        let mongo_user = std::env::var("MONGO_INITDB_ROOT_USERNAME").unwrap_or_default();
+        let mongo_password = std::env::var("MONGO_INITDB_ROOT_PASSWORD").unwrap_or_default();
+        let mongo_host = std::env::var("MONGO_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+        let mongo_port = std::env::var("MONGO_PORT").unwrap_or_else(|_| "27017".to_string());
+
+        let mongo_url = if !mongo_user.is_empty() && !mongo_password.is_empty() {
+            format!(
+                "mongodb://{}:{}@{}:{}/?authSource=admin",
+                mongo_user, mongo_password, mongo_host, mongo_port
+            )
+        } else {
+            format!("mongodb://{}:{}", mongo_host, mongo_port)
+        };
+
         Config {
-            mongo_url: "mongodb://127.0.0.1:27017".to_string(),
+            mongo_url,
             host: "127.0.0.1".to_string(),
             port: 3001,
             rss_cache_duration: 60,
