@@ -38,10 +38,12 @@ impl MessageService {
             .map_err(|e| anyhow::anyhow!("Validation error: {}", e))?;
 
         // Stocker dans la base de données
-        #[cfg(test)]
-        let collection_name = "contacts_test_submit_contact";
-        #[cfg(not(test))]
-        let collection_name = "contacts";
+        // Use is_test field to determine collection name (more reliable than cfg(test))
+        let collection_name = if form.is_test {
+            "contacts_test_submit_contact"
+        } else {
+            "contacts"
+        };
 
         let collection = self.db.collection::<Document>(collection_name);
         println!("Insertion du document dans la collection {collection_name}...");

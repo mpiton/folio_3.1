@@ -210,6 +210,9 @@ async fn g2_1_insert_contact_into_mongodb() -> Result<()> {
     // Act
     service.submit_contact(contact.clone()).await?;
 
+    // Small delay to ensure write is persisted before querying
+    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
     // Assert - Verify document was inserted
     let collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
     let count = collection.count_documents(doc! {}).await?;
@@ -255,6 +258,9 @@ async fn g2_2_use_test_collection_in_test_mode() -> Result<()> {
     // Act
     service.submit_contact(contact).await?;
 
+    // Small delay to ensure write is persisted before querying
+    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
     // Assert - Test collection should exist, production shouldn't
     let test_collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
     let test_count = test_collection.count_documents(doc! {}).await?;
@@ -276,9 +282,10 @@ async fn g2_3_multiple_sequential_inserts() -> Result<()> {
     let service = MessageService::new(db.clone(), config);
 
     // Act - Insert multiple contacts
-    for i in 0..3 {
+    let names = vec!["Alice Smith", "Bob Johnson", "Carol Davis"];
+    for (i, name) in names.iter().enumerate() {
         let contact = ContactRequestBuilder::new()
-            .name(&format!("User {}", i))
+            .name(name)
             .email(&format!("user{}@example.com", i))
             .subject("Sequential Insert Test")
             .message("This message tests sequential insertions in MongoDB.")
@@ -287,6 +294,9 @@ async fn g2_3_multiple_sequential_inserts() -> Result<()> {
 
         service.submit_contact(contact).await?;
     }
+
+    // Small delay to ensure all writes are persisted before querying
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 
     // Assert
     let collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
@@ -307,15 +317,17 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
 
     // Act - Create 5 concurrent insert tasks
     let mut handles = vec![];
+    let names = vec!["Alice", "Bob", "Carol", "David", "Emma"];
 
-    for i in 0..5 {
+    for (i, name) in names.iter().enumerate() {
         let db = db_arc.clone();
         let config = config.clone();
+        let name = name.to_string();
 
         let handle = tokio::spawn(async move {
             let service = MessageService::new((*db).clone(), (*config).clone());
             let contact = ContactRequestBuilder::new()
-                .name(&format!("Concurrent User {}", i))
+                .name(&name)
                 .email(&format!("concurrent{}@example.com", i))
                 .subject("Concurrent Insert Test")
                 .message("This message tests concurrent insertions in MongoDB.")
@@ -332,6 +344,9 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
     for handle in handles {
         assert!(handle.await?.is_ok(), "Concurrent insert should succeed");
     }
+
+    // Small delay to ensure all writes are persisted before querying
+    tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
 
     // Assert - Verify all documents were inserted
     let collection = db.collection::<mongodb::bson::Document>("contacts_test_submit_contact");
@@ -483,7 +498,15 @@ async fn boundary_message_max_length() -> Result<()> {
     let config = create_test_config();
     let service = MessageService::new(db.clone(), config);
 
-    let long_message = "a".repeat(1000);
+    // Create exactly 1000 chars with varied content (no character appears >50 times)
+    // Use a pattern with letters, digits, and common punctuation to distribute characters evenly
+    // With 40+ unique characters and 1000 total chars, each char appears ~25 times (under 50 limit)
+    let alphabet = "abcdefghijklmnopqrstuvwxyz0123456789 !?,.:;-";
+    let mut long_message = String::new();
+    while long_message.len() < 1000 {
+        long_message.push_str(alphabet);
+    }
+    long_message.truncate(1000); // Exactly 1000 characters
     let contact = ContactRequestBuilder::new()
         .name("Boundary Test")
         .email("boundary@example.com")
