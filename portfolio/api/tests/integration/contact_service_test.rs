@@ -212,7 +212,7 @@ async fn g2_1_insert_contact_into_mongodb() -> Result<()> {
     service.submit_contact(contact.clone()).await?;
 
     // Retry logic to ensure write is persisted before querying
-    let mut count = 0;
+    let mut count;
     for attempt in 0..5 {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_1");
@@ -270,7 +270,7 @@ async fn g2_2_use_test_collection_in_test_mode() -> Result<()> {
     service.submit_contact(contact).await?;
 
     // Retry logic to ensure write is persisted before querying
-    let mut test_count = 0;
+    let mut test_count;
     for attempt in 0..5 {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         let test_collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_2");
@@ -316,7 +316,7 @@ async fn g2_3_multiple_sequential_inserts() -> Result<()> {
     }
 
     // Retry logic to ensure all writes are persisted before querying
-    let mut count = 0;
+    let mut count;
     for attempt in 0..5 {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_3");
@@ -329,8 +329,7 @@ async fn g2_3_multiple_sequential_inserts() -> Result<()> {
         }
     }
 
-    // Assert
-    let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_3");
+    // Assert - All documents inserted successfully (verified by count in retry loop)
 
     cleanup_db(&db, &["contacts_test_g2_3"]).await?;
     Ok(())
@@ -376,7 +375,7 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
     }
 
     // Retry logic to ensure all writes are persisted before querying
-    let mut count = 0;
+    let mut count;
     for attempt in 0..5 {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_4");
@@ -392,8 +391,7 @@ async fn g2_4_concurrent_contact_inserts() -> Result<()> {
         }
     }
 
-    // Assert - Verify all documents were inserted
-    let collection = db.collection::<mongodb::bson::Document>("contacts_test_g2_4");
+    // Assert - All documents inserted successfully (verified by count in retry loop)
 
     cleanup_db(&db, &["contacts_test_g2_4"]).await?;
     Ok(())

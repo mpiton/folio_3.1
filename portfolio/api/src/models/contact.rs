@@ -109,6 +109,7 @@ mod tests {
             subject: "Test Subject".to_string(),
             message: "This is a valid message with good content.".to_string(),
             is_test: false,
+            test_name: None,
         };
         assert!(request.validate().is_ok());
     }
@@ -121,6 +122,7 @@ mod tests {
             subject: "Test Subject".to_string(),
             message: "Valid message".to_string(),
             is_test: false,
+            test_name: None,
         };
         assert!(request.validate().is_err());
     }
@@ -133,6 +135,7 @@ mod tests {
             subject: "Test Subject".to_string(),
             message: "Valid message".to_string(),
             is_test: false,
+            test_name: None,
         };
         assert!(request.validate().is_err());
     }
@@ -145,6 +148,7 @@ mod tests {
             subject: "Test <script>alert('xss')</script>".to_string(),
             message: "Valid message".to_string(),
             is_test: false,
+            test_name: None,
         };
         assert!(request.validate().is_err());
     }
@@ -157,6 +161,7 @@ mod tests {
             subject: "Test Subject".to_string(),
             message: "Message with <script>alert('xss')</script>".to_string(),
             is_test: false,
+            test_name: None,
         };
         assert!(request.validate().is_err());
     }
@@ -170,6 +175,7 @@ mod tests {
             message: "http://spam1.com http://spam2.com http://spam3.com http://spam4.com"
                 .to_string(),
             is_test: false,
+            test_name: None,
         };
         assert!(request.validate().is_err());
     }
@@ -182,6 +188,7 @@ mod tests {
             subject: "Test Subject".to_string(),
             message: "a".repeat(51),
             is_test: false,
+            test_name: None,
         };
         assert!(request.validate().is_err());
     }
