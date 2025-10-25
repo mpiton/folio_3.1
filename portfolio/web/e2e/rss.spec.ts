@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import './test-types';
 
 declare global {
   interface Window {

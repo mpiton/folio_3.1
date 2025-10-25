@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 import { AxeBuilder } from '@axe-core/playwright';
-import './test-types';
 
 // ============================================================================
 // GROUPE 1: FORM RENDERING (1.1-1.3)
