@@ -159,7 +159,7 @@ test.describe('ContactForm - Validation', () => {
     await submitButton.click();
 
     // Assert: success toast appears
-    const successToast = page.locator('.toast--success');
+    const successToast = page.locator('.toast[data-type="success"]');
     await expect(successToast).toBeVisible({ timeout: 10000 });
   });
 
@@ -461,7 +461,7 @@ test.describe('ContactForm - API Integration', () => {
     }
 
     // Wait for success response
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
 
     // Assert: button is re-enabled after submission
     await expect(submitButton).toBeEnabled({ timeout: 5000 });
@@ -521,7 +521,7 @@ test.describe('ContactForm - Success Feedback', () => {
     await submitButton.click();
 
     // Assert: success toast is visible
-    const successToast = page.locator('.toast--success');
+    const successToast = page.locator('.toast[data-type="success"]');
     await expect(successToast).toBeVisible({ timeout: 10000 });
 
     // Assert: toast has success styling
@@ -549,7 +549,7 @@ test.describe('ContactForm - Success Feedback', () => {
     await submitButton.click();
 
     // Wait for success toast to appear
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
 
     // Assert: all fields are empty after successful submission
     await expect(nameInput).toHaveValue('', { timeout: 5000 });
@@ -615,7 +615,7 @@ test.describe('ContactForm - Rate Limiting', () => {
 
     // Act: submit form first time
     await submitButton.click();
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
 
     // Act: wait for form reset
     await page.waitForFunction(
@@ -717,7 +717,7 @@ test.describe('ContactForm - Accessibility', () => {
     await submitButton.press('Enter');
 
     // Assert: form submission works via keyboard
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('6.2: should pass axe accessibility audit', async ({ page }) => {
@@ -805,7 +805,7 @@ test.describe('ContactForm - Edge Cases', () => {
     await submitButton.click();
 
     // Assert: form accepts 2-character name and submits
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should handle message with maximum characters', async ({ page }) => {
@@ -829,7 +829,7 @@ test.describe('ContactForm - Edge Cases', () => {
     await submitButton.click();
 
     // Assert: form accepts and submits maximum length message
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should reject message exceeding maximum characters', async ({ page }) => {
@@ -866,7 +866,7 @@ test.describe('ContactForm - Edge Cases', () => {
     await submitButton.click();
 
     // Assert: form accepts email with special characters
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should handle subject with special characters', async ({ page }) => {
@@ -887,7 +887,7 @@ test.describe('ContactForm - Edge Cases', () => {
     await submitButton.click();
 
     // Assert: form accepts subject with allowed special characters
-    await expect(page.locator('.toast--success')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
   });
 
   test('should trim whitespace from fields', async ({ page }) => {
@@ -927,8 +927,8 @@ test.describe('ContactForm - Edge Cases', () => {
     // Act: submit form
     await submitButton.click();
 
-    // Wait for API call
-    await page.waitForTimeout(2000);
+    // Wait for success toast to appear, ensuring API call completed
+    await expect(page.locator('.toast[data-type="success"]')).toBeVisible({ timeout: 10000 });
 
     // Assert: whitespace is trimmed in the API call
     expect(sentData).not.toBeNull();
