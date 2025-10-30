@@ -44,6 +44,12 @@ node_modules/
 .claude/
 CLAUDE.md
 
+# Archive files
+*.zip
+
+# Test logs
+test-logs/
+test-logs.zip
 
 
 # End of https://www.toptal.com/developers/gitignore/api/rust,rust-analyzer,dotenv
