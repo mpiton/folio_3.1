@@ -29,7 +29,7 @@
     "@astrojs/sitemap": "^3.6.0",
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@tailwindcss/vite": "^4.1.16",
-    "astro": "^5.15.1",
+    "astro": "^5.15.6",
     "sharp": "^0.34.4",
     "tailwindcss": "^4.1.16",
     "three": "^0.180.0",
