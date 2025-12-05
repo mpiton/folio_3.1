@@ -136,7 +136,9 @@ impl FeedService {
                                 // Fallback for legacy string format
                                 doc.get_str("pub_date")
                                     .ok()
-                                    .and_then(|date_str| DateTime::parse_from_rfc3339(date_str).ok())
+                                    .and_then(|date_str| {
+                                        DateTime::parse_from_rfc3339(date_str).ok()
+                                    })
                                     .map(|dt| dt.with_timezone(&Utc))
                             })
                             .unwrap_or_else(Utc::now),
