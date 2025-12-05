@@ -2,7 +2,7 @@ use crate::{config::Config, models::rss::RssItem};
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use futures_util::TryStreamExt;
-use mongodb::bson::{doc, Document};
+use mongodb::bson::{doc, Bson, Document};
 use mongodb::Database;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -126,10 +126,19 @@ impl FeedService {
                         title: doc.get_str("title").unwrap_or_default().to_string(),
                         url: doc.get_str("url").unwrap_or_default().to_string(),
                         pub_date: doc
-                            .get_str("pub_date")
+                            .get_datetime("pub_date")
                             .ok()
-                            .and_then(|date_str| DateTime::parse_from_rfc3339(date_str).ok())
-                            .map(|dt| dt.with_timezone(&Utc))
+                            .map(|bson_dt| {
+                                DateTime::from_timestamp_millis(bson_dt.timestamp_millis())
+                                    .unwrap_or_else(Utc::now)
+                            })
+                            .or_else(|| {
+                                // Fallback for legacy string format
+                                doc.get_str("pub_date")
+                                    .ok()
+                                    .and_then(|date_str| DateTime::parse_from_rfc3339(date_str).ok())
+                                    .map(|dt| dt.with_timezone(&Utc))
+                            })
                             .unwrap_or_else(Utc::now),
                         description: doc.get_str("description").unwrap_or_default().to_string(),
                         image_url: doc
@@ -226,7 +235,7 @@ impl FeedService {
                             doc! {
                                 "title": title,
                                 "url": link,
-                                "pub_date": pub_date.to_rfc3339(),
+                                "pub_date": Bson::DateTime(mongodb::bson::DateTime::from_millis(pub_date.timestamp_millis())),
                                 "description": description,
                                 "image_url": image_url,
                             },
