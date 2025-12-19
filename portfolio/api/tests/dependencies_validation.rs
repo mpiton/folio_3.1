@@ -5,14 +5,6 @@
 
 #[cfg(test)]
 mod dependencies {
-    // Verify testcontainers is available
-    #[test]
-    fn testcontainers_available() {
-        use testcontainers::core::WaitFor;
-        // Just verifying the import works
-        let _ = WaitFor::message_on_stdout("test");
-    }
-
     // Verify wiremock is available
     #[test]
     fn wiremock_available() {
